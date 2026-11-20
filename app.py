@@ -60,7 +60,7 @@ DEFAULT_THEME = {
     "int_general": "", "int_music": "", "int_movies": "", "int_tv": "", "int_books": "",
     "spray_word": "LeX!", "custom_wall": "", "website": "",
     "left_blocks": DEFAULT_LEFT.copy(), "right_blocks": DEFAULT_RIGHT.copy(),
-    "followers": [], "following": [], "playlist": [], "albums": [],
+    "followers": [], "following": [], "playlist": [], "albums": [], "blocked": [],
 }
 DEFAULT_TOP8 = [
     {"rank": 1, "handle": "@LeX", "name": "LeX (Studio Co-Pilot)", "mood": "Online • Remixing Vibes ⚡", "anthem": "Y2K Cobalt Synth"},
@@ -194,6 +194,38 @@ def build_backdrop_url(style_name: str, accent: str, tag_word: str = "LeX!") -> 
     body = art_map.get(style_name, art_map["Punk Spray-Paint Graffiti"])
     raw_svg = f'{SV_OPEN}xmlns="{SVG_NS}" width="260" height="220">{body}{SV_CLOSE}'
     return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
+BLOCKED_TERMS = {
+    "porn", "pornhub", "xvideos", "xnxx", "onlyfans", "nsfw", "nudes",
+    "xxx", "camgirl", "escort", "hentai", "sexwork",
+}
+
+def is_text_safe(raw_txt: str) -> bool:
+    low = (raw_txt or "").lower()
+    return not any(term in low for term in BLOCKED_TERMS)
+
+def is_image_safe(uploaded_file) -> bool:
+    if uploaded_file is None:
+        return True
+    api_key = st.secrets.get("GEMINI_API_KEY", "")
+    if not api_key:
+        return True
+    try:
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=api_key)
+        prompt = (
+            "Safety check for a 13+ social network. Reply ONLY 'SAFE' or 'UNSAFE'. "
+            "Reply UNSAFE if the image contains nudity, sexual content, graphic violence, or hate symbols."
+        )
+        part = types.Part.from_bytes(
+            data=uploaded_file.getvalue(),
+            mime_type=uploaded_file.type or "image/png",
+        )
+        resp = client.models.generate_content(model="gemini-2.5-flash", contents=[prompt, part])
+        return "UNSAFE" not in (resp.text or "").upper()
+    except Exception:
+        return True
+
 def calc_age(dob: date) -> int:
     today = date.today()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
@@ -387,6 +419,8 @@ if st.session_state.lex_user is None:
                 ch = r_handle.strip().lstrip("@").replace(" ", "")
                 if calc_age(dob) < 13:
                     st.error("Must be 13+ to join LeX.")
+                elif not is_text_safe(d_name) or not is_text_safe(ch):
+                    st.error("Display name or handle violates LeX 13+ safety rules.")
                 elif s_email.strip() and len(s_pass) >= 6 and d_name.strip() and ch:
                     try:
                         ares = sb.auth.sign_up({"email": s_email.strip(), "password": s_pass})
@@ -475,9 +509,13 @@ if st.session_state.viewing_handle and sb:
                 va_cols[idx_p % 3].markdown(f'<div class="lex-card" style="padding:6px;"><img src="{ph["img"]}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;" /><div style="font-size:11px;margin-top:4px;">{ph.get("caption","")}</div></div>', unsafe_allow_html=True)
     st.stop()
 def render_social_hub():
-    t_feed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
-        "📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 LeX Studio", "📡 Radar"
-    ])
+    is_founder = user.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"}
+    tab_names = ["📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 LeX Studio", "📡 Radar"]
+    if is_founder:
+        tab_names.append("🛡️ Mod Queue")
+    tabs = st.tabs(tab_names)
+    t_feed, t_friends, t_dm, t_top8, t_studio, t_radar = tabs[:6]
+
     with t_feed:
         with st.form("feed_post_form", clear_on_submit=True):
             new_post = st.text_area("Share a status update, photo, or link...", height=68)
@@ -485,15 +523,24 @@ def render_social_hub():
             post_img = fc1.file_uploader("Attach Photo", type=["png", "jpg", "jpeg", "webp"], key="fp_img")
             post_link = fc2.text_input("Attach Link / URL", placeholder="https://...", key="fp_link")
             if st.form_submit_button("Publish Status ✦") and (new_post.strip() or post_img or post_link.strip()) and sb:
-                packed = new_post.strip()
-                if post_link.strip():
-                    packed += f"\n[LEX_LINK]{normalize_url(post_link)}"
-                if post_img is not None:
-                    packed += f"\n[LEX_IMG]{encode_image_data_url(post_img)}"
-                sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
-                st.rerun()
+                if not is_text_safe(new_post) or not is_text_safe(post_link):
+                    st.error("Blocked: Post contains restricted 18+ keywords or links.")
+                elif not is_image_safe(post_img):
+                    st.error("Blocked: Image violates LeX 13+ community safety rules.")
+                else:
+                    packed = new_post.strip()
+                    if post_link.strip():
+                        packed += f"\n[LEX_LINK]{normalize_url(post_link)}"
+                    if post_img is not None:
+                        packed += f"\n[LEX_IMG]{encode_image_data_url(post_img)}"
+                    sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
+                    st.rerun()
+
+        blocked_set = set(th.get("blocked") or [])
         posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(25).execute().data or [] if sb else []
         for p in posts:
+            if p.get("handle") in blocked_set:
+                continue
             clean_txt, img_src, lnk_src = (p.get("body") or ""), "", ""
             if "[LEX_IMG]" in clean_txt:
                 clean_txt, img_src = clean_txt.split("[LEX_IMG]", 1)
@@ -506,15 +553,49 @@ def render_social_hub():
             rx_key = f"rx_{p['id']}"
             if rx_key not in st.session_state:
                 st.session_state[rx_key] = {"🔥": p.get("likes", 0), "💖": 0, "🎸": 0, "💀": 0}
-            rcols = st.columns(4)
+            rcols = st.columns(6)
             for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
                 if rcols[idx_e].button(f"{emo} {st.session_state[rx_key][emo]}", key=f"b_{p['id']}_{emo}"):
                     st.session_state[rx_key][emo] += 1
                     if emo == "🔥" and sb:
                         sb.table("lex_posts").update({"likes": st.session_state[rx_key]["🔥"]}).eq("id", p["id"]).execute()
                     st.rerun()
-    return t_friends, t_dm, t_top8, t_studio, t_radar
+            if rcols[4].button("🚩", key=f"rep_{p['id']}", help="Report post to Founder"):
+                if sb:
+                    sb.table("lex_messages").insert({
+                        "sender_handle": user["handle"],
+                        "recipient_handle": "@LeX_MOD",
+                        "body": f"REPORT Post #{p['id']} by {p['handle']}: {clean_txt[:120]}",
+                    }).execute()
+                st.toast("Post reported to LeX Moderation 🛡️")
+            if p.get("handle") != user["handle"] and rcols[5].button("🚫", key=f"blk_{p['id']}", help="Block user"):
+                blk_list = list(th.get("blocked") or [])
+                if p["handle"] not in blk_list:
+                    blk_list.append(p["handle"])
+                st.session_state.lex_theme["blocked"] = blk_list
+                save_profile_to_cloud()
+                st.rerun()
 
+    if is_founder:
+        with tabs[6]:
+            st.markdown("#### 🛡️ Founder Safety & Moderation Queue")
+            reps = sb.table("lex_messages").select("*").eq("recipient_handle", "@LeX_MOD").order("id", desc=True).limit(30).execute().data or [] if sb else []
+            if not reps:
+                st.info("Zero open reports — community feed is clean ✦")
+            for rp in reps:
+                rc1, rc2 = st.columns([0.8, 0.2])
+                rc1.warning(f"**From {rp['sender_handle']}:** {rp['body']}")
+                if rc2.button("Dismiss ✕", key=f"dis_{rp['id']}") and sb:
+                    sb.table("lex_messages").delete().eq("id", rp["id"]).execute()
+                    st.rerun()
+            st.markdown("##### Quick Delete Post by ID")
+            del_id = st.number_input("Post ID # to Remove", min_value=1, step=1, key="mod_del_id")
+            if st.button("Delete Post Permanently 🗑️", key="mod_del_btn") and sb:
+                sb.table("lex_posts").delete().eq("id", int(del_id)).execute()
+                st.success(f"Deleted Post #{int(del_id)}")
+                st.rerun()
+
+    return t_friends, t_dm, t_top8, t_studio, t_radar
 def render_block(blk: str):
     if blk == "Profile Card":
         if th.get("marquee_on") and th.get("marquee_text"):
@@ -566,15 +647,18 @@ def render_block(blk: str):
             if st.button("Add Photo to Album ✦", key="alb_save_btn"):
                 t_clean = new_alb_name.strip()
                 if t_clean and alb_up is not None:
-                    img_data = encode_image_data_url(alb_up)
-                    found = next((a for a in albums if a["title"].lower() == t_clean.lower()), None)
-                    if found:
-                        found["photos"].append({"img": img_data, "caption": alb_cap.strip()})
+                    if not is_text_safe(t_clean) or not is_text_safe(alb_cap) or not is_image_safe(alb_up):
+                        st.error("Blocked: Photo or caption violates LeX 13+ safety rules.")
                     else:
-                        albums.append({"title": t_clean, "photos": [{"img": img_data, "caption": alb_cap.strip()}]})
-                    st.session_state.lex_theme["albums"] = albums
-                    save_profile_to_cloud()
-                    st.rerun()
+                        img_data = encode_image_data_url(alb_up)
+                        found = next((a for a in albums if a["title"].lower() == t_clean.lower()), None)
+                        if found:
+                            found["photos"].append({"img": img_data, "caption": alb_cap.strip()})
+                        else:
+                            albums.append({"title": t_clean, "photos": [{"img": img_data, "caption": alb_cap.strip()}]})
+                        st.session_state.lex_theme["albums"] = albums
+                        save_profile_to_cloud()
+                        st.rerun()
     elif blk == "Top 8 Friends":
         st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};font-size:15px;">✦ {user["name"]}\'s Top 8</strong></div>', unsafe_allow_html=True)
         g_cols = st.columns(2)
@@ -628,12 +712,13 @@ def render_block(blk: str):
         st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};font-size:15px;">💬 Profile Wall</strong></div>', unsafe_allow_html=True)
         w_msg = st.text_input("Sign profile wall...", key="wall_in")
         if st.button("Post Wall Note", key="wall_btn") and w_msg.strip():
-            st.session_state.lex_wall.insert(0, {"sender": user["handle"], "msg": w_msg.strip()})
-            save_profile_to_cloud()
-            st.rerun()
+            if not is_text_safe(w_msg):
+                st.error("Blocked: Wall note contains restricted 18+ keywords.")
+            else:
+                st.session_state.lex_wall.insert(0, {"sender": user["handle"], "msg": w_msg.strip()})
+                save_profile_to_cloud()
+                st.rerun()
         for w in st.session_state.lex_wall[:6]:
-            st.markdown(f'<div class="lex-card"><strong>{w["sender"]}:</strong> {w["msg"]}</div>', unsafe_allow_html=True)
-
 left_blks = th.get("left_blocks") or DEFAULT_LEFT
 right_blks = th.get("right_blocks") or DEFAULT_RIGHT
 col_l, col_r = st.columns([1.15, 1.3], gap="large")
@@ -712,8 +797,11 @@ with t_dm:
         st.markdown(f"**{m['sender_handle']}:** {m['body']}")
     dm_txt = st.text_input(f"Message {active_chat}...", key="dm_in")
     if st.button("Send DM ✉") and dm_txt.strip() and sb:
-        sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": active_chat, "body": dm_txt.strip()}).execute()
-        st.rerun()
+        if not is_text_safe(dm_txt):
+            st.error("Blocked: Message violates LeX 13+ safety rules.")
+        else:
+            sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": active_chat, "body": dm_txt.strip()}).execute()
+            st.rerun()
 with t_top8:
     st.markdown("#### Ranked Top 8 Friends")
     t_cols = st.columns(2)
@@ -761,15 +849,21 @@ with t_studio:
     st.markdown("#### 🎨 LeX Studio Visuals, Glow, Opacity & 20 Wall Arts")
     new_av = st.file_uploader("Update Profile Picture", type=["png", "jpg", "jpeg", "webp"], key="upd_av")
     if new_av is not None and st.button("Save Profile Picture"):
-        user["avatar"] = encode_image_data_url(new_av)
-        save_profile_to_cloud()
-        st.rerun()
+        if not is_image_safe(new_av):
+            st.error("Blocked: Avatar violates LeX 13+ safety rules.")
+        else:
+            user["avatar"] = encode_image_data_url(new_av)
+            save_profile_to_cloud()
+            st.rerun()
     wall_up = st.file_uploader("Upload Custom Wallpaper", type=["png", "jpg", "jpeg", "webp"], key="upd_wall")
     wc1, wc2 = st.columns(2)
     if wall_up is not None and wc1.button("Set Wallpaper 🖼"):
-        st.session_state.lex_theme["custom_wall"] = encode_image_data_url(wall_up)
-        save_profile_to_cloud()
-        st.rerun()
+        if not is_image_safe(wall_up):
+            st.error("Blocked: Wallpaper violates LeX 13+ safety rules.")
+        else:
+            st.session_state.lex_theme["custom_wall"] = encode_image_data_url(wall_up)
+            save_profile_to_cloud()
+            st.rerun()
     if st.session_state.lex_theme.get("custom_wall") and wc2.button("Clear Wallpaper"):
         st.session_state.lex_theme["custom_wall"] = ""
         save_profile_to_cloud()
@@ -809,13 +903,16 @@ with t_studio:
     i_tv = ig2.text_input("Favorite TV Shows", value=th.get("int_tv", ""))
     i_bk = st.text_input("Books & Heroes", value=th.get("int_books", ""))
     if st.button("Save All Profile Details ✦"):
-        user["website"] = normalize_url(new_site)
-        user["mood"] = new_mood.strip()
-        user["bio"] = new_bio.strip()
-        user["who_to_meet"] = new_meet.strip()
-        st.session_state.lex_theme.update({"pinned_note": pin_in.strip(), "int_general": i_gen.strip(), "int_music": i_mus.strip(), "int_movies": i_mov.strip(), "int_tv": i_tv.strip(), "int_books": i_bk.strip()})
-        save_profile_to_cloud()
-        st.rerun()
+        if not is_text_safe(f"{pin_in} {new_site} {new_mood} {new_bio} {new_meet} {i_gen} {i_mus} {i_mov} {i_tv} {i_bk}"):
+            st.error("Blocked: Profile details contain restricted 18+ keywords.")
+        else:
+            user["website"] = normalize_url(new_site)
+            user["mood"] = new_mood.strip()
+            user["bio"] = new_bio.strip()
+            user["who_to_meet"] = new_meet.strip()
+            st.session_state.lex_theme.update({"pinned_note": pin_in.strip(), "int_general": i_gen.strip(), "int_music": i_mus.strip(), "int_movies": i_mov.strip(), "int_tv": i_tv.strip(), "int_books": i_bk.strip()})
+            save_profile_to_cloud()
+            st.rerun()
 
 with t_radar:
     st.markdown("#### 📡 Inner Circle Radar")
