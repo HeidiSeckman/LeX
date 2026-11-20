@@ -96,27 +96,104 @@ def founder_studio_link_html(handle: str, accent: str) -> str:
 def build_backdrop_url(style_name: str, accent: str, tag_word: str = "LeX!") -> str:
     w = (tag_word or "LeX!")[:14].replace("<", "").replace(">", "").replace("&", "")
     if style_name == "Architectural Grid":
-        return "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)"
+        return (
+            "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), "
+            "linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)"
+        )
     if style_name == "Checkered Ska / Vans":
         return f"repeating-conic-gradient({accent}28 0% 25%, transparent 0% 50%) 50% / 60px 60px"
     art_map = {
-        "Punk Spray-Paint Graffiti": f'<text x="16" y="88" font-family="cursive" font-size="46" font-weight="900" fill="{accent}" fill-opacity="0.30" transform="rotate(-11 70 80)">{w}</text><text x="145" y="190" font-family="cursive" font-size="28" font-weight="900" fill="#FFF" fill-opacity="0.16" transform="rotate(8 190 190)">RIOT // 2026</text><path d="M20 145 Q110 120 230 155" stroke="{accent}" stroke-width="3" stroke-opacity="0.32" fill="none" stroke-dasharray="12 6"/>',
-        "Y2K Stars & Sparkles": f'<polygon points="55,18 64,44 92,44 69,60 78,86 55,70 32,86 41,60 18,44 46,44" fill="none" stroke="{accent}" stroke-width="2.2" stroke-opacity="0.36"/><path d="M185,115 L193,140 L218,148 L193,156 L185,181 L177,156 L152,148 L177,140 Z" fill="{accent}" fill-opacity="0.28"/><circle cx="115" cy="195" r="3" fill="#FFF" fill-opacity="0.35"/>',
-        "Leopard Rosette Print": f'<path d="M45,35 C65,25 85,42 78,62 C70,80 42,78 36,60 C31,46 35,40 45,35 Z" fill="{accent}" fill-opacity="0.22" stroke="#FFF" stroke-opacity="0.26" stroke-width="4" stroke-dasharray="18 7 12 6"/><circle cx="57" cy="54" r="7" fill="{accent}" fill-opacity="0.34"/><path d="M165,135 C188,125 210,145 200,168 C190,188 158,185 152,165 C146,148 152,140 165,135 Z" fill="{accent}" fill-opacity="0.24" stroke="#FFF" stroke-opacity="0.26" stroke-width="4" stroke-dasharray="20 8 10 6"/><circle cx="177" cy="157" r="8" fill="{accent}" fill-opacity="0.36"/>',
-        "Cherry Hearts & Kisses": f'<path d="M60,78 C60,78 26,54 26,35 C26,22 38,16 48,24 C54,28 60,36 60,36 C60,36 66,28 72,24 C82,16 94,22 94,35 C94,54 60,78 60,78 Z" fill="none" stroke="{accent}" stroke-width="2.5" stroke-opacity="0.38"/><path d="M180,178 C180,178 152,158 152,142 C152,131 162,126 170,133 C175,137 180,143 180,143 C180,143 185,137 190,133 C198,126 208,131 208,142 C208,158 180,178 180,178 Z" fill="{accent}" fill-opacity="0.25"/>',
-        "Coquette Ribbon Bows": f'<path d="M65,55 L32,35 L38,75 Z M65,55 L98,35 L92,75 Z M65,55 L52,92 M65,55 L78,92" fill="{accent}" fill-opacity="0.25" stroke="{accent}" stroke-width="2.2" stroke-opacity="0.42"/><circle cx="65" cy="55" r="6" fill="#FFF" fill-opacity="0.4"/><path d="M185,155 L155,138 L160,172 Z M185,155 L215,138 L210,172 Z" fill="none" stroke="#FFF" stroke-width="2" stroke-opacity="0.26"/>',
-        "Butterfly Dreamscape": f'<path d="M65,60 C35,20 15,55 48,72 C22,85 42,110 65,80 C88,110 108,85 82,72 C115,55 95,20 65,60 Z" fill="{accent}" fill-opacity="0.24" stroke="{accent}" stroke-width="2" stroke-opacity="0.42"/><line x1="65" y1="45" x2="65" y2="92" stroke="#FFF" stroke-width="2" stroke-opacity="0.35"/><path d="M185,155 C160,122 142,152 170,166 C148,177 165,198 185,172 C205,198 222,177 200,166 C228,152 210,122 185,155 Z" fill="none" stroke="#FFF" stroke-width="2" stroke-opacity="0.26"/>',
-        "Skull & Crossbones Punk": f'<circle cx="65" cy="52" r="22" fill="none" stroke="#FFF" stroke-width="2.2" stroke-opacity="0.28"/><rect x="53" y="68" width="24" height="14" rx="4" fill="none" stroke="#FFF" stroke-width="2" stroke-opacity="0.28"/><circle cx="57" cy="50" r="4" fill="{accent}" fill-opacity="0.55"/><circle cx="73" cy="50" r="4" fill="{accent}" fill-opacity="0.55"/><line x1="35" y1="95" x2="95" y2="115" stroke="{accent}" stroke-width="2.5" stroke-opacity="0.35"/><line x1="95" y1="95" x2="35" y2="115" stroke="{accent}" stroke-width="2.5" stroke-opacity="0.35"/>',
-        "Lightning Bolts & Voltage": f'<polygon points="72,18 38,72 64,72 50,122 96,62 68,62" fill="{accent}" fill-opacity="0.26" stroke="{accent}" stroke-width="2" stroke-opacity="0.45"/><polygon points="192,115 162,162 184,162 172,208 212,154 188,154" fill="none" stroke="#FFF" stroke-width="2" stroke-opacity="0.25"/>',
-        "Gothic Bats & Moons": f'<path d="M175,35 A28,28 0 1,0 205,75 A22,22 0 1,1 175,35 Z" fill="{accent}" fill-opacity="0.30"/><path d="M65,145 Q45,125 20,142 Q35,150 42,162 Q55,152 65,166 Q75,152 88,162 Q95,150 110,142 Q85,125 65,145 Z" fill="#FFF" fill-opacity="0.20" stroke="{accent}" stroke-width="1.8" stroke-opacity="0.38"/>',
-        "Cyber Matrix Rain": f'<text x="18" y="45" font-family="monospace" font-size="16" font-weight="700" fill="{accent}" fill-opacity="0.36">010110 // {w}</text><text x="85" y="110" font-family="monospace" font-size="16" fill="{accent}" fill-opacity="0.26">1010011101</text><text x="24" y="175" font-family="monospace" font-size="16" fill="#FFF" fill-opacity="0.20">SYS_OVERRIDE</text><line x1="15" y1="55" x2="235" y2="55" stroke="{accent}" stroke-opacity="0.18" stroke-dasharray="4 4"/>',
-        "Carbon Fiber Hex": f'<polygon points="60,18 96,38 96,78 60,98 24,78 24,38" fill="none" stroke="{accent}" stroke-opacity="0.34" stroke-width="2.2"/><polygon points="168,112 204,132 204,172 168,192 132,172 132,132" fill="none" stroke="#FFF" stroke-opacity="0.20" stroke-width="2"/>',
-        "Retro Cassette & Vinyl": f'<rect x="24" y="28" width="88" height="54" rx="6" fill="none" stroke="{accent}" stroke-width="2.2" stroke-opacity="0.38"/><circle cx="48" cy="55" r="10" fill="none" stroke="#FFF" stroke-width="2" stroke-opacity="0.3"/><circle cx="88" cy="55" r="10" fill="none" stroke="#FFF" stroke-width="2" stroke-opacity="0.3"/><circle cx="180" cy="160" r="36" fill="none" stroke="{accent}" stroke-width="2.2" stroke-opacity="0.32"/><circle cx="180" cy="160" r="10" fill="{accent}" fill-opacity="0.35"/>',
-        "Flame & Hotrod Stripes": f'<path d="M55,105 C32,85 38,55 58,32 C55,52 68,56 72,42 C88,65 82,92 55,105 Z" fill="{accent}" fill-opacity="0.30" stroke="{accent}" stroke-width="2" stroke-opacity="0.45"/><line x1="0" y1="135" x2="260" y2="135" stroke="{accent}" stroke-width="3" stroke-opacity="0.25"/><line x1="0" y1="145" x2="260" y2="145" stroke="#FFF" stroke-width="1.5" stroke-opacity="0.18"/>',
-        "Crown & Diamond Luxe": f'<polygon points="28,78 28,38 48,56 65,30 82,56 102,38 102,78" fill="none" stroke="{accent}" stroke-width="2.4" stroke-opacity="0.42"/><polygon points="180,125 206,150 180,188 154,150" fill="{accent}" fill-opacity="0.22" stroke="#FFF" stroke-width="2" stroke-opacity="0.3"/>',
-        "Rose Thorns & Petals": f'<circle cx="65" cy="55" r="22" fill="none" stroke="{accent}" stroke-width="2.5" stroke-opacity="0.4"/><path d="M52,55 A13,13 0 1,1 78,55 A9,9 0 1,1 58,55" fill="none" stroke="#FFF" stroke-width="2" stroke-opacity="0.3"/><line x1="65" y1="77" x2="65" y2="122" stroke="{accent}" stroke-width="2.4" stroke-opacity="0.4"/><polygon points="65,92 78,86 65,100" fill="{accent}" fill-opacity="0.4"/>',
-        "8-Bit Arcade Invaders": f'<path d="M40,40 h10 v10 h20 v-10 h10 v20 h10 v20 h-10 v-10 h-40 v10 h-10 v-20 h10 z" fill="{accent}" fill-opacity="0.30"/><rect x="155" y="135" width="44" height="32" fill="none" stroke="#FFF" stroke-width="2.5" stroke-opacity="0.25"/>',
-        "Tactical Urban Camo": f'<polygon points="18,28 68,18 92,46 64,74 22,62" fill="{accent}" fill-opacity="0.22"/><polygon points="125,85 188,72 225,108 192,142 138,125" fill="#FFF" fill-opacity="0.11"/><polygon points="35,148 95,138 118,178 72,208 24,186" fill="{accent}" fill-opacity="0.18"/>',
+        "Punk Spray-Paint Graffiti": (
+            f'<text x="16" y="88" font-family="cursive" font-size="46" font-weight="900" '
+            f'fill="{accent}" fill-opacity="0.30" transform="rotate(-11 70 80)">{w}</text>'
+            f'<path d="M20 145 Q110 120 230 155" stroke="{accent}" stroke-width="3" '
+            f'stroke-opacity="0.32" fill="none" stroke-dasharray="12 6"/>'
+        ),
+        "Y2K Stars & Sparkles": (
+            f'<polygon points="55,18 64,44 92,44 69,60 78,86 55,70 32,86 41,60 18,44 46,44" '
+            f'fill="none" stroke="{accent}" stroke-width="2.2" stroke-opacity="0.36"/>'
+            f'<path d="M185,115 L193,140 L218,148 L193,156 L185,181 L177,156 L152,148 Z" '
+            f'fill="{accent}" fill-opacity="0.28"/>'
+        ),
+        "Leopard Rosette Print": (
+            f'<circle cx="57" cy="54" r="20" fill="{accent}" fill-opacity="0.22" '
+            f'stroke="#FFF" stroke-opacity="0.26" stroke-width="4" stroke-dasharray="14 6"/>'
+            f'<circle cx="177" cy="157" r="22" fill="{accent}" fill-opacity="0.24" '
+            f'stroke="#FFF" stroke-opacity="0.26" stroke-width="4" stroke-dasharray="16 6"/>'
+        ),
+        "Cherry Hearts & Kisses": (
+            f'<path d="M60,78 C60,78 26,54 26,35 C26,22 38,16 48,24 C54,28 60,36 60,36 '
+            f'C60,36 66,28 72,24 C82,16 94,22 94,35 C94,54 60,78 60,78 Z" '
+            f'fill="none" stroke="{accent}" stroke-width="2.5" stroke-opacity="0.38"/>'
+        ),
+        "Coquette Ribbon Bows": (
+            f'<path d="M65,55 L32,35 L38,75 Z M65,55 L98,35 L92,75 Z" '
+            f'fill="{accent}" fill-opacity="0.25" stroke="{accent}" stroke-width="2.2"/>'
+            f'<circle cx="65" cy="55" r="6" fill="#FFF" fill-opacity="0.4"/>'
+        ),
+        "Butterfly Dreamscape": (
+            f'<path d="M65,60 C35,20 15,55 48,72 C22,85 42,110 65,80 '
+            f'C88,110 108,85 82,72 C115,55 95,20 65,60 Z" '
+            f'fill="{accent}" fill-opacity="0.24" stroke="{accent}" stroke-width="2"/>'
+        ),
+        "Skull & Crossbones Punk": (
+            f'<circle cx="65" cy="52" r="22" fill="none" stroke="#FFF" stroke-width="2.2" '
+            f'stroke-opacity="0.28"/><circle cx="57" cy="50" r="4" fill="{accent}"/>'
+            f'<circle cx="73" cy="50" r="4" fill="{accent}"/>'
+        ),
+        "Lightning Bolts & Voltage": (
+            f'<polygon points="72,18 38,72 64,72 50,122 96,62 68,62" '
+            f'fill="{accent}" fill-opacity="0.26" stroke="{accent}" stroke-width="2"/>'
+        ),
+        "Gothic Bats & Moons": (
+            f'<path d="M175,35 A28,28 0 1,0 205,75 A22,22 0 1,1 175,35 Z" '
+            f'fill="{accent}" fill-opacity="0.30"/>'
+        ),
+        "Cyber Matrix Rain": (
+            f'<text x="18" y="45" font-family="monospace" font-size="16" font-weight="700" '
+            f'fill="{accent}" fill-opacity="0.36">010110 // {w}</text>'
+            f'<text x="24" y="175" font-family="monospace" font-size="16" fill="#FFF" '
+            f'fill-opacity="0.20">SYS_OVERRIDE</text>'
+        ),
+        "Carbon Fiber Hex": (
+            f'<polygon points="60,18 96,38 96,78 60,98 24,78 24,38" fill="none" '
+            f'stroke="{accent}" stroke-opacity="0.34" stroke-width="2.2"/>'
+        ),
+        "Retro Cassette & Vinyl": (
+            f'<rect x="24" y="28" width="88" height="54" rx="6" fill="none" '
+            f'stroke="{accent}" stroke-width="2.2" stroke-opacity="0.38"/>'
+            f'<circle cx="180" cy="160" r="36" fill="none" stroke="{accent}" stroke-width="2"/>'
+        ),
+        "Flame & Hotrod Stripes": (
+            f'<path d="M55,105 C32,85 38,55 58,32 C55,52 68,56 72,42 C88,65 82,92 55,105 Z" '
+            f'fill="{accent}" fill-opacity="0.30" stroke="{accent}" stroke-width="2"/>'
+        ),
+        "Crown & Diamond Luxe": (
+            f'<polygon points="28,78 28,38 48,56 65,30 82,56 102,38 102,78" fill="none" '
+            f'stroke="{accent}" stroke-width="2.4" stroke-opacity="0.42"/>'
+        ),
+        "Rose Thorns & Petals": (
+            f'<circle cx="65" cy="55" r="22" fill="none" stroke="{accent}" stroke-width="2.5"/>'
+            f'<line x1="65" y1="77" x2="65" y2="122" stroke="{accent}" stroke-width="2.4"/>'
+        ),
+        "8-Bit Arcade Invaders": (
+            f'<path d="M40,40 h10 v10 h20 v-10 h10 v20 h10 v20 h-10 v-10 h-40 v10 h-10 '
+            f'v-20 h10 z" fill="{accent}" fill-opacity="0.30"/>'
+        ),
+        "Tactical Urban Camo": (
+            f'<polygon points="18,28 68,18 92,46 64,74 22,62" fill="{accent}" fill-opacity="0.22"/>'
+            f'<polygon points="125,85 188,72 225,108 192,142 138,125" fill="#FFF" fill-opacity="0.11"/>'
+        ),
+        "Cosmic Planets & Rings": (
+            f'<circle cx="68" cy="62" r="22" fill="{accent}" fill-opacity="0.26" '
+            f'stroke="{accent}" stroke-width="2"/>'
+            f'<ellipse cx="68" cy="62" rx="44" ry="11" transform="rotate(-22 68 62)" '
+            f'fill="none" stroke="#FFF" stroke-width="2.2" stroke-opacity="0.34"/>'
+        ),
+    }
+    body = art_map.get(style_name, art_map["Punk Spray-Paint Graffiti"])
+    raw_svg = f'{SV_OPEN}xmlns="{SVG_NS}" width="260" height="220">{body}{SV_CLOSE}'
+    return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
 def calc_age(dob: date) -> int:
     today = date.today()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
@@ -437,6 +514,7 @@ def render_social_hub():
                         sb.table("lex_posts").update({"likes": st.session_state[rx_key]["🔥"]}).eq("id", p["id"]).execute()
                     st.rerun()
     return t_friends, t_dm, t_top8, t_studio, t_radar
+
 def render_block(blk: str):
     if blk == "Profile Card":
         if th.get("marquee_on") and th.get("marquee_text"):
@@ -555,6 +633,7 @@ def render_block(blk: str):
             st.rerun()
         for w in st.session_state.lex_wall[:6]:
             st.markdown(f'<div class="lex-card"><strong>{w["sender"]}:</strong> {w["msg"]}</div>', unsafe_allow_html=True)
+
 left_blks = th.get("left_blocks") or DEFAULT_LEFT
 right_blks = th.get("right_blocks") or DEFAULT_RIGHT
 col_l, col_r = st.columns([1.15, 1.3], gap="large")
