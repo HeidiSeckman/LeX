@@ -113,6 +113,7 @@ def save_profile_to_cloud():
             "custom_song_title": u.get("custom_song_title", ""),
             "theme_json": theme_payload,
             "top8_json": st.session_state.lex_top8,
+            "all_friends_json": st.session_state.lex_all_friends,
             "wall_json": st.session_state.lex_wall,
         }).execute()
     except Exception as e:
@@ -189,6 +190,8 @@ if "lex_theme" not in st.session_state:
     st.session_state.lex_theme = DEFAULT_THEME.copy()
 if "lex_top8" not in st.session_state:
     st.session_state.lex_top8 = [item.copy() for item in DEFAULT_TOP8]
+if "lex_all_friends" not in st.session_state:
+    st.session_state.lex_all_friends = [item.copy() for item in DEFAULT_TOP8]
 if "lex_wall" not in st.session_state:
     st.session_state.lex_wall = [
         {"sender": "@LeX", "msg": "Thanks for joining LeX! Leave a comment on the profile wall anytime ✦"},
@@ -256,7 +259,7 @@ if st.session_state.lex_user is None:
                         uid = res.user.id
                         prof = sb.table("lex_profiles").select("*").eq("user_id", uid).execute().data
                         if prof:
-                            row = prof[0]
+                            row = prof
                             st.session_state.lex_user = {
                                 "user_id": uid, "name": row["display_name"], "handle": row["handle"],
                                 "bio": row.get("bio", ""), "who_to_meet": row.get("who_to_meet", ""),
@@ -270,6 +273,8 @@ if st.session_state.lex_user is None:
                                 st.session_state.lex_theme.update(row["theme_json"])
                             if row.get("top8_json"):
                                 st.session_state.lex_top8 = row["top8_json"]
+                            if row.get("all_friends_json"):
+                                st.session_state.lex_all_friends = row["all_friends_json"]
                             if row.get("wall_json"):
                                 st.session_state.lex_wall = row["wall_json"]
                             st.rerun()
@@ -358,10 +363,9 @@ with left_col:
         if user.get("custom_song_url") and not render_popular_song_embed(user["custom_song_url"]):
             st.warning("Paste a valid Spotify track, Apple Music song, or YouTube link.")
     else:
-        idx = list(ANTHEM_TRACKS.keys()).index(user["anthem"]) if user["anthem"] in ANTHEM_TRACKS else 0
 with right_col:
-    tab_feed, tab_dm, tab_top8, tab_studio, tab_radar = st.tabs([
-        "📰 Friends Feed", "✉️ Messages", "✦ Top 8", "🎨 Theme Studio", "📡 Radar"
+    tab_feed, tab_dm, tab_friends, tab_top8, tab_studio = st.tabs([
+        "📰 Friends Feed", "✉️ Messages", "👥 Friends & Search", "✦ Top 8", "🎨 Theme Studio"
     ])
 
     with tab_feed:
@@ -394,14 +398,27 @@ with right_col:
                 f'<p style="margin-top:8px;">{post["body"]}</p></div>',
                 unsafe_allow_html=True,
             )
-            if st.button(f"⚡ Vibe ({post.get('likes', 1)})", key=f"like_{post['id']}"):
-                if sb:
-                    sb.table("lex_posts").update({"likes": (post.get("likes", 1) + 1)}).eq("id", post["id"]).execute()
-                st.rerun()
+            r1, r2, r3 = st.columns(3)
+            cur_likes = post.get("likes", 1)
+            with r1:
+                if st.button(f"⚡ Vibe ({cur_likes})", key=f"vibe_{post['id']}"):
+                    if sb:
+                        sb.table("lex_posts").update({"likes": cur_likes + 1}).eq("id", post["id"]).execute()
+                    st.rerun()
+            with r2:
+                if st.button("🔥 Fire", key=f"fire_{post['id']}"):
+                    if sb:
+                        sb.table("lex_posts").update({"likes": cur_likes + 1}).eq("id", post["id"]).execute()
+                    st.rerun()
+            with r3:
+                if st.button("💖 Love", key=f"love_{post['id']}"):
+                    if sb:
+                        sb.table("lex_posts").update({"likes": cur_likes + 1}).eq("id", post["id"]).execute()
+                    st.rerun()
 
     with tab_dm:
         st.markdown("#### ✉️ Direct Messages")
-        dm_targets = [f["handle"] for f in st.session_state.lex_top8 if f["handle"] != user["handle"]]
+        dm_targets = [f["handle"] for f in st.session_state.lex_all_friends if f["handle"] != user["handle"]]
         active_chat = st.selectbox("Select Friend", dm_targets or ["@LeX"])
         msgs = []
         if sb:
@@ -425,9 +442,66 @@ with right_col:
                 if active_chat == "@LeX":
                     sb.table("lex_messages").insert({
                         "sender_handle": "@LeX", "recipient_handle": user["handle"],
-                        "body": "Got it! Your profile and Top 8 are synced live to the cloud ✦"
+                        "body": "Got it! Your profile, friends list, and Top 8 are synced live to the cloud ✦"
                     }).execute()
             st.rerun()
+    with tab_friends:
+        st.markdown("#### 🔍 Search People on LeX")
+        q = st.text_input("Search by @handle or name...", placeholder="Type a name or @handle")
+        all_members = []
+        if sb:
+            try:
+                all_members = sb.table("lex_profiles").select("handle,display_name,mood,anthem").limit(50).execute().data or []
+            except Exception:
+                all_members = []
+        filtered = [
+            m for m in all_members
+            if m["handle"] != user["handle"]
+            and (not q.strip() or q.lower() in m["handle"].lower() or q.lower() in m["display_name"].lower())
+        ]
+        existing_handles = {f["handle"] for f in st.session_state.lex_all_friends}
+        if not filtered:
+            st.caption("No matching members found yet—invite your friends to sign up on LeX!")
+        for m in filtered[:12]:
+            c_info, c_act = st.columns([0.72, 0.28])
+            with c_info:
+                st.markdown(f"**{m['display_name']}** (`{m['handle']}`) — {m.get('mood', '')} | 🎵 *{m.get('anthem', '')}*")
+            with c_act:
+                if m["handle"] in existing_handles:
+                    st.caption("✓ Friend")
+                elif st.button("➕ Add Friend", key=f"add_{m['handle']}"):
+                    st.session_state.lex_all_friends.append({
+                        "handle": m["handle"], "name": m["display_name"],
+                        "mood": m.get("mood", "Online ⚡"), "anthem": m.get("anthem", "Y2K Cobalt Synth"),
+                    })
+                    save_profile_to_cloud()
+                    st.rerun()
+
+        st.markdown("---")
+        st.markdown(f"#### 👥 All Friends ({len(st.session_state.lex_all_friends)})")
+        for f_idx, fr in enumerate(st.session_state.lex_all_friends):
+            fc_a, fc_b, fc_c = st.columns([0.56, 0.22, 0.22])
+            with fc_a:
+                st.markdown(f"**{fr['name']}** (`{fr['handle']}`) — {fr.get('mood', '')}")
+            with fc_b:
+                in_top8 = any(t["handle"] == fr["handle"] for t in st.session_state.lex_top8)
+                if not in_top8 and len(st.session_state.lex_top8) < 8:
+                    if st.button("✦ Top 8", key=f"pin8_{f_idx}"):
+                        entry = fr.copy()
+                        entry["rank"] = len(st.session_state.lex_top8) + 1
+                        st.session_state.lex_top8.append(entry)
+                        save_profile_to_cloud()
+                        st.rerun()
+            with fc_c:
+                if st.button("🗑️ Delete", key=f"del_fr_{f_idx}"):
+                    removed_h = fr["handle"]
+                    st.session_state.lex_all_friends.pop(f_idx)
+                    st.session_state.lex_top8 = [t for t in st.session_state.lex_top8 if t["handle"] != removed_h]
+                    for r_i, item in enumerate(st.session_state.lex_top8):
+                        item["rank"] = r_i + 1
+                    save_profile_to_cloud()
+                    st.rerun()
+
     with tab_top8:
         st.markdown("#### Ranked Top 8 Friends (Full 8-Slot Editor)")
         t_cols = st.columns(2)
@@ -460,7 +534,7 @@ with right_col:
         st.markdown("---")
         if len(st.session_state.lex_top8) < 8:
             with st.form("add_top_friend_form", clear_on_submit=True):
-                st.markdown(f"**Add New Friend ({8 - len(st.session_state.lex_top8)} slots open)**")
+                st.markdown(f"**Add Friend to Top 8 ({8 - len(st.session_state.lex_top8)} slots open)**")
                 fc1, fc2 = st.columns(2)
                 with fc1:
                     f_name = st.text_input("Friend Name", placeholder="Taylor")
@@ -471,32 +545,14 @@ with right_col:
                 if st.form_submit_button("Add to Top 8 ✦"):
                     clean_fh = f_handle.strip().lstrip("@").replace(" ", "")
                     if f_name.strip() and clean_fh:
-                        st.session_state.lex_top8.append({
+                        new_f = {
                             "rank": len(st.session_state.lex_top8) + 1,
                             "handle": f"@{clean_fh}", "name": f_name.strip(),
                             "mood": f_mood.strip(), "anthem": f_anthem.strip() or "Y2K Cobalt Synth",
-                        })
-                        save_profile_to_cloud()
-                        st.rerun()
-        else:
-            st.caption("All 8 slots are full! Click **Remove ✕** on any friend above to swap in someone new.")
-
-        if st.session_state.lex_top8:
-            with st.expander("✏️ Edit an Existing Top 8 Friend"):
-                slot_labels = [f"#{f['rank']} {f['name']} ({f['handle']})" for f in st.session_state.lex_top8]
-                pick_idx = st.selectbox("Choose Slot to Edit", range(len(slot_labels)), format_func=lambda i: slot_labels[i])
-                target_f = st.session_state.lex_top8[pick_idx]
-                ed_name = st.text_input("Edit Name", value=target_f["name"], key="ed_fn")
-                ed_handle = st.text_input("Edit @handle", value=target_f["handle"], key="ed_fh")
-                ed_mood = st.text_input("Edit Mood", value=target_f["mood"], key="ed_fm")
-                ed_anthem = st.text_input("Edit Song", value=target_f["anthem"], key="ed_fa")
-                if st.button("Save Friend Changes"):
-                    clean_eh = ed_handle.strip().lstrip("@").replace(" ", "")
-                    if ed_name.strip() and clean_eh:
-                        target_f["name"] = ed_name.strip()
-                        target_f["handle"] = f"@{clean_eh}"
-                        target_f["mood"] = ed_mood.strip()
-                        target_f["anthem"] = ed_anthem.strip()
+                        }
+                        st.session_state.lex_top8.append(new_f)
+                        if not any(x["handle"] == new_f["handle"] for x in st.session_state.lex_all_friends):
+                            st.session_state.lex_all_friends.append(new_f.copy())
                         save_profile_to_cloud()
                         st.rerun()
 
@@ -557,11 +613,6 @@ with right_col:
             user["who_to_meet"] = new_meet.strip()
             save_profile_to_cloud()
             st.rerun()
-
-    with tab_radar:
-        st.markdown("#### 📡 Inner Circle Radar")
-        for friend in st.session_state.lex_top8:
-            st.markdown(f"- **{friend['name']}** (`{friend['handle']}`) — {friend['mood']} | 🎵 *{friend['anthem']}*")
 
 st.markdown("---")
 st.caption("© 2026 LeX Social // Built & Engineered by Heidi Seckman at LexiTech Studio. Ages 13+ Only.")
