@@ -266,6 +266,52 @@ def friend_card_html(fr: dict, badge: str = "") -> str:
         f'<div style="font-size:11px;color:#D4D4D8;margin-top:8px;">{fr.get("mood", "Vibing ⚡")}</div>'
         f'<div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.05);font-size:10px;color:{th["accent"]};">🎵 {fr.get("anthem", "Y2K Cobalt Synth")}</div></div>'
     )
+def render_social_hub():
+    t_feed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
+        "📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 Theme & Layout", "📡 Radar"
+    ])
+    with t_feed:
+        with st.form("feed_post_form", clear_on_submit=True):
+            new_post = st.text_area("Share a status update, photo, or link...", height=68)
+            fc1, fc2 = st.columns(2)
+            post_img = fc1.file_uploader("Attach Photo", type=["png", "jpg", "jpeg", "webp"], key="fp_img")
+            post_link = fc2.text_input("Attach Link / URL", placeholder="https://...", key="fp_link")
+            if st.form_submit_button("Publish Status ✦") and (new_post.strip() or post_img or post_link.strip()) and sb:
+                packed = new_post.strip()
+                if post_link.strip():
+                    packed += f"\n[LEX_LINK]{normalize_url(post_link)}"
+                if post_img is not None:
+                    packed += f"\n[LEX_IMG]{encode_image_data_url(post_img)}"
+                sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
+                st.rerun()
+
+        posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(25).execute().data or [] if sb else []
+        for p in posts:
+            clean_txt, img_src, lnk_src = (p.get("body") or ""), "", ""
+            if "[LEX_IMG]" in clean_txt:
+                clean_txt, img_src = clean_txt.split("[LEX_IMG]", 1)
+            if "[LEX_LINK]" in clean_txt:
+                clean_txt, lnk_src = clean_txt.split("[LEX_LINK]", 1)
+            clean_txt, lnk_src, img_src = clean_txt.strip(), lnk_src.strip(), img_src.strip()
+            img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:10px;border:1px solid {th["accent"]};" />' if img_src else ""
+            lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="display:inline-block;padding:6px 12px;border-radius:8px;background:{th["accent"]}22;border:1px solid {th["accent"]};color:{th["accent"]};font-weight:700;text-decoration:none;">🔗 {lnk_src}</a></div>' if lnk_src else ""
+            st.markdown(
+                f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};">{p["handle"]}</span>'
+                f'<p style="margin-top:6px;">{clean_txt}</p>{lnk_tag}{img_tag}</div>',
+                unsafe_allow_html=True,
+            )
+            rx_key = f"rx_{p['id']}"
+            if rx_key not in st.session_state:
+                st.session_state[rx_key] = {"🔥": p.get("likes", 0), "💖": 0, "🎸": 0, "💀": 0}
+            rcols = st.columns(4)
+            for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
+                if rcols[idx_e].button(f"{emo} {st.session_state[rx_key][emo]}", key=f"b_{p['id']}_{emo}"):
+                    st.session_state[rx_key][emo] += 1
+                    if emo == "🔥" and sb:
+                        sb.table("lex_posts").update({"likes": st.session_state[rx_key]["🔥"]}).eq("id", p["id"]).execute()
+                    st.rerun()
+    return t_friends, t_dm, t_top8, t_studio, t_radar
+
 def render_block(blk: str):
     if blk == "Profile Card":
         av_html = f'<img src="{user["avatar"]}" class="lex-avatar" />' if user.get("avatar") else f'<div class="lex-avatar-fallback">{(user["name"][:1] or "L").upper()}</div>'
@@ -284,8 +330,7 @@ def render_block(blk: str):
         st.markdown(f"#### ✦ {user['name']}'s Top 8")
         g_cols = st.columns(2)
         for i_t, fr in enumerate(st.session_state.lex_top8[:8]):
-            crown = "👑 #1" if fr["rank"] == 1 else f"#{fr['rank']}"
-            g_cols[i_t % 2].markdown(friend_card_html(fr, crown), unsafe_allow_html=True)
+            g_cols[i_t % 2].markdown(friend_card_html(fr, "👑 #1" if fr["rank"] == 1 else f"#{fr['rank']}"), unsafe_allow_html=True)
     elif blk == "Profile Anthem":
         st.markdown("#### 🎵 Profile Anthem")
         mode = st.radio("Audio Source", ["Popular Song Link", "Built-In LeX Synth"], horizontal=True, key="anthem_src")
@@ -313,189 +358,158 @@ def render_block(blk: str):
 left_blks = th.get("left_blocks") or DEFAULT_LEFT
 right_blks = th.get("right_blocks") or DEFAULT_RIGHT
 col_l, col_r = st.columns([1.15, 1.3], gap="large")
-with col_l:
-    for b in left_blks:
-        if b != "Main Social Hub":
-            render_block(b)
-with col_r:
-    for b in right_blks:
-        if b != "Main Social Hub":
-            render_block(b)
-
-hub_host = col_l if "Main Social Hub" in left_blks else col_r
-with hub_host:
-    t_feed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
-        "📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 Theme & Drag Layout", "📡 Radar"
-    ])
-    with t_feed:
-        with st.form("feed_post_form", clear_on_submit=True):
-            new_post = st.text_area("Share a status update or lyric...", height=68)
-            if st.form_submit_button("Publish ✦") and new_post.strip() and sb:
-                sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": new_post.strip(), "likes": 0}).execute()
-                st.rerun()
-        posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(25).execute().data or [] if sb else []
-        for p in posts:
-            st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};">{p["handle"]}</span><p style="margin-top:6px;">{p["body"]}</p></div>', unsafe_allow_html=True)
-            rx_key = f"rx_{p['id']}"
-            if rx_key not in st.session_state:
-                st.session_state[rx_key] = {"🔥": p.get("likes", 0), "💖": 0, "🎸": 0, "💀": 0}
-            rcols = st.columns(4)
-            for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
-                if rcols[idx_e].button(f"{emo} {st.session_state[rx_key][emo]}", key=f"b_{p['id']}_{emo}"):
-                    st.session_state[rx_key][emo] += 1
-                    if emo == "🔥" and sb:
-                        sb.table("lex_posts").update({"likes": st.session_state[rx_key]["🔥"]}).eq("id", p["id"]).execute()
-                    st.rerun()
-    with t_friends:
-        st.markdown("#### 🔍 Search People on LeX")
-        q_search = st.text_input("Search by @handle or name...", key="people_q").strip().lower()
-        all_profiles = sb.table("lex_profiles").select("handle, display_name, mood, anthem").execute().data or [] if sb else []
-        my_handles = {f["handle"].lower() for f in st.session_state.lex_friends}
-        matches = [r for r in all_profiles if r["handle"] != user["handle"] and (not q_search or q_search in r["handle"].lower() or q_search in r["display_name"].lower())]
-        for m in matches[:12]:
-            c_info, c_btn = st.columns([0.72, 0.28])
-            c_info.markdown(f"**{m['display_name']}** (`{m['handle']}`) — {m.get('mood', '')}")
-            if m["handle"].lower() not in my_handles:
-                if c_btn.button("+ Add Friend", key=f"addf_{m['handle']}"):
-                    st.session_state.lex_friends.append({"handle": m["handle"], "name": m["display_name"], "mood": m.get("mood", "Online ⚡"), "anthem": m.get("anthem", "Y2K Cobalt Synth")})
-                    save_profile_to_cloud()
-                    st.rerun()
+tabs_pack = None
+for target_col, blk_seq in [(col_l, left_blks), (col_r, right_blks)]:
+    with target_col:
+        for b in blk_seq:
+            if b == "Main Social Hub":
+                tabs_pack = render_social_hub()
             else:
-                c_btn.caption("✓ Friends")
+                render_block(b)
+if tabs_pack is None:
+    with col_r:
+        tabs_pack = render_social_hub()
+t_friends, t_dm, t_top8, t_studio, t_radar = tabs_pack
 
-        st.markdown(f"#### 👥 All Friends ({len(st.session_state.lex_friends)})")
-        f_cols = st.columns(2)
-        for idx_f, fr in enumerate(st.session_state.lex_friends):
-            with f_cols[idx_f % 2]:
-                is_t8 = any(t["handle"] == fr["handle"] for t in st.session_state.lex_top8)
-                st.markdown(friend_card_html(fr, "★ TOP 8" if is_t8 else "FRIEND"), unsafe_allow_html=True)
-                fb1, fb2 = st.columns(2)
-                if not is_t8 and len(st.session_state.lex_top8) < 8 and fb1.button("+ Top 8", key=f"t8p_{idx_f}"):
-                    st.session_state.lex_top8.append({**fr, "rank": len(st.session_state.lex_top8) + 1})
-                    save_profile_to_cloud()
-                    st.rerun()
-                if fb2.button("Delete ✕", key=f"delf_{idx_f}"):
-                    st.session_state.lex_friends.pop(idx_f)
-                    st.session_state.lex_top8 = [t for t in st.session_state.lex_top8 if t["handle"] != fr["handle"]]
-                    for r_i, item in enumerate(st.session_state.lex_top8):
-                        item["rank"] = r_i + 1
-                    save_profile_to_cloud()
-                    st.rerun()
+with t_friends:
+    st.markdown("#### 🔍 Search People on LeX")
+    q_search = st.text_input("Search by @handle or name...", key="people_q").strip().lower()
+    all_profiles = sb.table("lex_profiles").select("handle, display_name, mood, anthem").execute().data or [] if sb else []
+    my_handles = {f["handle"].lower() for f in st.session_state.lex_friends}
+    matches = [r for r in all_profiles if r["handle"] != user["handle"] and (not q_search or q_search in r["handle"].lower() or q_search in r["display_name"].lower())]
+    for m in matches[:12]:
+        c_info, c_btn = st.columns([0.72, 0.28])
+        c_info.markdown(f"**{m['display_name']}** (`{m['handle']}`) — {m.get('mood', '')}")
+        if m["handle"].lower() not in my_handles:
+            if c_btn.button("+ Add Friend", key=f"addf_{m['handle']}"):
+                st.session_state.lex_friends.append({"handle": m["handle"], "name": m["display_name"], "mood": m.get("mood", "Online ⚡"), "anthem": m.get("anthem", "Y2K Cobalt Synth")})
+                save_profile_to_cloud()
+                st.rerun()
+        else:
+            c_btn.caption("✓ Friends")
 
-    with t_dm:
-        dm_targets = [f["handle"] for f in st.session_state.lex_friends if f["handle"] != user["handle"]]
-        active_chat = st.selectbox("Message Friend", dm_targets or ["@LeX"])
-        all_m = sb.table("lex_messages").select("*").order("id", desc=False).limit(100).execute().data or [] if sb else []
-        for m in [x for x in all_m if {x["sender_handle"], x["recipient_handle"]} == {user["handle"], active_chat}]:
-            st.markdown(f"**{m['sender_handle']}:** {m['body']}")
-        dm_txt = st.text_input(f"Message {active_chat}...", key="dm_in")
-        if st.button("Send DM") and dm_txt.strip() and sb:
-            sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": active_chat, "body": dm_txt.strip()}).execute()
-            st.rerun()
+    st.markdown(f"#### 👥 All Friends ({len(st.session_state.lex_friends)})")
+    f_cols = st.columns(2)
+    for idx_f, fr in enumerate(st.session_state.lex_friends):
+        with f_cols[idx_f % 2]:
+            is_t8 = any(t["handle"] == fr["handle"] for t in st.session_state.lex_top8)
+            st.markdown(friend_card_html(fr, "★ TOP 8" if is_t8 else "FRIEND"), unsafe_allow_html=True)
+            fb1, fb2 = st.columns(2)
+            if not is_t8 and len(st.session_state.lex_top8) < 8 and fb1.button("+ Top 8", key=f"t8p_{idx_f}"):
+                st.session_state.lex_top8.append({**fr, "rank": len(st.session_state.lex_top8) + 1})
+                save_profile_to_cloud()
+                st.rerun()
+            if fb2.button("Delete ✕", key=f"delf_{idx_f}"):
+                st.session_state.lex_friends.pop(idx_f)
+                st.session_state.lex_top8 = [t for t in st.session_state.lex_top8 if t["handle"] != fr["handle"]]
+                for r_i, item in enumerate(st.session_state.lex_top8):
+                    item["rank"] = r_i + 1
+                save_profile_to_cloud()
+                st.rerun()
+with t_dm:
+    dm_targets = [f["handle"] for f in st.session_state.lex_friends if f["handle"] != user["handle"]]
+    active_chat = st.selectbox("Message Friend", dm_targets or ["@LeX"])
+    all_m = sb.table("lex_messages").select("*").order("id", desc=False).limit(100).execute().data or [] if sb else []
+    for m in [x for x in all_m if {x["sender_handle"], x["recipient_handle"]} == {user["handle"], active_chat}]:
+        st.markdown(f"**{m['sender_handle']}:** {m['body']}")
+    dm_txt = st.text_input(f"Message {active_chat}...", key="dm_in")
+    if st.button("Send DM") and dm_txt.strip() and sb:
+        sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": active_chat, "body": dm_txt.strip()}).execute()
+        st.rerun()
 
-    with t_top8:
-        st.markdown("#### Ranked Top 8 Friends")
-        t_cols = st.columns(2)
-        for idx, friend in enumerate(st.session_state.lex_top8):
-            with t_cols[idx % 2]:
-                crown = "👑 #1" if friend["rank"] == 1 else f"#{friend['rank']}"
-                st.markdown(friend_card_html(friend, crown), unsafe_allow_html=True)
-                b1, b2 = st.columns(2)
-                if idx > 0 and b1.button("Move Up ↑", key=f"up_{idx}"):
-                    lst = st.session_state.lex_top8
-                    lst[idx], lst[idx - 1] = lst[idx - 1], lst[idx]
-                    for r_i, item in enumerate(lst):
-                        item["rank"] = r_i + 1
-                    save_profile_to_cloud()
-                    st.rerun()
-                if b2.button("Remove ✕", key=f"rm8_{idx}"):
-                    st.session_state.lex_top8.pop(idx)
-                    for r_i, item in enumerate(st.session_state.lex_top8):
-                        item["rank"] = r_i + 1
-                    save_profile_to_cloud()
-                    st.rerun()
-    with t_studio:
-        st.markdown("#### 🖱️ Drag & Drop Profile Layout Board")
-        st.caption("Drag any block card between the Left & Right columns or reorder them, then paste/apply your layout below:")
-        l_items = "".join([f'<div class="d-item" draggable="true" data-b="{b}">⠿ {b}</div>' for b in left_blks])
-        r_items = "".join([f'<div class="d-item" draggable="true" data-b="{b}">⠿ {b}</div>' for b in right_blks])
-        board_html = (
-            f'{ST_OPEN}.wrap{{display:flex;gap:12px;font-family:sans-serif;color:#fff}}'
-            f'.col{{flex:1;background:#0b0b10;border:1.5px dashed {th["accent"]};border-radius:10px;padding:10px;min-height:150px}}'
-            f'.d-item{{background:#161622;border:1px solid {th["accent"]};padding:8px 10px;margin:6px 0;border-radius:8px;cursor:grab;font-size:13px;font-weight:700}}'
-            f'{ST_CLOSE}<div class="wrap"><div class="col" id="L"><b>LEFT COLUMN</b>{l_items}</div>'
-            f'<div class="col" id="R"><b>RIGHT COLUMN</b>{r_items}</div></div>'
-            f'<div id="out" style="margin-top:8px;font-family:monospace;font-size:11px;color:{th["accent"]};"></div>'
-            f'{SC_OPEN}let drag=null;document.querySelectorAll(".d-item").forEach(el=>{{el.ondragstart=()=>drag=el;}});'
-            f'document.querySelectorAll(".col").forEach(c=>{{c.ondragover=e=>e.preventDefault();c.ondrop=()=>{{if(drag)c.appendChild(drag);'
-            f'const l=[...document.querySelectorAll("#L .d-item")].map(x=>x.dataset.b).join(", ");'
-            f'const r=[...document.querySelectorAll("#R .d-item")].map(x=>x.dataset.b).join(", ");'
-            f'document.getElementById("out").innerText="LEFT: "+l+"  |  RIGHT: "+r;}};}});{SC_CLOSE}'
-        )
-        components.html(board_html, height=230)
-        all_b = ["Profile Card", "Top 8 Friends", "Profile Anthem", "Profile Wall", "Main Social Hub"]
-        pick_l = st.multiselect("Left Column Blocks (in top-to-bottom order)", all_b, default=[b for b in left_blks if b in all_b])
-        rem_r = [b for b in all_b if b not in pick_l]
-        pick_r = st.multiselect("Right Column Blocks (in top-to-bottom order)", all_b, default=[b for b in right_blks if b in rem_r] + [b for b in rem_r if b not in right_blks])
-        if st.button("Save Block Layout ✦"):
-            st.session_state.lex_theme["left_blocks"] = pick_l or ["Profile Card"]
-            st.session_state.lex_theme["right_blocks"] = pick_r or ["Main Social Hub"]
-            save_profile_to_cloud()
-            st.rerun()
+with t_top8:
+    st.markdown("#### Ranked Top 8 Friends")
+    t_cols = st.columns(2)
+    for idx, friend in enumerate(st.session_state.lex_top8):
+        with t_cols[idx % 2]:
+            st.markdown(friend_card_html(friend, "👑 #1" if friend["rank"] == 1 else f"#{friend['rank']}"), unsafe_allow_html=True)
+            b1, b2 = st.columns(2)
+            if idx > 0 and b1.button("Move Up ↑", key=f"up_{idx}"):
+                lst = st.session_state.lex_top8
+                lst[idx], lst[idx - 1] = lst[idx - 1], lst[idx]
+                for r_i, item in enumerate(lst):
+                    item["rank"] = r_i + 1
+                save_profile_to_cloud()
+                st.rerun()
+            if b2.button("Remove ✕", key=f"rm8_{idx}"):
+                st.session_state.lex_top8.pop(idx)
+                for r_i, item in enumerate(st.session_state.lex_top8):
+                    item["rank"] = r_i + 1
+                save_profile_to_cloud()
+                st.rerun()
 
-        st.markdown("#### 🎨 Glow Borders, Colors & 20 Crisp Wall Arts")
-        new_av = st.file_uploader("Update Profile Picture", type=["png", "jpg", "jpeg", "webp"], key="upd_av")
-        if new_av is not None and st.button("Save Profile Picture"):
-            user["avatar"] = encode_image_data_url(new_av)
-            save_profile_to_cloud()
-            st.rerun()
-        wall_up = st.file_uploader("Upload Custom Wallpaper", type=["png", "jpg", "jpeg", "webp"], key="upd_wall")
-        wc1, wc2 = st.columns(2)
-        if wall_up is not None and wc1.button("Set Wallpaper 🖼"):
-            st.session_state.lex_theme["custom_wall"] = encode_image_data_url(wall_up)
-            save_profile_to_cloud()
-            st.rerun()
-        if st.session_state.lex_theme.get("custom_wall") and wc2.button("Clear Wallpaper"):
-            st.session_state.lex_theme["custom_wall"] = ""
-            save_profile_to_cloud()
-            st.rerun()
+with t_studio:
+    st.markdown("#### 🖱️ Drag & Drop Profile Layout Board")
+    l_items = "".join([f'<div class="d-item" draggable="true" data-b="{b}">⠿ {b}</div>' for b in left_blks])
+    r_items = "".join([f'<div class="d-item" draggable="true" data-b="{b}">⠿ {b}</div>' for b in right_blks])
+    board_html = (
+        f'{ST_OPEN}.wrap{{display:flex;gap:12px;font-family:sans-serif;color:#fff}}.col{{flex:1;background:#0b0b10;border:1.5px dashed {th["accent"]};border-radius:10px;padding:10px;min-height:140px}}.d-item{{background:#161622;border:1px solid {th["accent"]};padding:8px 10px;margin:6px 0;border-radius:8px;cursor:grab;font-size:13px;font-weight:700}}{ST_CLOSE}'
+        f'<div class="wrap"><div class="col" id="L"><b>LEFT COLUMN</b>{l_items}</div><div class="col" id="R"><b>RIGHT COLUMN</b>{r_items}</div></div>'
+        f'<div id="out" style="margin-top:6px;font-family:monospace;font-size:11px;color:{th["accent"]};"></div>'
+        f'{SC_OPEN}let drag=null;document.querySelectorAll(".d-item").forEach(el=>{{el.ondragstart=()=>drag=el;}});document.querySelectorAll(".col").forEach(c=>{{c.ondragover=e=>e.preventDefault();c.ondrop=()=>{{if(drag)c.appendChild(drag);document.getElementById("out").innerText="LEFT: "+[...document.querySelectorAll("#L .d-item")].map(x=>x.dataset.b).join(", ")+" | RIGHT: "+[...document.querySelectorAll("#R .d-item")].map(x=>x.dataset.b).join(", ");}};}});{SC_CLOSE}'
+    )
+    components.html(board_html, height=225)
+    all_b = ["Profile Card", "Top 8 Friends", "Profile Anthem", "Profile Wall", "Main Social Hub"]
+    cur_l = [b for b in left_blks if b in all_b]
+    cur_r = [b for b in right_blks if b in all_b and b not in cur_l]
+    pick_l = st.multiselect("Left Column Blocks (top-to-bottom)", all_b, default=cur_l, key="ms_left")
+    avail_r = [b for b in all_b if b not in pick_l]
+    pick_r = st.multiselect("Right Column Blocks (top-to-bottom)", avail_r, default=[b for b in cur_r if b in avail_r] or avail_r, key="ms_right")
+    if st.button("Save & Move Blocks Now ✦", key="save_blk_btn"):
+        st.session_state.lex_theme["left_blocks"] = pick_l
+        st.session_state.lex_theme["right_blocks"] = pick_r + [b for b in avail_r if b not in pick_r]
+        save_profile_to_cloud()
+        st.rerun()
 
-        c_a, c_b, c_c = st.columns(3)
-        new_bg = c_a.color_picker("Background Color", th["bg"])
-        new_card = c_b.color_picker("Card Surface", th["card"])
-        new_acc = c_c.color_picker("Accent & Glow Color", th["accent"])
-        glow_on = st.toggle("✨ Neon Glowing Borders", value=th.get("glow_borders", True))
-        font_keys = list(FONT_MAP.keys())
-        new_font = st.selectbox("Profile Font", font_keys, index=font_keys.index(th["font"]) if th.get("font") in font_keys else 0)
-        new_backdrop = st.selectbox("Wall Background Art (20 Crisp Vectors)", BACKDROP_OPTIONS, index=BACKDROP_OPTIONS.index(th["backdrop"]) if th.get("backdrop") in BACKDROP_OPTIONS else 0)
-        new_spray = st.text_input("Custom Spray-Paint / Tag Word", value=th.get("spray_word", "LeX!"))
-        borders = ["solid", "dashed", "double"]
-        new_border = st.selectbox("Border Style", borders, index=borders.index(th["border_style"]) if th.get("border_style") in borders else 0)
-        if st.button("Apply Custom Look ✦"):
-            st.session_state.lex_theme.update({
-                "bg": new_bg, "card": new_card, "accent": new_acc, "glow_borders": glow_on,
-                "font": new_font, "backdrop": new_backdrop, "spray_word": new_spray,
-                "border_style": new_border, "custom_wall": "",
-            })
-            save_profile_to_cloud()
-            st.rerun()
+    st.markdown("#### 🎨 Glow Borders, Colors & 20 Crisp Wall Arts")
+    new_av = st.file_uploader("Update Profile Picture", type=["png", "jpg", "jpeg", "webp"], key="upd_av")
+    if new_av is not None and st.button("Save Profile Picture"):
+        user["avatar"] = encode_image_data_url(new_av)
+        save_profile_to_cloud()
+        st.rerun()
+    wall_up = st.file_uploader("Upload Custom Wallpaper", type=["png", "jpg", "jpeg", "webp"], key="upd_wall")
+    wc1, wc2 = st.columns(2)
+    if wall_up is not None and wc1.button("Set Wallpaper 🖼"):
+        st.session_state.lex_theme["custom_wall"] = encode_image_data_url(wall_up)
+        save_profile_to_cloud()
+        st.rerun()
+    if st.session_state.lex_theme.get("custom_wall") and wc2.button("Clear Wallpaper"):
+        st.session_state.lex_theme["custom_wall"] = ""
+        save_profile_to_cloud()
+        st.rerun()
 
-        new_site = st.text_input("Profile Website / Portfolio Link", value=user.get("website", ""))
-        new_mood = st.text_input("Update Mood Badge", value=user["mood"])
-        new_bio = st.text_area("Update About Me", value=user["bio"])
-        new_meet = st.text_input("Update Who I'd Like to Meet", value=user.get("who_to_meet", ""))
-        if st.button("Save Profile Text & Link"):
-            user["website"] = normalize_url(new_site)
-            user["mood"] = new_mood.strip()
-            user["bio"] = new_bio.strip()
-            user["who_to_meet"] = new_meet.strip()
-            save_profile_to_cloud()
-            st.rerun()
+    c_a, c_b, c_c = st.columns(3)
+    new_bg = c_a.color_picker("Background Color", th["bg"])
+    new_card = c_b.color_picker("Card Surface", th["card"])
+    new_acc = c_c.color_picker("Accent & Glow Color", th["accent"])
+    glow_on = st.toggle("✨ Neon Glowing Borders", value=th.get("glow_borders", True))
+    font_keys = list(FONT_MAP.keys())
+    new_font = st.selectbox("Profile Font", font_keys, index=font_keys.index(th["font"]) if th.get("font") in font_keys else 0)
+    new_backdrop = st.selectbox("Wall Background Art (20 Crisp Vectors)", BACKDROP_OPTIONS, index=BACKDROP_OPTIONS.index(th["backdrop"]) if th.get("backdrop") in BACKDROP_OPTIONS else 0)
+    new_spray = st.text_input("Custom Spray-Paint / Tag Word", value=th.get("spray_word", "LeX!"))
+    borders = ["solid", "dashed", "double"]
+    new_border = st.selectbox("Border Style", borders, index=borders.index(th["border_style"]) if th.get("border_style") in borders else 0)
+    if st.button("Apply Custom Look ✦"):
+        st.session_state.lex_theme.update({"bg": new_bg, "card": new_card, "accent": new_acc, "glow_borders": glow_on, "font": new_font, "backdrop": new_backdrop, "spray_word": new_spray, "border_style": new_border, "custom_wall": ""})
+        save_profile_to_cloud()
+        st.rerun()
 
-    with t_radar:
-        st.markdown("#### 📡 Inner Circle Radar")
-        for friend in st.session_state.lex_top8:
-            st.markdown(friend_card_html(friend, f"#{friend['rank']}"), unsafe_allow_html=True)
+    new_site = st.text_input("Profile Website / Portfolio Link", value=user.get("website", ""))
+    new_mood = st.text_input("Update Mood Badge", value=user["mood"])
+    new_bio = st.text_area("Update About Me", value=user["bio"])
+    new_meet = st.text_input("Update Who I'd Like to Meet", value=user.get("who_to_meet", ""))
+    if st.button("Save Profile Text & Link"):
+        user["website"] = normalize_url(new_site)
+        user["mood"] = new_mood.strip()
+        user["bio"] = new_bio.strip()
+        user["who_to_meet"] = new_meet.strip()
+        save_profile_to_cloud()
+        st.rerun()
+
+with t_radar:
+    st.markdown("#### 📡 Inner Circle Radar")
+    for friend in st.session_state.lex_top8:
+        st.markdown(friend_card_html(friend, f"#{friend['rank']}"), unsafe_allow_html=True)
 
 st.markdown("---")
 st.caption("© 2026 LeX Social // Built & Engineered by Heidi Seckman at LexiTech Studio. Ages 13+ Only.")
