@@ -35,11 +35,23 @@ FONT_MAP = {
     "Futuristic Orbitron": ("Orbitron", "'Orbitron', sans-serif"),
 }
 
+BACKDROP_OPTIONS = [
+    "Architectural Grid", "Punk Spray-Paint Graffiti", "Y2K Stars & Sparkles",
+    "Hot Pink Leopard Print", "Cherry Hearts & Kisses", "Coquette Ribbon Bows",
+    "Butterfly Dreamscape", "Checkered Ska / Vans", "Skull & Crossbones Punk",
+    "Lightning Bolts & Voltage", "Gothic Bats & Crescent Moons", "Cyber Matrix Rain",
+    "Carbon Fiber Hex", "Retro Cassette & Vinyl", "Flame & Hotrod Stripes",
+    "Crown & Diamond Luxe", "Rose Thorns & Petals", "8-Bit Arcade Invaders",
+    "Camo Streetwear", "Cosmic Planets & Rings",
+]
+
+DEFAULT_BLOCKS = ["Profile Card", "Top 8 Friends", "Profile Anthem", "Profile Wall"]
+
 DEFAULT_THEME = {
-    "name": "LexiTech Obsidian (Official)",
-    "bg": "#000000", "card": "#070709", "accent": "#EC4899", "text": "#F4F4F5",
-    "font": "Clean Studio Sans", "backdrop": "Architectural Grid",
-    "border_style": "solid", "spray_word": "LeX!", "custom_wall": "", "website": "",
+    "name": "LexiTech Obsidian (Official)", "bg": "#000000", "card": "#070709",
+    "accent": "#EC4899", "text": "#F4F4F5", "font": "Clean Studio Sans",
+    "backdrop": "Architectural Grid", "border_style": "solid", "spray_word": "LeX!",
+    "custom_wall": "", "website": "", "layout_side": "Left (Classic)", "block_order": DEFAULT_BLOCKS.copy(),
 }
 
 DEFAULT_TOP8 = [
@@ -52,33 +64,36 @@ DEFAULT_TOP8 = [
     {"rank": 7, "handle": "@Mina", "name": "Mina Solis", "mood": "Night owl mode 🌙", "anthem": "Midnight Tokyo Lo-Fi"},
     {"rank": 8, "handle": "@Jax", "name": "Jax Sterling", "mood": "Hanging in Vibe-Sync 💠", "anthem": "Velvet Chrome Rhodes"},
 ]
-
 def build_backdrop_url(style_name: str, accent: str, tag_word: str = "LeX!") -> str:
-    safe_word = (tag_word or "LeX!")[:14].replace("<", "").replace(">", "").replace("&", "")
-    if style_name == "Punk Spray-Paint Graffiti":
-        raw_svg = (
-            f'{SV_OPEN}xmlns="{SVG_NS}" width="420" height="260">'
-            f'<text x="24" y="95" font-family="cursive" font-size="54" font-weight="900" fill="{accent}" fill-opacity="0.26" transform="rotate(-11 80 80)">{safe_word}</text>'
-            f'<text x="200" y="210" font-family="cursive" font-size="40" font-weight="900" fill="#FFFFFF" fill-opacity="0.14" transform="rotate(8 240 200)">PUNK // 2026</text>'
-            f'<circle cx="150" cy="55" r="3" fill="{accent}" fill-opacity="0.45"/>'
-            f'<circle cx="330" cy="145" r="4" fill="#FFFFFF" fill-opacity="0.25"/>'
-            f'<path d="M30 165 Q120 140 210 175 T390 155" stroke="{accent}" stroke-width="3" stroke-opacity="0.28" fill="none" stroke-dasharray="10 6"/>'
-            f'{SV_CLOSE}'
-        )
-        return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
-    if style_name == "Y2K Stars & Sparkles":
-        raw_svg = (
-            f'{SV_OPEN}xmlns="{SVG_NS}" width="220" height="220">'
-            f'<text x="30" y="65" font-size="34" fill="{accent}" fill-opacity="0.28">✦</text>'
-            f'<text x="145" y="155" font-size="28" fill="#FFFFFF" fill-opacity="0.18">★</text>'
-            f'<text x="75" y="190" font-size="20" fill="{accent}" fill-opacity="0.25">⚡</text>'
-            f'{SV_CLOSE}'
-        )
-        return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
-    return (
-        "linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px), "
-        "linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px)"
-    )
+    w = (tag_word or "LeX!")[:14].replace("<", "").replace(">", "").replace("&", "")
+    if style_name == "Architectural Grid":
+        return "linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px)"
+    if style_name == "Checkered Ska / Vans":
+        return f"repeating-conic-gradient({accent}26 0% 25%, transparent 0% 50%) 50% / 64px 64px"
+    art_map = {
+        "Punk Spray-Paint Graffiti": f'<text x="20" y="90" font-family="cursive" font-size="48" font-weight="900" fill="{accent}" fill-opacity="0.28" transform="rotate(-10 80 80)">{w}</text><text x="170" y="195" font-family="cursive" font-size="32" font-weight="900" fill="#FFF" fill-opacity="0.14" transform="rotate(8 210 190)">RIOT // 2026</text><circle cx="140" cy="50" r="4" fill="{accent}" fill-opacity="0.45"/>',
+        "Y2K Stars & Sparkles": f'<text x="25" y="65" font-size="36" fill="{accent}" fill-opacity="0.32">✦</text><text x="165" y="145" font-size="30" fill="#FFF" fill-opacity="0.20">★</text><text x="80" y="205" font-size="24" fill="{accent}" fill-opacity="0.28">✧</text>',
+        "Hot Pink Leopard Print": f'<ellipse cx="60" cy="60" rx="22" ry="16" fill="{accent}" fill-opacity="0.22" stroke="#FFF" stroke-opacity="0.18" stroke-width="4" stroke-dasharray="14 6"/><ellipse cx="195" cy="165" rx="26" ry="18" fill="{accent}" fill-opacity="0.25" stroke="#FFF" stroke-opacity="0.18" stroke-width="4" stroke-dasharray="16 7"/>',
+        "Cherry Hearts & Kisses": f'<text x="28" y="70" font-size="34" fill="{accent}" fill-opacity="0.32">💖</text><text x="160" y="150" font-size="32" fill="{accent}" fill-opacity="0.28">💋</text><text x="75" y="210" font-size="28" fill="#FFF" fill-opacity="0.20">🍒</text>',
+        "Coquette Ribbon Bows": f'<text x="30" y="72" font-size="36" fill="{accent}" fill-opacity="0.32">🎀</text><text x="165" y="165" font-size="30" fill="{accent}" fill-opacity="0.26">🎀</text><circle cx="115" cy="115" r="4" fill="#FFF" fill-opacity="0.25"/>',
+        "Butterfly Dreamscape": f'<text x="30" y="75" font-size="36" fill="{accent}" fill-opacity="0.32">🦋</text><text x="165" y="160" font-size="32" fill="#FFF" fill-opacity="0.22">🦋</text><text x="85" y="215" font-size="22" fill="{accent}" fill-opacity="0.26">✨</text>',
+        "Skull & Crossbones Punk": f'<text x="28" y="75" font-size="36" fill="#FFF" fill-opacity="0.22">💀</text><text x="160" y="165" font-size="34" fill="{accent}" fill-opacity="0.30">☠️</text><text x="85" y="210" font-size="22" fill="{accent}" fill-opacity="0.28">✖</text>',
+        "Lightning Bolts & Voltage": f'<text x="30" y="75" font-size="38" fill="{accent}" fill-opacity="0.34">⚡</text><text x="165" y="170" font-size="34" fill="#FFF" fill-opacity="0.20">⚡</text>',
+        "Gothic Bats & Crescent Moons": f'<text x="28" y="72" font-size="34" fill="#FFF" fill-opacity="0.22">🦇</text><text x="160" y="160" font-size="34" fill="{accent}" fill-opacity="0.30">🌙</text><text x="80" y="210" font-size="24" fill="{accent}" fill-opacity="0.25">🕸️</text>',
+        "Cyber Matrix Rain": f'<text x="20" y="60" font-family="monospace" font-size="18" fill="{accent}" fill-opacity="0.32">010110 // {w}</text><text x="90" y="140" font-family="monospace" font-size="18" fill="{accent}" fill-opacity="0.24">1010011101</text><text x="30" y="210" font-family="monospace" font-size="18" fill="#FFF" fill-opacity="0.16">SYS_ONLINE</text>',
+        "Carbon Fiber Hex": f'<polygon points="60,20 95,40 95,80 60,100 25,80 25,40" fill="none" stroke="{accent}" stroke-opacity="0.28" stroke-width="2"/><polygon points="165,110 200,130 200,170 165,190 130,170 130,130" fill="none" stroke="#FFF" stroke-opacity="0.16" stroke-width="2"/>',
+        "Retro Cassette & Vinyl": f'<text x="28" y="75" font-size="36" fill="{accent}" fill-opacity="0.30">📼</text><text x="160" y="165" font-size="36" fill="#FFF" fill-opacity="0.22">💿</text><text x="80" y="215" font-size="24" fill="{accent}" fill-opacity="0.28">🎧</text>',
+        "Flame & Hotrod Stripes": f'<text x="28" y="78" font-size="38" fill="{accent}" fill-opacity="0.34">🔥</text><text x="160" y="170" font-size="36" fill="{accent}" fill-opacity="0.28">🔥</text><line x1="0" y1="120" x2="260" y2="120" stroke="{accent}" stroke-opacity="0.22" stroke-width="3"/>',
+        "Crown & Diamond Luxe": f'<text x="30" y="74" font-size="34" fill="{accent}" fill-opacity="0.32">👑</text><text x="162" y="165" font-size="32" fill="#FFF" fill-opacity="0.24">💎</text>',
+        "Rose Thorns & Petals": f'<text x="30" y="75" font-size="36" fill="{accent}" fill-opacity="0.32">🥀</text><text x="162" y="165" font-size="34" fill="{accent}" fill-opacity="0.28">🌹</text>',
+        "8-Bit Arcade Invaders": f'<text x="28" y="75" font-size="34" fill="{accent}" fill-opacity="0.32">👾</text><text x="160" y="165" font-size="34" fill="#FFF" fill-opacity="0.22">🕹️</text>',
+        "Camo Streetwear": f'<ellipse cx="65" cy="65" rx="42" ry="22" fill="{accent}" fill-opacity="0.20"/><ellipse cx="175" cy="155" rx="48" ry="25" fill="#FFF" fill-opacity="0.10"/><ellipse cx="105" cy="195" rx="35" ry="18" fill="{accent}" fill-opacity="0.16"/>',
+        "Cosmic Planets & Rings": f'<text x="28" y="75" font-size="36" fill="{accent}" fill-opacity="0.32">🪐</text><text x="162" y="165" font-size="30" fill="#FFF" fill-opacity="0.22">🚀</text><text x="85" y="212" font-size="22" fill="{accent}" fill-opacity="0.28">✨</text>',
+    }
+    body = art_map.get(style_name, art_map["Punk Spray-Paint Graffiti"])
+    raw_svg = f'{SV_OPEN}xmlns="{SVG_NS}" width="260" height="240">{body}{SV_CLOSE}'
+    return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
+
 def calc_age(dob: date) -> int:
     today = date.today()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
@@ -95,9 +110,7 @@ def normalize_url(raw_url: str) -> str:
     clean = (raw_url or "").strip()
     if not clean:
         return ""
-    if clean.startswith("http://") or clean.startswith("https://"):
-        return clean
-    return "https://" + clean
+    return clean if (clean.startswith("http://") or clean.startswith("https://")) else ("https://" + clean)
 
 def save_profile_to_cloud():
     sb = get_sb()
@@ -110,22 +123,14 @@ def save_profile_to_cloud():
         theme_payload["website"] = u.get("website", "")
         theme_payload["all_friends"] = st.session_state.lex_friends
         sb.table("lex_profiles").upsert({
-            "user_id": u["user_id"],
-            "handle": u["handle"],
-            "display_name": u["name"],
-            "bio": u.get("bio", ""),
-            "who_to_meet": u.get("who_to_meet", ""),
-            "mood": u.get("mood", "Online Now • Vibing ⚡"),
-            "anthem": u.get("anthem", "Y2K Cobalt Synth"),
-            "custom_song_url": u.get("custom_song_url", ""),
-            "custom_song_title": u.get("custom_song_title", ""),
-            "theme_json": theme_payload,
-            "top8_json": st.session_state.lex_top8,
-            "wall_json": st.session_state.lex_wall,
+            "user_id": u["user_id"], "handle": u["handle"], "display_name": u["name"],
+            "bio": u.get("bio", ""), "who_to_meet": u.get("who_to_meet", ""),
+            "mood": u.get("mood", "Online Now • Vibing ⚡"), "anthem": u.get("anthem", "Y2K Cobalt Synth"),
+            "custom_song_url": u.get("custom_song_url", ""), "custom_song_title": u.get("custom_song_title", ""),
+            "theme_json": theme_payload, "top8_json": st.session_state.lex_top8, "wall_json": st.session_state.lex_wall,
         }).execute()
     except Exception as e:
         st.warning(f"Cloud sync notice: {e}")
-
 def remix_theme_from_prompt(prompt: str) -> dict:
     p = (prompt or "").lower()
     th = st.session_state.lex_theme.copy()
@@ -139,7 +144,7 @@ def remix_theme_from_prompt(prompt: str) -> dict:
         th.update({
             "name": "2004 Mall Goth", "bg": "#050307", "card": "#110B14",
             "accent": "#C084FC", "text": "#F3E8FF", "font": "Gothic Editorial",
-            "backdrop": "Punk Spray-Paint Graffiti", "border_style": "double", "spray_word": "NOCTURNE",
+            "backdrop": "Gothic Bats & Crescent Moons", "border_style": "double", "spray_word": "NOCTURNE",
         })
     elif any(k in p for k in ["y2k", "star", "glitter", "sparkle", "2006", "pop"]):
         th.update({
@@ -151,16 +156,17 @@ def remix_theme_from_prompt(prompt: str) -> dict:
         th.update({
             "name": "Cyber Glitch Matrix", "bg": "#020A06", "card": "#071910",
             "accent": "#10B981", "text": "#ECFDF5", "font": "Cyber Glitch",
-            "backdrop": "Architectural Grid", "border_style": "solid", "spray_word": "SYS_ONLINE",
+            "backdrop": "Cyber Matrix Rain", "border_style": "solid", "spray_word": "SYS_ONLINE",
         })
     return th
+
 def render_popular_song_embed(url: str) -> bool:
     clean = (url or "").strip()
     if not clean:
         return False
     sp_host = ".".join(["open", "spotify", "com"]) + "/track/"
     if sp_host in clean:
-        track_id = clean.split(sp_host)[1].split("?")[0].strip("/")
+        track_id = clean.split(sp_host).split("?").strip("/")
         components.iframe(f"{SPOTIFY_EMBED}{track_id}?utm_source=generator&theme=0", height=152)
         return True
     if "youtube.com" in clean or "youtu.be/" in clean:
@@ -183,7 +189,7 @@ g_font_name, css_font_family = FONT_MAP.get(th.get("font", "Clean Studio Sans"),
 bg_pattern = build_backdrop_url(th.get("backdrop", "Architectural Grid"), th["accent"], th.get("spray_word", "LeX!"))
 custom_wall = th.get("custom_wall", "")
 bg_css_img = f'url("{custom_wall}")' if custom_wall else bg_pattern
-bg_size = "cover" if custom_wall else ("56px 56px" if th.get("backdrop") == "Architectural Grid" else "420px 260px")
+bg_size = "cover" if custom_wall else ("56px 56px" if th.get("backdrop") == "Architectural Grid" else "260px 240px")
 bg_repeat = "no-repeat" if custom_wall else "repeat"
 
 css = (
@@ -217,7 +223,7 @@ if st.session_state.lex_user is None:
                     res = sb.auth.sign_in_with_password({"email": l_email.strip(), "password": l_pass})
                     prof = sb.table("lex_profiles").select("*").eq("user_id", res.user.id).execute().data
                     if prof:
-                        r = prof[0]
+                        r = prof
                         tj = r.get("theme_json") or {}
                         st.session_state.lex_user = {
                             "user_id": res.user.id, "name": r["display_name"], "handle": r["handle"],
@@ -264,46 +270,68 @@ if st.button("Sign Out"):
     st.session_state.lex_user = None
     st.rerun()
 
-left_col, right_col = st.columns([1.0, 1.45], gap="large")
-with left_col:
-    av_html = f'<img src="{user["avatar"]}" class="lex-avatar" />' if user.get("avatar") else f'<div class="lex-avatar-fallback">{(user["name"][:1] or "L").upper()}</div>'
-    site_url = user.get("website", "")
-    site_badge = f'<div style="margin-top:6px;"><a href="{site_url}" target="_blank" style="color:{th["accent"]};font-weight:700;text-decoration:none;">🔗 {site_url}</a></div>' if site_url else ""
-    st.markdown(
-        f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{av_html}'
-        f'<div><h2 style="margin:0;color:{th["text"]};">{user["name"]}</h2>'
-        f'<div style="color:{th["accent"]};font-weight:700;">{user["handle"]}</div>'
-        f'<div style="color:#34D399;font-size:13px;">● {user["mood"]}</div>{site_badge}</div></div>'
-        f'<p style="margin-top:12px;"><strong>About Me:</strong> {user["bio"]}</p>'
-        f'<p><strong>Who I\'d Like to Meet:</strong> {user["who_to_meet"]}</p></div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown("#### 🎵 Profile Anthem")
-    mode = st.radio("Audio Source", ["Popular Song Link", "Built-In LeX Synth"], horizontal=True)
-    if mode.startswith("Popular"):
-        s_url = st.text_input("Spotify / YouTube / Apple Link", value=user.get("custom_song_url", ""))
-        if st.button("Save Song 🎵"):
-            user["custom_song_url"] = s_url.strip()
-            save_profile_to_cloud()
-            st.rerun()
-        if user.get("custom_song_url"):
-            render_popular_song_embed(user["custom_song_url"])
-    else:
-        pick_synth = st.selectbox("Synth Track", list(ANTHEM_TRACKS.keys()))
-        st.audio(generate_anthem_wav(pick_synth), format="audio/wav")
+def render_profile_blocks():
+    order = th.get("block_order") or DEFAULT_BLOCKS
+    for blk in order:
+        if blk == "Profile Card":
+            av_html = f'<img src="{user["avatar"]}" class="lex-avatar" />' if user.get("avatar") else f'<div class="lex-avatar-fallback">{(user["name"][:1] or "L").upper()}</div>'
+            site_url = user.get("website", "")
+            site_badge = f'<div style="margin-top:6px;"><a href="{site_url}" target="_blank" style="color:{th["accent"]};font-weight:700;text-decoration:none;">🔗 {site_url}</a></div>' if site_url else ""
+            st.markdown(
+                f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{av_html}'
+                f'<div><h2 style="margin:0;color:{th["text"]};">{user["name"]}</h2>'
+                f'<div style="color:{th["accent"]};font-weight:700;">{user["handle"]}</div>'
+                f'<div style="color:#34D399;font-size:13px;">● {user["mood"]}</div>{site_badge}</div></div>'
+                f'<p style="margin-top:12px;"><strong>About Me:</strong> {user["bio"]}</p>'
+                f'<p><strong>Who I\'d Like to Meet:</strong> {user["who_to_meet"]}</p></div>',
+                unsafe_allow_html=True,
+            )
+        elif blk == "Top 8 Friends":
+            st.markdown(f"#### ✦ {user['name']}'s Top 8")
+            g_cols = st.columns(4)
+            for i_t, fr in enumerate(st.session_state.lex_top8[:8]):
+                g_cols[i_t % 4].markdown(
+                    f'<div class="lex-card" style="padding:8px;text-align:center;">'
+                    f'<div style="font-size:11px;color:{th["accent"]};font-weight:700;">#{fr["rank"]}</div>'
+                    f'<div style="font-size:12px;font-weight:700;">{fr["name"][:10]}</div>'
+                    f'<div style="font-size:10px;color:#A1A1AA;">{fr["handle"]}</div></div>',
+                    unsafe_allow_html=True,
+                )
+        elif blk == "Profile Anthem":
+            st.markdown("#### 🎵 Profile Anthem")
+            mode = st.radio("Audio Source", ["Popular Song Link", "Built-In LeX Synth"], horizontal=True)
+            if mode.startswith("Popular"):
+                s_url = st.text_input("Spotify / YouTube / Apple Link", value=user.get("custom_song_url", ""))
+                if st.button("Save Song 🎵"):
+                    user["custom_song_url"] = s_url.strip()
+                    save_profile_to_cloud()
+                    st.rerun()
+                if user.get("custom_song_url"):
+                    render_popular_song_embed(user["custom_song_url"])
+            else:
+                pick_synth = st.selectbox("Synth Track", list(ANTHEM_TRACKS.keys()))
+                st.audio(generate_anthem_wav(pick_synth), format="audio/wav")
+        elif blk == "Profile Wall":
+            st.markdown("#### 💬 Profile Wall")
+            w_msg = st.text_input("Sign profile wall...", key="wall_in")
+            if st.button("Post Wall Note") and w_msg.strip():
+                st.session_state.lex_wall.insert(0, {"sender": user["handle"], "msg": w_msg.strip()})
+                save_profile_to_cloud()
+                st.rerun()
+            for w in st.session_state.lex_wall[:6]:
+                st.markdown(f'<div class="lex-card"><strong>{w["sender"]}:</strong> {w["msg"]}</div>', unsafe_allow_html=True)
 
-    st.markdown("#### 💬 Profile Wall")
-    w_msg = st.text_input("Sign profile wall...", key="wall_in")
-    if st.button("Post Wall Note") and w_msg.strip():
-        st.session_state.lex_wall.insert(0, {"sender": user["handle"], "msg": w_msg.strip()})
-        save_profile_to_cloud()
-        st.rerun()
-    for w in st.session_state.lex_wall[:6]:
-        st.markdown(f'<div class="lex-card"><strong>{w["sender"]}:</strong> {w["msg"]}</div>', unsafe_allow_html=True)
+is_flipped = th.get("layout_side") == "Right (Flipped)"
+if is_flipped:
+    main_col, prof_col = st.columns([1.45, 1.0], gap="large")
+else:
+    prof_col, main_col = st.columns([1.0, 1.45], gap="large")
 
-with right_col:
+with prof_col:
+    render_profile_blocks()
+with main_col:
     t_feed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
-        "📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 Theme Studio", "📡 Radar"
+        "📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 Theme & Layout", "📡 Radar"
     ])
     with t_feed:
         with st.form("feed_post_form", clear_on_submit=True):
@@ -357,6 +385,7 @@ with right_col:
                     item["rank"] = r_i + 1
                 save_profile_to_cloud()
                 st.rerun()
+
     with t_dm:
         dm_targets = [f["handle"] for f in st.session_state.lex_friends if f["handle"] != user["handle"]]
         active_chat = st.selectbox("Message Friend", dm_targets or ["@LeX"])
@@ -386,16 +415,38 @@ with right_col:
                     item["rank"] = r_i + 1
                 save_profile_to_cloud()
                 st.rerun()
-
     with t_studio:
-        st.markdown("#### 🎨 Profile Photo, Wallpaper & Full Theme Customizer")
+        st.markdown("#### 📐 Page Layout & Movable Profile Blocks")
+        cur_side = th.get("layout_side", "Left (Classic)")
+        side_pick = st.radio("Profile Column Side", ["Left (Classic)", "Right (Flipped)"], index=1 if cur_side == "Right (Flipped)" else 0, horizontal=True)
+        if side_pick != cur_side:
+            st.session_state.lex_theme["layout_side"] = side_pick
+            save_profile_to_cloud()
+            st.rerun()
+
+        blk_list = list(th.get("block_order") or DEFAULT_BLOCKS)
+        for bi, bname in enumerate(blk_list):
+            bc1, bc2, bc3 = st.columns([0.64, 0.18, 0.18])
+            bc1.markdown(f"**{bi + 1}. {bname}**")
+            if bi > 0 and bc2.button("↑", key=f"bup_{bi}"):
+                blk_list[bi], blk_list[bi - 1] = blk_list[bi - 1], blk_list[bi]
+                st.session_state.lex_theme["block_order"] = blk_list
+                save_profile_to_cloud()
+                st.rerun()
+            if bi < len(blk_list) - 1 and bc3.button("↓", key=f"bdn_{bi}"):
+                blk_list[bi], blk_list[bi + 1] = blk_list[bi + 1], blk_list[bi]
+                st.session_state.lex_theme["block_order"] = blk_list
+                save_profile_to_cloud()
+                st.rerun()
+
+        st.markdown("#### 🎨 Colors, Fonts & 20 Wall Backgrounds")
         new_av = st.file_uploader("Update Profile Picture", type=["png", "jpg", "jpeg", "webp"], key="upd_av")
         if new_av is not None and st.button("Save New Profile Picture"):
             user["avatar"] = encode_image_data_url(new_av)
             save_profile_to_cloud()
             st.rerun()
 
-        wall_up = st.file_uploader("Upload Custom Profile Background Wallpaper", type=["png", "jpg", "jpeg", "webp"], key="upd_wall")
+        wall_up = st.file_uploader("Upload Custom Wallpaper", type=["png", "jpg", "jpeg", "webp"], key="upd_wall")
         w_c1, w_c2 = st.columns(2)
         with w_c1:
             if wall_up is not None and st.button("Set Background Wallpaper 🖼"):
@@ -408,34 +459,28 @@ with right_col:
                 save_profile_to_cloud()
                 st.rerun()
 
-        vibe_prompt = st.text_input("AI Vibe Prompt", placeholder="e.g., girl punk theme with spray paint writing in the back")
+        vibe_prompt = st.text_input("AI Vibe Prompt", placeholder="e.g., girl punk spray paint or goth bats")
         if st.button("Generate Custom Theme ⚡"):
             st.session_state.lex_theme = remix_theme_from_prompt(vibe_prompt)
             save_profile_to_cloud()
             st.rerun()
 
         c_a, c_b, c_c = st.columns(3)
-        with c_a:
-            new_bg = st.color_picker("Background Color", th["bg"])
-        with c_b:
-            new_card = st.color_picker("Card Surface", th["card"])
-        with c_c:
-            new_acc = st.color_picker("Accent & Spray Color", th["accent"])
+        new_bg = c_a.color_picker("Background Color", th["bg"])
+        new_card = c_b.color_picker("Card Surface", th["card"])
+        new_acc = c_c.color_picker("Accent & Art Color", th["accent"])
 
         font_keys = list(FONT_MAP.keys())
         new_font = st.selectbox("Profile Font", font_keys, index=font_keys.index(th["font"]) if th.get("font") in font_keys else 0)
-        backdrops = ["Architectural Grid", "Punk Spray-Paint Graffiti", "Y2K Stars & Sparkles"]
-        new_backdrop = st.selectbox("Wall Background Art", backdrops, index=backdrops.index(th["backdrop"]) if th.get("backdrop") in backdrops else 0)
-        new_spray = st.text_input("Custom Spray-Paint / Wall Tag Text", value=th.get("spray_word", "LeX!"))
+        new_backdrop = st.selectbox("Wall Background Art (20 Styles)", BACKDROP_OPTIONS, index=BACKDROP_OPTIONS.index(th["backdrop"]) if th.get("backdrop") in BACKDROP_OPTIONS else 0)
+        new_spray = st.text_input("Custom Spray-Paint / Tag Word", value=th.get("spray_word", "LeX!"))
         borders = ["solid", "dashed", "double"]
         new_border = st.selectbox("Border Style", borders, index=borders.index(th["border_style"]) if th.get("border_style") in borders else 0)
 
         if st.button("Apply Custom Look ✦"):
             st.session_state.lex_theme.update({
-                "bg": new_bg, "card": new_card, "accent": new_acc,
-                "font": new_font, "backdrop": new_backdrop,
-                "spray_word": new_spray, "border_style": new_border,
-                "custom_wall": "",
+                "bg": new_bg, "card": new_card, "accent": new_acc, "font": new_font,
+                "backdrop": new_backdrop, "spray_word": new_spray, "border_style": new_border, "custom_wall": "",
             })
             save_profile_to_cloud()
             st.rerun()
