@@ -1,6 +1,7 @@
 import os
 from datetime import date
 import streamlit as st
+import streamlit.components.v1 as components
 from audio_engine import ANTHEM_TRACKS, generate_anthem_wav
 
 st.set_page_config(page_title="LeX // Social by LexiTech Studio", page_icon="✦", layout="wide")
@@ -28,6 +29,26 @@ def calc_age(dob: date) -> int:
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
 
 
+def render_popular_song_embed(url: str) -> bool:
+    clean = (url or "").strip()
+    if not clean:
+        return False
+    if "://spotify.com" in clean:
+        after_track = clean.split("://spotify.com").__getitem__(1)
+        track_id = after_track.split("?").__getitem__(0).strip("/")
+        embed_src = f"https://spotify.com{track_id}?utm_source=generator&theme=0"
+        components.iframe(embed_src, height=152)
+        return True
+    if "://youtube.com" in clean or "youtu.be/" in clean:
+        st.video(clean)
+        return True
+    if "://apple.com" in clean and "://apple.com" not in clean:
+        embed_src = clean.replace("https://://apple.com", "https://embed.://apple.com")
+        components.iframe(embed_src, height=175)
+        return True
+    return False
+
+
 if "lex_user" not in st.session_state:
     st.session_state.lex_user = None
 if "lex_theme" not in st.session_state:
@@ -40,46 +61,22 @@ if "lex_room_chat" not in st.session_state:
     ]
 
 th = st.session_state.lex_theme
-css = f"""
-{ST_OPEN}
-.stApp {{
-  background-color: {th['bg']};
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 56px 56px;
-  color: {th['text']};
-}}
-.lex-banner {{
-  background: radial-gradient(circle at 15% 50%, rgba(236, 72, 153, 0.16), {th['card']} 62%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  padding: 22px 28px;
-  margin-bottom: 20px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}}
-.lex-wordmark {{
-  font-size: 40px; font-weight: 800; letter-spacing: 0.08em;
-  color: #FFFFFF;
-  text-shadow: 0 0 22px rgba(255, 255, 255, 0.45), 0 0 36px {th['accent']};
-}}
-.lex-card {{
-  background: {th['card']};
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  padding: 18px 20px;
-  margin-bottom: 14px;
-}}
-{ST_CLOSE}
-"""
+css = (
+    ST_OPEN
+    + f".stApp {{ background-color: {th['bg']}; background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 56px 56px; color: {th['text']}; }}"
+    + f".lex-banner {{ background: radial-gradient(circle at 15% 50%, rgba(236,72,153,0.16), {th['card']} 62%); border: 1px solid rgba(255,255,255,0.14); border-radius: 14px; padding: 22px 28px; margin-bottom: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.1); }}"
+    + f".lex-wordmark {{ font-size: 40px; font-weight: 800; letter-spacing: 0.08em; color: #FFFFFF; text-shadow: 0 0 22px rgba(255,255,255,0.45), 0 0 36px {th['accent']}; }}"
+    + f".lex-card {{ background: {th['card']}; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}"
+    + ST_CLOSE
+)
 st.markdown(css, unsafe_allow_html=True)
 
-head_c1, head_c2 = st.columns([1, 5])
+head_c1, head_c2 = st.columns([1, 4])
 with head_c1:
     if os.path.exists("lex-logo.png"):
-        st.image("lex-logo.png", width=115)
+        st.image("lex-logo.png", width=155)
     elif os.path.exists("LEXItech.PNG"):
-        st.image("LEXItech.PNG", width=115)
+        st.image("LEXItech.PNG", width=155)
 with head_c2:
     st.markdown(
         '<div class="lex-banner"><div class="lex-wordmark">LeX</div>'
@@ -101,7 +98,7 @@ if st.session_state.lex_user is None:
                 min_value=date(1920, 1, 1),
                 max_value=date.today(),
             )
-            starting_anthem = st.selectbox("Choose Your Profile Anthem", list(ANTHEM_TRACKS.keys()))
+            starting_anthem = st.selectbox("Starting Synth Vibe (You can embed any song next)", list(ANTHEM_TRACKS.keys()))
         bio_text = st.text_area("About Me", value="Zero algorithms. Custom vibes. Building on LeX.")
         submitted = st.form_submit_button("Launch My LeX Profile ✦", use_container_width=True)
 
@@ -121,6 +118,8 @@ if st.session_state.lex_user is None:
                     "bio": bio_text.strip(),
                     "who_to_meet": "Creators, builders, music lovers, and night owls.",
                     "anthem": starting_anthem,
+                    "custom_song_url": "",
+                    "custom_song_title": "",
                 }
                 st.rerun()
     st.stop()
@@ -140,18 +139,42 @@ with left_col:
     )
 
     st.markdown("#### 🎵 Profile Anthem & Live Vibe-Sync")
-    selected_track = st.selectbox(
-        "Active Profile Track",
-        list(ANTHEM_TRACKS.keys()),
-        index=list(ANTHEM_TRACKS.keys()).index(user["anthem"]),
+    anthem_mode = st.radio(
+        "Anthem Source",
+        ["Popular Song Link (Spotify / YouTube / Apple Music)", "Built-In LeX Synth Vibe"],
+        horizontal=True,
     )
-    if selected_track != user["anthem"]:
-        user["anthem"] = selected_track
-        st.rerun()
 
-    wav_bytes = generate_anthem_wav(user["anthem"])
-    st.audio(wav_bytes, format="audio/wav")
-    st.caption("🔴 LIVE VIBE-SYNC ACTIVE — Visitors on your page hear this track in real time.")
+    if anthem_mode.startswith("Popular"):
+        song_url = st.text_input(
+            "Paste any Spotify, Apple Music, or YouTube song link",
+            value=user.get("custom_song_url", ""),
+            placeholder="Paste track link here to put the song directly on your profile...",
+        )
+        song_title = st.text_input(
+            "Now Playing Label (shown on your profile & Top 8)",
+            value=user.get("custom_song_title", "Hot New Track 🔥"),
+        )
+        if st.button("Set Profile Song 🎵"):
+            user["custom_song_url"] = song_url.strip()
+            user["custom_song_title"] = song_title.strip() or "Hot New Track 🔥"
+            user["anthem"] = user["custom_song_title"]
+            st.rerun()
+
+        if user.get("custom_song_url"):
+            ok = render_popular_song_embed(user["custom_song_url"])
+            if not ok:
+                st.warning("Paste a valid Spotify track, Apple Music song, or YouTube link.")
+    else:
+        default_idx = list(ANTHEM_TRACKS.keys()).index(user["anthem"]) if user["anthem"] in ANTHEM_TRACKS else 0
+        selected_track = st.selectbox("Active Studio Synth Track", list(ANTHEM_TRACKS.keys()), index=default_idx)
+        if selected_track != user["anthem"]:
+            user["anthem"] = selected_track
+            st.rerun()
+        wav_bytes = generate_anthem_wav(user["anthem"])
+        st.audio(wav_bytes, format="audio/wav")
+
+    st.caption(f"🔴 LIVE VIBE-SYNC ACTIVE — Playing: {user['anthem']}")
 
     with st.expander("💬 Ephemeral Vibe-Sync Room Chat", expanded=True):
         for entry in st.session_state.lex_room_chat[-5:]:
@@ -196,7 +219,7 @@ with right_col:
                 f_handle = st.text_input("Friend @handle", placeholder="Alex")
             with fc2:
                 f_mood = st.text_input("Status / Mood", value="Online • Chilling 🎧")
-                f_anthem = st.selectbox("Their Anthem", list(ANTHEM_TRACKS.keys()), key="f_ant")
+                f_anthem = st.text_input("Their Current Song", value="Hot New Track 🔥")
             if st.form_submit_button("Pin to Top 8") and len(st.session_state.lex_top8) < 8:
                 clean_fh = f_handle.strip().lstrip("@").replace(" ", "")
                 if f_name.strip() and clean_fh:
@@ -205,7 +228,7 @@ with right_col:
                         "handle": f"@{clean_fh}",
                         "name": f_name.strip(),
                         "mood": f_mood.strip(),
-                        "anthem": f_anthem,
+                        "anthem": f_anthem.strip() or "Y2K Cobalt Synth",
                     })
                     st.rerun()
 
@@ -219,16 +242,12 @@ with right_col:
             vp = vibe_prompt.lower()
             if "rose" in vp or "pink" in vp or "velvet" in vp:
                 st.session_state.lex_theme = PRESET_THEMES["Velvet Rose Neon"].copy()
-                user["anthem"] = "Velvet Chrome Rhodes"
             elif "cobalt" in vp or "blue" in vp or "2006" in vp:
                 st.session_state.lex_theme = PRESET_THEMES["Midnight Cobalt"].copy()
-                user["anthem"] = "Y2K Cobalt Synth"
             elif "chrome" in vp or "silver" in vp or "cyber" in vp:
                 st.session_state.lex_theme = PRESET_THEMES["Y2K Cyber Chrome"].copy()
-                user["anthem"] = "Neon Arcade Pulse"
             else:
                 st.session_state.lex_theme = PRESET_THEMES["LexiTech Obsidian (Official)"].copy()
-                user["anthem"] = "Y2K Cobalt Synth"
             st.rerun()
 
         preset_choice = st.selectbox("Or Pick a Classic Theme Preset", list(PRESET_THEMES.keys()))
