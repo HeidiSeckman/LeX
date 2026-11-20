@@ -701,7 +701,7 @@ def render_block(blk: str):
                     st.rerun()
                 else:
                     st.warning("Enter a song title and valid YouTube URL or 11-character code.")
-          elif blk == "Profile Wall":
+          elif blk == "Profile Wall": 
             st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};font-size:15px;">💬 Profile Wall</strong></div>', unsafe_allow_html=True)
             w_msg = st.text_input("Sign profile wall...", key="wall_in")
             if st.button("Post Wall Note", key="wall_btn") and w_msg.strip():
