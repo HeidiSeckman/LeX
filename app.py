@@ -29,21 +29,21 @@ def build_backdrop_url(style_name: str, accent: str, tag_word: str = "LeX!") -> 
     if style_name == "Punk Spray-Paint Graffiti":
         raw_svg = (
             f'{SV_OPEN}xmlns="http://w3.org" width="420" height="260">'
-            f'<text x="24" y="95" font-family="cursive" font-size="54" font-weight="900" fill="{accent}" fill-opacity="0.22" transform="rotate(-11 80 80)">{safe_word}</text>'
-            f'<text x="200" y="210" font-family="cursive" font-size="40" font-weight="900" fill="#FFFFFF" fill-opacity="0.12" transform="rotate(8 240 200)">PUNK // 2026</text>'
-            f'<circle cx="150" cy="55" r="3" fill="{accent}" fill-opacity="0.4"/>'
-            f'<circle cx="162" cy="64" r="2" fill="{accent}" fill-opacity="0.32"/>'
-            f'<circle cx="330" cy="145" r="4" fill="#FFFFFF" fill-opacity="0.22"/>'
-            f'<path d="M30 165 Q120 140 210 175 T390 155" stroke="{accent}" stroke-width="3" stroke-opacity="0.24" fill="none" stroke-dasharray="10 6"/>'
+            f'<text x="24" y="95" font-family="cursive" font-size="54" font-weight="900" fill="{accent}" fill-opacity="0.26" transform="rotate(-11 80 80)">{safe_word}</text>'
+            f'<text x="200" y="210" font-family="cursive" font-size="40" font-weight="900" fill="#FFFFFF" fill-opacity="0.14" transform="rotate(8 240 200)">PUNK // 2026</text>'
+            f'<circle cx="150" cy="55" r="3" fill="{accent}" fill-opacity="0.45"/>'
+            f'<circle cx="162" cy="64" r="2" fill="{accent}" fill-opacity="0.35"/>'
+            f'<circle cx="330" cy="145" r="4" fill="#FFFFFF" fill-opacity="0.25"/>'
+            f'<path d="M30 165 Q120 140 210 175 T390 155" stroke="{accent}" stroke-width="3" stroke-opacity="0.28" fill="none" stroke-dasharray="10 6"/>'
             f'{SV_CLOSE}'
         )
         return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
     if style_name == "Y2K Stars & Sparkles":
         raw_svg = (
             f'{SV_OPEN}xmlns="http://w3.org" width="220" height="220">'
-            f'<text x="30" y="65" font-size="34" fill="{accent}" fill-opacity="0.25">✦</text>'
-            f'<text x="145" y="155" font-size="28" fill="#FFFFFF" fill-opacity="0.16">★</text>'
-            f'<text x="75" y="190" font-size="20" fill="{accent}" fill-opacity="0.22">⚡</text>'
+            f'<text x="30" y="65" font-size="34" fill="{accent}" fill-opacity="0.28">✦</text>'
+            f'<text x="145" y="155" font-size="28" fill="#FFFFFF" fill-opacity="0.18">★</text>'
+            f'<text x="75" y="190" font-size="20" fill="{accent}" fill-opacity="0.25">⚡</text>'
             f'{SV_CLOSE}'
         )
         return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
@@ -63,6 +63,7 @@ DEFAULT_THEME = {
     "backdrop": "Architectural Grid",
     "border_style": "solid",
     "spray_word": "LeX!",
+    "custom_wall": "",
 }
 
 DEFAULT_TOP8 = [
@@ -179,7 +180,7 @@ if "lex_feed" not in st.session_state:
     st.session_state.lex_feed = [
         {"author": "Heidi Seckman", "handle": "@Heidi", "time": "Just now", "text": "Officially building on LeX — zero algorithms, custom spray-paint punk themes, and real music profiles! ✦", "image": "", "likes": 12},
         {"author": "Nova Chen", "handle": "@Nova", "time": "14m ago", "text": "Finally a social network where my profile looks like my actual bedroom wall in 2006 🎧", "image": "", "likes": 8},
-        {"author": "LeX (Studio Co-Pilot)", "handle": "@LeX", "time": "1h ago", "text": "Tip: Open Theme Studio to spray-paint your background, upload a profile photo, or embed any Spotify/YouTube track.", "image": "", "likes": 24},
+        {"author": "LeX (Studio Co-Pilot)", "handle": "@LeX", "time": "1h ago", "text": "Tip: Open Theme Studio to spray-paint your background, upload a profile photo/wallpaper, or embed any Spotify/YouTube track.", "image": "", "likes": 24},
     ]
 if "lex_dms" not in st.session_state:
     st.session_state.lex_dms = {
@@ -196,12 +197,22 @@ th = st.session_state.lex_theme
 g_font_name, css_font_family = FONT_MAP.get(th.get("font", "Clean Studio Sans"), FONT_MAP["Clean Studio Sans"])
 font_query = g_font_name.replace(" ", "+")
 bg_pattern = build_backdrop_url(th.get("backdrop", "Architectural Grid"), th["accent"], th.get("spray_word", "LeX!"))
-bg_size = "56px 56px" if th.get("backdrop") == "Architectural Grid" else "420px 260px"
+
+custom_wall = th.get("custom_wall", "")
+if custom_wall:
+    bg_css_img = f'url("{custom_wall}")'
+    bg_size = "cover"
+    bg_repeat = "no-repeat"
+else:
+    bg_css_img = bg_pattern
+    bg_size = "56px 56px" if th.get("backdrop") == "Architectural Grid" else "420px 260px"
+    bg_repeat = "repeat"
 
 css = (
     f'{LK_OPEN}rel="stylesheet" href="https://googleapis.com{font_query}&display=swap" />'
     + ST_OPEN
-    + f".stApp {{ background-color: {th['bg']}; background-image: {bg_pattern}; background-size: {bg_size}; color: {th['text']}; }}"
+    + f'[data-testid="stAppViewContainer"], .stApp {{ background-color: {th["bg"]} !important; background-image: {bg_css_img} !important; background-size: {bg_size} !important; background-repeat: {bg_repeat} !important; background-attachment: fixed !important; color: {th["text"]} !important; }}'
+    + '[data-testid="stHeader"], [data-testid="stMain"] { background: transparent !important; }'
     + f".lex-banner {{ background: radial-gradient(circle at 15% 50%, rgba(236,72,153,0.18), {th['card']} 65%); border: 2px {th['border_style']} {th['accent']}; border-radius: 14px; padding: 20px 26px; margin-bottom: 18px; }}"
     + f".lex-wordmark {{ font-family: {css_font_family}; font-size: 40px; font-weight: 800; letter-spacing: 0.06em; color: #FFFFFF; text-shadow: 0 0 22px {th['accent']}; }}"
     + f".lex-card {{ background: {th['card']}; border: 1.5px {th['border_style']} {th['accent']}; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}"
@@ -369,11 +380,22 @@ with right_col:
                     st.rerun()
 
     with tab_studio:
-        st.markdown("#### 🎨 Profile Photo, Bio & Full Theme Customizer")
+        st.markdown("#### 🎨 Profile Photo, Wallpaper & Full Theme Customizer")
         new_av = st.file_uploader("Update Profile Picture", type=["png", "jpg", "jpeg", "webp"], key="upd_av")
         if new_av is not None and st.button("Save New Profile Picture"):
             user["avatar"] = encode_image_data_url(new_av)
             st.rerun()
+
+        wall_up = st.file_uploader("Upload Custom Profile Background Wallpaper", type=["png", "jpg", "jpeg", "webp"], key="upd_wall")
+        w_c1, w_c2 = st.columns(2)
+        with w_c1:
+            if wall_up is not None and st.button("Set Background Wallpaper 🖼️"):
+                st.session_state.lex_theme["custom_wall"] = encode_image_data_url(wall_up)
+                st.rerun()
+        with w_c2:
+            if st.session_state.lex_theme.get("custom_wall") and st.button("Clear Wallpaper"):
+                st.session_state.lex_theme["custom_wall"] = ""
+                st.rerun()
 
         vibe_prompt = st.text_input("AI Vibe Prompt", placeholder="e.g., girl punk theme with spray paint writing in the back")
         if st.button("Generate Custom Theme ⚡"):
@@ -396,6 +418,7 @@ with right_col:
                 "bg": new_bg, "card": new_card, "accent": new_acc,
                 "font": new_font, "backdrop": new_backdrop,
                 "spray_word": new_spray, "border_style": new_border,
+                "custom_wall": "",
             })
             st.rerun()
 
