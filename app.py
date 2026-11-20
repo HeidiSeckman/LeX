@@ -701,21 +701,20 @@ def render_block(blk: str):
                     st.rerun()
                 else:
                     st.warning("Enter a song title and valid YouTube URL or 11-character code.")
-  
-       elif blk == "Profile Wall":
-        st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};font-size:15px;">💬 Profile Wall</strong></div>', unsafe_allow_html=True)
-        w_msg = st.text_input("Sign profile wall...", key="wall_in")
-        if st.button("Post Wall Note", key="wall_btn") and w_msg.strip():
-            ok_w, msg_w = check_text_and_links(w_msg)
-            if not ok_w:
-                st.error(f"🛡️ Safety Filter: {msg_w}")
-            else:
-                st.session_state.lex_wall.insert(0, {"sender": user["handle"], "msg": w_msg.strip()})
-                save_profile_to_cloud()
-                st.rerun()
-        blocked_wall = get_blocked_set()
-        for w in [x for x in st.session_state.lex_wall if x.get("sender", "").lower() not in blocked_wall][:6]:
-            st.markdown(f'<div class="lex-card"><strong>{w["sender"]}:</strong> {w["msg"]}</div>', unsafe_allow_html=True)
+          elif blk == "Profile Wall":
+            st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};font-size:15px;">💬 Profile Wall</strong></div>', unsafe_allow_html=True)
+            w_msg = st.text_input("Sign profile wall...", key="wall_in")
+            if st.button("Post Wall Note", key="wall_btn") and w_msg.strip():
+                ok_w, msg_w = check_text_and_links(w_msg)
+                if not ok_w:
+                    st.error(f"🛡️ Safety Filter: {msg_w}")
+                else:
+                    st.session_state.lex_wall.insert(0, {"sender": user["handle"], "msg": w_msg.strip()})
+                    save_profile_to_cloud()
+                    st.rerun()
+            blocked_wall = get_blocked_set()
+            for w in [x for x in st.session_state.lex_wall if x.get("sender", "").lower() not in blocked_wall][:6]:
+                st.markdown(f'<div class="lex-card"><strong>{w["sender"]}:</strong> {w["msg"]}</div>', unsafe_allow_html=True)
 
 left_blks = th.get("left_blocks") or DEFAULT_LEFT
 right_blks = th.get("right_blocks") or DEFAULT_RIGHT
