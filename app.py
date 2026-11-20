@@ -701,13 +701,39 @@ def render_block(blk: str):
                     st.rerun()
                 else:
                     st.warning("Enter a song title and valid YouTube URL or 11-character code.")
-    elif blk == "Profile Wall":
+  elif blk == "Profile Wall":
         st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};font-size:15px;">💬 Profile Wall</strong></div>', unsafe_allow_html=True)
         w_msg = st.text_input("Sign profile wall...", key="wall_in")
         if st.button("Post Wall Note", key="wall_btn") and w_msg.strip():
             ok_w, msg_w = check_text_and_links(w_msg)
             if not ok_w:
+                st.error(f"🛡️ Safety Filter: {msg_w}")
+            else:
+                st.session_state.lex_wall.insert(0, {"sender": user["handle"], "msg": w_msg.strip()})
+                save_profile_to_cloud()
+                st.rerun()
+        blocked_wall = get_blocked_set()
+        for w in [x for x in st.session_state.lex_wall if x.get("sender", "").lower() not in blocked_wall][:6]:
+            st.markdown(f'<div class="lex-card"><strong>{w["sender"]}:</strong> {w["msg"]}</div>', unsafe_allow_html=True)
+
+left_blks = th.get("left_blocks") or DEFAULT_LEFT
+right_blks = th.get("right_blocks") or DEFAULT_RIGHT
+col_l, col_r = st.columns([1.15, 1.3], gap="large")
+tabs_pack = None
+for target_col, blk_seq in [(col_l, left_blks), (col_r, right_blks)]:
+    with target_col:
+        for b in blk_seq:
+            if b == "Main Social Hub":
+                tabs_pack = render_social_hub()
+            else:
+                render_block(b)
+if tabs_pack is None:
+    with col_r:
+        tabs_pack = render_social_hub()
+t_friends, t_dm, t_top8, t_studio, t_radar = tabs_pack
+
 with t_friends:
+    
     st.markdown("#### 🔍 Discover & Follow Creators on LeX")
     q_search = st.text_input("Search by @handle or name...", key="people_q").strip().lower()
     all_profiles = sb.table("lex_profiles").select("handle, display_name, mood, anthem, theme_json").execute().data or [] if sb else []
