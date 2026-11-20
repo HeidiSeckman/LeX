@@ -302,8 +302,8 @@ with left_col:
         st.markdown(f'<div class="lex-card"><strong>{w["sender"]}:</strong> {w["msg"]}</div>', unsafe_allow_html=True)
 
 with right_col:
-    t_feed, t_friends, t_dm, t_top8, t_studio = st.tabs([
-        "📰 Feed & Reactions", "👥 All Friends & Search", "✉ Messages", "✦ Top 8", "🎨 Theme Studio"
+    t_feed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
+        "📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 Theme Studio", "📡 Radar"
     ])
     with t_feed:
         with st.form("feed_post_form", clear_on_submit=True):
@@ -324,6 +324,7 @@ with right_col:
                     if emo == "🔥" and sb:
                         sb.table("lex_posts").update({"likes": st.session_state[rx_key]["🔥"]}).eq("id", p["id"]).execute()
                     st.rerun()
+
     with t_friends:
         st.markdown("#### 🔍 Search People on LeX")
         q_search = st.text_input("Search by @handle or name...", key="people_q").strip().lower()
@@ -340,7 +341,6 @@ with right_col:
                     st.rerun()
             else:
                 c_btn.caption("✓ Friends")
-
         st.markdown(f"#### 👥 All Friends ({len(st.session_state.lex_friends)})")
         for idx_f, fr in enumerate(st.session_state.lex_friends):
             fc1, fc2, fc3 = st.columns([0.56, 0.22, 0.22])
@@ -357,7 +357,6 @@ with right_col:
                     item["rank"] = r_i + 1
                 save_profile_to_cloud()
                 st.rerun()
-
     with t_dm:
         dm_targets = [f["handle"] for f in st.session_state.lex_friends if f["handle"] != user["handle"]]
         active_chat = st.selectbox("Message Friend", dm_targets or ["@LeX"])
@@ -370,6 +369,7 @@ with right_col:
             st.rerun()
 
     with t_top8:
+        st.markdown("#### Ranked Top 8 Friends")
         for idx, friend in enumerate(st.session_state.lex_top8):
             st.markdown(f'<div class="lex-card"><strong>#{friend["rank"]} {friend["name"]}</strong> <span style="color:{th["accent"]};">{friend["handle"]}</span> — {friend["mood"]}</div>', unsafe_allow_html=True)
             b1, b2 = st.columns(2)
@@ -388,26 +388,74 @@ with right_col:
                 st.rerun()
 
     with t_studio:
-        new_site = st.text_input("Profile Website / Portfolio Link", value=user.get("website", ""))
-        new_mood = st.text_input("Mood Badge", value=user["mood"])
-        new_bio = st.text_area("About Me", value=user["bio"])
-        vibe_p = st.text_input("AI Vibe Prompt", placeholder="girl punk spray paint")
-        if st.button("Remix Vibe ⚡") and vibe_p.strip():
-            st.session_state.lex_theme = remix_theme_from_prompt(vibe_p)
+        st.markdown("#### 🎨 Profile Photo, Wallpaper & Full Theme Customizer")
+        new_av = st.file_uploader("Update Profile Picture", type=["png", "jpg", "jpeg", "webp"], key="upd_av")
+        if new_av is not None and st.button("Save New Profile Picture"):
+            user["avatar"] = encode_image_data_url(new_av)
             save_profile_to_cloud()
             st.rerun()
-        new_av = st.file_uploader("New Profile Photo", type=["png", "jpg", "jpeg", "webp"])
-        wall_up = st.file_uploader("Custom Background Wallpaper", type=["png", "jpg", "jpeg", "webp"])
-        if st.button("Save All Profile & Theme Changes ✦"):
+
+        wall_up = st.file_uploader("Upload Custom Profile Background Wallpaper", type=["png", "jpg", "jpeg", "webp"], key="upd_wall")
+        w_c1, w_c2 = st.columns(2)
+        with w_c1:
+            if wall_up is not None and st.button("Set Background Wallpaper 🖼"):
+                st.session_state.lex_theme["custom_wall"] = encode_image_data_url(wall_up)
+                save_profile_to_cloud()
+                st.rerun()
+        with w_c2:
+            if st.session_state.lex_theme.get("custom_wall") and st.button("Clear Wallpaper"):
+                st.session_state.lex_theme["custom_wall"] = ""
+                save_profile_to_cloud()
+                st.rerun()
+
+        vibe_prompt = st.text_input("AI Vibe Prompt", placeholder="e.g., girl punk theme with spray paint writing in the back")
+        if st.button("Generate Custom Theme ⚡"):
+            st.session_state.lex_theme = remix_theme_from_prompt(vibe_prompt)
+            save_profile_to_cloud()
+            st.rerun()
+
+        c_a, c_b, c_c = st.columns(3)
+        with c_a:
+            new_bg = st.color_picker("Background Color", th["bg"])
+        with c_b:
+            new_card = st.color_picker("Card Surface", th["card"])
+        with c_c:
+            new_acc = st.color_picker("Accent & Spray Color", th["accent"])
+
+        font_keys = list(FONT_MAP.keys())
+        new_font = st.selectbox("Profile Font", font_keys, index=font_keys.index(th["font"]) if th.get("font") in font_keys else 0)
+        backdrops = ["Architectural Grid", "Punk Spray-Paint Graffiti", "Y2K Stars & Sparkles"]
+        new_backdrop = st.selectbox("Wall Background Art", backdrops, index=backdrops.index(th["backdrop"]) if th.get("backdrop") in backdrops else 0)
+        new_spray = st.text_input("Custom Spray-Paint / Wall Tag Text", value=th.get("spray_word", "LeX!"))
+        borders = ["solid", "dashed", "double"]
+        new_border = st.selectbox("Border Style", borders, index=borders.index(th["border_style"]) if th.get("border_style") in borders else 0)
+
+        if st.button("Apply Custom Look ✦"):
+            st.session_state.lex_theme.update({
+                "bg": new_bg, "card": new_card, "accent": new_acc,
+                "font": new_font, "backdrop": new_backdrop,
+                "spray_word": new_spray, "border_style": new_border,
+                "custom_wall": "",
+            })
+            save_profile_to_cloud()
+            st.rerun()
+
+        new_site = st.text_input("Profile Website / Portfolio Link", value=user.get("website", ""))
+        new_mood = st.text_input("Update Mood Badge", value=user["mood"])
+        new_bio = st.text_area("Update About Me", value=user["bio"])
+        new_meet = st.text_input("Update Who I'd Like to Meet", value=user.get("who_to_meet", ""))
+        if st.button("Save Profile Text & Link"):
             user["website"] = normalize_url(new_site)
             user["mood"] = new_mood.strip()
             user["bio"] = new_bio.strip()
-            if new_av is not None:
-                user["avatar"] = encode_image_data_url(new_av)
-            if wall_up is not None:
-                st.session_state.lex_theme["custom_wall"] = encode_image_data_url(wall_up)
+            user["who_to_meet"] = new_meet.strip()
             save_profile_to_cloud()
             st.rerun()
+
+    with t_radar:
+        st.markdown("#### 📡 Inner Circle Radar")
+        for friend in st.session_state.lex_top8:
+            st.markdown(f"- **{friend['name']}** (`{friend['handle']}`) — {friend['mood']} | 🎵 *{friend['anthem']}*")
 
 st.markdown("---")
 st.caption("© 2026 LeX Social // Built & Engineered by Heidi Seckman at LexiTech Studio. Ages 13+ Only.")
