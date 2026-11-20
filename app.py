@@ -47,21 +47,20 @@ BACKDROP_OPTIONS = [
     "Tactical Urban Camo", "Cosmic Planets & Rings",
 ]
 
-DEFAULT_LEFT = ["Profile Card", "Profile Anthem", "Profile Wall"]
+DEFAULT_LEFT = ["Profile Card", "Photo Albums", "Profile Anthem", "Profile Wall"]
 DEFAULT_RIGHT = ["Top 8 Friends", "Main Social Hub"]
-
 DEFAULT_THEME = {
     "name": "LexiTech Obsidian (Official)", "bg": "#000000", "card": "#070709",
     "accent": "#EC4899", "text": "#F4F4F5", "font": "Clean Studio Sans",
     "backdrop": "Architectural Grid", "border_style": "solid", "glow_borders": True,
-    "card_opacity": 92, "card_radius": 12, "marquee_text": "✦ WELCOME TO MY LeX PROFILE // ZERO ALGORITHMS ✦",
+    "card_opacity": 92, "card_radius": 12,
+    "marquee_text": "✦ WELCOME TO MY LeX PROFILE // ZERO ALGORITHMS ✦",
     "marquee_on": True, "pinned_note": "", "custom_css": "",
     "int_general": "", "int_music": "", "int_movies": "", "int_tv": "", "int_books": "",
     "spray_word": "LeX!", "custom_wall": "", "website": "",
     "left_blocks": DEFAULT_LEFT.copy(), "right_blocks": DEFAULT_RIGHT.copy(),
-    "followers": [], "following": [], "playlist": [],
+    "followers": [], "following": [], "playlist": [], "albums": [],
 }
-
 DEFAULT_TOP8 = [
     {"rank": 1, "handle": "@LeX", "name": "LeX (Studio Co-Pilot)", "mood": "Online • Remixing Vibes ⚡", "anthem": "Y2K Cobalt Synth"},
     {"rank": 2, "handle": "@Heidi", "name": "Heidi Seckman", "mood": "Founder @ LexiTech Studio ✦", "anthem": "Velvet Chrome Rhodes"},
@@ -72,6 +71,17 @@ DEFAULT_TOP8 = [
     {"rank": 7, "handle": "@Mina", "name": "Mina Solis", "mood": "Night owl mode 🌙", "anthem": "Midnight Tokyo Lo-Fi"},
     {"rank": 8, "handle": "@Jax", "name": "Jax Sterling", "mood": "Hanging in Vibe-Sync 💠", "anthem": "Velvet Chrome Rhodes"},
 ]
+
+def founder_badge_html(handle: str) -> str:
+    if (handle or "").strip().lower() not in {"@heidi", "@heidiseckman"}:
+        return ""
+    return (
+        '<span style="display:inline-block;margin-left:8px;padding:3px 10px;border-radius:99px;'
+        'background:linear-gradient(90deg,#F59E0B,#EC4899);color:#000000;font-size:11px;'
+        'font-weight:900;letter-spacing:0.06em;box-shadow:0 0 12px #EC4899;">'
+        '👑 CREATOR &amp; FOUNDER</span>'
+    )
+
 def build_backdrop_url(style_name: str, accent: str, tag_word: str = "LeX!") -> str:
     w = (tag_word or "LeX!")[:14].replace("<", "").replace(">", "").replace("&", "")
     if style_name == "Architectural Grid":
@@ -101,7 +111,6 @@ def build_backdrop_url(style_name: str, accent: str, tag_word: str = "LeX!") -> 
     body = art_map.get(style_name, art_map["Punk Spray-Paint Graffiti"])
     raw_svg = f'{SV_OPEN}xmlns="{SVG_NS}" width="260" height="220">{body}{SV_CLOSE}'
     return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
-
 def calc_age(dob: date) -> int:
     today = date.today()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
@@ -129,6 +138,7 @@ def extract_yt_id(raw: str) -> str:
             head, _, _ = head.partition("&")
             return head.strip("/")[:11]
     return ""
+
 def save_profile_to_cloud():
     sb = get_sb()
     u = st.session_state.get("lex_user")
@@ -171,7 +181,6 @@ def toggle_follow_user(my_handle: str, target_handle: str):
                 sb.table("lex_profiles").update({"theme_json": tj}).eq("user_id", t_row["user_id"]).execute()
         except Exception:
             pass
-
 def render_popular_song_embed(url: str) -> bool:
     clean = (url or "").strip()
     if not clean:
@@ -209,6 +218,7 @@ for k, v in [("lex_user", None), ("lex_theme", DEFAULT_THEME.copy()), ("lex_top8
         st.session_state[k] = v
 if "lex_wall" not in st.session_state:
     st.session_state.lex_wall = [{"sender": "@LeX", "msg": "Welcome to LeX! Drop a wall note anytime ✦"}]
+
 th = st.session_state.lex_theme
 g_font_name, css_font_family = FONT_MAP.get(th.get("font", "Clean Studio Sans"), FONT_MAP["Clean Studio Sans"])
 bg_pattern = build_backdrop_url(th.get("backdrop", "Architectural Grid"), th["accent"], th.get("spray_word", "LeX!"))
@@ -241,7 +251,6 @@ with head_c1:
         st.image("lex-logo.png", width=145)
 with head_c2:
     st.markdown('<div class="lex-banner"><div class="lex-wordmark">LeX</div><div style="color:#A1A1AA;font-family:monospace;font-size:12px;">NEXT-GEN SOCIAL ARCHITECTURE // LEXITECH STUDIO // 13+ ONLY</div></div>', unsafe_allow_html=True)
-
 sb = get_sb()
 if st.session_state.lex_user is None:
     t_in, t_up = st.tabs(["🔐 Member Sign In", "✦ Create Account (13+ Required)"])
@@ -317,7 +326,9 @@ if top_c2.button("Sign Out"):
 
 def friend_card_html(fr: dict, badge: str = "") -> str:
     ini = (fr.get("name", "L")[:1] or "L").upper()
-    top_tag = f'<span style="background:{th["accent"]};color:#000;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:900;">{badge}</span>' if badge else ""
+    is_owner = (fr.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"})
+    pill_lbl = "👑 FOUNDER" if is_owner else badge
+    top_tag = f'<span style="background:{th["accent"]};color:#000;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:900;">{pill_lbl}</span>' if pill_lbl else ""
     return (
         f'<div class="lex-friend-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">{top_tag}'
         f'<span style="color:#34D399;font-size:11px;font-weight:700;">● ONLINE</span></div>'
@@ -334,13 +345,13 @@ if st.session_state.viewing_handle and sb:
     vp = next(iter(v_res), None) if isinstance(v_res, list) else v_res
     if isinstance(vp, dict):
         vtj = vp.get("theme_json") or {}
-        v_fol = list(vtj.get("followers") or [])
-        v_fr = list(vtj.get("all_friends") or [])
+        v_fol, v_fr = list(vtj.get("followers") or []), list(vtj.get("all_friends") or [])
         v_av = f'<img src="{vtj["avatar"]}" class="lex-avatar" />' if vtj.get("avatar") else f'<div class="lex-avatar-fallback">{(vp.get("display_name", "L")[:1] or "L").upper()}</div>'
         v_site = f'<div style="margin-top:6px;"><a href="{vtj["website"]}" target="_blank" style="color:{th["accent"]};font-weight:700;">🔗 {vtj["website"]}</a></div>' if vtj.get("website") else ""
         st.markdown(
             f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}'
-            f'<div><h2 style="margin:0;">{vp.get("display_name", "")}</h2><div style="color:{th["accent"]};font-weight:700;">{vp.get("handle", "")}</div>'
+            f'<div><h2 style="margin:0;">{vp.get("display_name", "")}{founder_badge_html(vp.get("handle", ""))}</h2>'
+            f'<div style="color:{th["accent"]};font-weight:700;">{vp.get("handle", "")}</div>'
             f'<div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_site}</div></div>'
             f'<div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;">'
             f'<span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div>'
@@ -364,11 +375,18 @@ if st.session_state.viewing_handle and sb:
             st.rerun()
         if vp.get("custom_song_url"):
             render_popular_song_embed(vp["custom_song_url"])
+        v_albs = list(vtj.get("albums") or [])
+        if v_albs:
+            st.markdown(f"#### 📸 {vp.get('display_name', '')}'s Featured Albums")
+            va_pick = st.selectbox("View Album", [a["title"] for a in v_albs], key="pub_alb_sel")
+            va_obj = next((a for a in v_albs if a["title"] == va_pick), {})
+            va_cols = st.columns(3)
+            for idx_p, ph in enumerate(va_obj.get("photos") or []):
+                va_cols[idx_p % 3].markdown(f'<div class="lex-card" style="padding:6px;"><img src="{ph["img"]}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;" /><div style="font-size:11px;margin-top:4px;">{ph.get("caption","")}</div></div>', unsafe_allow_html=True)
     st.stop()
-
 def render_social_hub():
     t_feed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
-        "📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 MySpace Studio", "📡 Radar"
+        "📰 Feed", "👥 All Friends", "✉ Messages", "✦ Top 8", "🎨 LeX Studio", "📡 Radar"
     ])
     with t_feed:
         with st.form("feed_post_form", clear_on_submit=True):
@@ -384,7 +402,6 @@ def render_social_hub():
                     packed += f"\n[LEX_IMG]{encode_image_data_url(post_img)}"
                 sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
                 st.rerun()
-
         posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(25).execute().data or [] if sb else []
         for p in posts:
             clean_txt, img_src, lnk_src = (p.get("body") or ""), "", ""
@@ -395,7 +412,7 @@ def render_social_hub():
             clean_txt, lnk_src, img_src = clean_txt.strip(), lnk_src.strip(), img_src.strip()
             img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:10px;border:1px solid {th["accent"]};" />' if img_src else ""
             lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="display:inline-block;padding:6px 12px;border-radius:8px;background:{th["accent"]}22;border:1px solid {th["accent"]};color:{th["accent"]};font-weight:700;text-decoration:none;">🔗 {lnk_src}</a></div>' if lnk_src else ""
-            st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};">{p["handle"]}</span><p style="margin-top:6px;">{clean_txt}</p>{lnk_tag}{img_tag}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};">{p["handle"]}</span>{founder_badge_html(p.get("handle", ""))}<p style="margin-top:6px;">{clean_txt}</p>{lnk_tag}{img_tag}</div>', unsafe_allow_html=True)
             rx_key = f"rx_{p['id']}"
             if rx_key not in st.session_state:
                 st.session_state[rx_key] = {"🔥": p.get("likes", 0), "💖": 0, "🎸": 0, "💀": 0}
@@ -407,6 +424,7 @@ def render_social_hub():
                         sb.table("lex_posts").update({"likes": st.session_state[rx_key]["🔥"]}).eq("id", p["id"]).execute()
                     st.rerun()
     return t_friends, t_dm, t_top8, t_studio, t_radar
+
 def render_block(blk: str):
     if blk == "Profile Card":
         if th.get("marquee_on") and th.get("marquee_text"):
@@ -421,7 +439,7 @@ def render_block(blk: str):
         int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong style="color:{th["accent"]};">{l}:</strong> {v}</div>' for l, v in ints])
         st.markdown(
             f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{av_html}'
-            f'<div><h2 style="margin:0;color:{th["text"]};">{user["name"]}</h2>'
+            f'<div><h2 style="margin:0;color:{th["text"]};">{user["name"]}{founder_badge_html(user["handle"])}</h2>'
             f'<div style="color:{th["accent"]};font-weight:700;">{user["handle"]}</div>'
             f'<div style="color:#34D399;font-size:13px;">● {user["mood"]}</div>{site_badge}</div></div>'
             f'<div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.04);font-size:12px;font-weight:800;">'
@@ -430,6 +448,40 @@ def render_block(blk: str):
             f'<p><strong>Who I\'d Like to Meet:</strong> {user["who_to_meet"]}</p>{int_html}</div>',
             unsafe_allow_html=True,
         )
+    elif blk == "Photo Albums":
+        st.markdown(f"#### 📸 {user['name']}'s Photo Albums")
+        albums = list(th.get("albums") or [])
+        if albums:
+            pick_alb = st.selectbox("Select Album", [a["title"] for a in albums], key="alb_view_sel")
+            cur_alb = next((a for a in albums if a["title"] == pick_alb), next(iter(albums), {}))
+            photos = cur_alb.get("photos") or []
+            if photos:
+                p_cols = st.columns(2)
+                for pi_idx, ph in enumerate(photos):
+                    with p_cols[pi_idx % 2]:
+                        cap_html = f'<div style="font-size:11px;color:#D4D4D8;margin-top:4px;">{ph["caption"]}</div>' if ph.get("caption") else ""
+                        st.markdown(f'<div class="lex-card" style="padding:8px;"><img src="{ph["img"]}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;" />{cap_html}</div>', unsafe_allow_html=True)
+                        if st.button("Remove ✕", key=f"rm_ph_{pick_alb}_{pi_idx}"):
+                            cur_alb["photos"].pop(pi_idx)
+                            st.session_state.lex_theme["albums"] = albums
+                            save_profile_to_cloud()
+                            st.rerun()
+        with st.expander("+ Manage / Add Featured Photo Album"):
+            new_alb_name = st.text_input("New or Existing Album Name", placeholder="Vibe Dump 2026", key="alb_name_in")
+            alb_up = st.file_uploader("Upload Photo", type=["png", "jpg", "jpeg", "webp"], key="alb_img_up")
+            alb_cap = st.text_input("Photo Caption (Optional)", placeholder="Late night studio session ✦", key="alb_cap_in")
+            if st.button("Add Photo to Album ✦", key="alb_save_btn"):
+                t_clean = new_alb_name.strip()
+                if t_clean and alb_up is not None:
+                    img_data = encode_image_data_url(alb_up)
+                    found = next((a for a in albums if a["title"].lower() == t_clean.lower()), None)
+                    if found:
+                        found["photos"].append({"img": img_data, "caption": alb_cap.strip()})
+                    else:
+                        albums.append({"title": t_clean, "photos": [{"img": img_data, "caption": alb_cap.strip()}]})
+                    st.session_state.lex_theme["albums"] = albums
+                    save_profile_to_cloud()
+                    st.rerun()
     elif blk == "Top 8 Friends":
         st.markdown(f"#### ✦ {user['name']}'s Top 8")
         g_cols = st.columns(2)
@@ -449,13 +501,12 @@ def render_block(blk: str):
         else:
             pick_synth = st.selectbox("Synth Track", list(ANTHEM_TRACKS.keys()), key="synth_pick")
             st.audio(generate_anthem_wav(pick_synth), format="audio/wav")
-
         st.markdown("##### 🎶 Audio-Only YouTube Playlist")
         plist = list(th.get("playlist") or [])
         active_idx = st.session_state.get("active_pl_idx", -1)
         if 0 <= active_idx < len(plist):
-            cur_tr = plist[active_idx]
-            render_mini_yt_audio_bar(cur_tr["yt_id"], f"{cur_tr['title']} — {cur_tr['artist']}", th["accent"])
+            cur_tr = next(iter(plist[active_idx:active_idx + 1]), {})
+            render_mini_yt_audio_bar(cur_tr.get("yt_id", ""), f"{cur_tr.get('title', '')} — {cur_tr.get('artist', '')}", th["accent"])
         for pi, tr in enumerate(plist):
             pc1, pc2, pc3 = st.columns([0.66, 0.17, 0.17])
             pc1.markdown(f"**{pi + 1}. {tr['title']}** · *{tr['artist']}*")
@@ -504,6 +555,7 @@ for target_col, blk_seq in [(col_l, left_blks), (col_r, right_blks)]:
 if tabs_pack is None:
     with col_r:
         tabs_pack = render_social_hub()
+
 t_friends, t_dm, t_top8, t_studio, t_radar = tabs_pack
 
 with t_friends:
@@ -533,7 +585,6 @@ with t_friends:
                 st.rerun()
         else:
             c4.caption("✓ Friend")
-
     st.markdown(f"#### 👥 All Friends ({len(st.session_state.lex_friends)} / {MAX_FRIENDS} Max)")
     f_cols = st.columns(2)
     for idx_f, fr in enumerate(st.session_state.lex_friends):
@@ -592,7 +643,7 @@ with t_top8:
                 st.rerun()
 
 with t_studio:
-    st.markdown("#### 🖱️ Drag & Drop Profile Layout Board")
+    st.markdown("#### 🖱 Drag & Drop Profile Layout Board")
     l_items = "".join([f'<div class="d-item" draggable="true" data-b="{b}">⠿ {b}</div>' for b in left_blks])
     r_items = "".join([f'<div class="d-item" draggable="true" data-b="{b}">⠿ {b}</div>' for b in right_blks])
     board_html = (
@@ -601,8 +652,8 @@ with t_studio:
         f'<div id="out" style="margin-top:6px;font-family:monospace;font-size:11px;color:{th["accent"]};"></div>'
         f'{SC_OPEN}let drag=null;document.querySelectorAll(".d-item").forEach(el=>{{el.ondragstart=()=>drag=el;}});document.querySelectorAll(".col").forEach(c=>{{c.ondragover=e=>e.preventDefault();c.ondrop=()=>{{if(drag)c.appendChild(drag);document.getElementById("out").innerText="LEFT: "+[...document.querySelectorAll("#L .d-item")].map(x=>x.dataset.b).join(", ")+" | RIGHT: "+[...document.querySelectorAll("#R .d-item")].map(x=>x.dataset.b).join(", ");}};}});{SC_CLOSE}'
     )
-    components.html(board_html, height=210)
-    all_b = ["Profile Card", "Top 8 Friends", "Profile Anthem", "Profile Wall", "Main Social Hub"]
+    components.html(board_html, height=215)
+    all_b = ["Profile Card", "Photo Albums", "Top 8 Friends", "Profile Anthem", "Profile Wall", "Main Social Hub"]
     cur_l = [b for b in left_blks if b in all_b]
     cur_r = [b for b in right_blks if b in all_b and b not in cur_l]
     pick_l = st.multiselect("Left Column Blocks", all_b, default=cur_l, key="ms_left")
@@ -614,7 +665,7 @@ with t_studio:
         save_profile_to_cloud()
         st.rerun()
 
-    st.markdown("#### 🎨 MySpace Visuals, Glow, Opacity & 20 Wall Arts")
+    st.markdown("#### 🎨 LeX Studio Visuals, Glow, Opacity & 20 Wall Arts")
     new_av = st.file_uploader("Update Profile Picture", type=["png", "jpg", "jpeg", "webp"], key="upd_av")
     if new_av is not None and st.button("Save Profile Picture"):
         user["avatar"] = encode_image_data_url(new_av)
@@ -630,7 +681,6 @@ with t_studio:
         st.session_state.lex_theme["custom_wall"] = ""
         save_profile_to_cloud()
         st.rerun()
-
     c_a, c_b, c_c = st.columns(3)
     new_bg = c_a.color_picker("Background", th["bg"])
     new_card = c_b.color_picker("Card Surface", th["card"])
@@ -647,7 +697,7 @@ with t_studio:
     new_spray = st.text_input("Custom Spray-Paint / Tag Word", value=th.get("spray_word", "LeX!"))
     borders = ["solid", "dashed", "double"]
     new_border = st.selectbox("Border Style", borders, index=borders.index(th["border_style"]) if th.get("border_style") in borders else 0)
-    raw_css = st.text_area("Advanced Custom CSS (MySpace Override)", value=th.get("custom_css", ""), height=68)
+    raw_css = st.text_area("Advanced Custom CSS (LeX Override)", value=th.get("custom_css", ""), height=68)
     if st.button("Apply Custom Look ✦"):
         st.session_state.lex_theme.update({"bg": new_bg, "card": new_card, "accent": new_acc, "card_opacity": new_op, "card_radius": new_rad, "glow_borders": glow_on, "marquee_on": mq_on, "marquee_text": mq_txt, "font": new_font, "backdrop": new_backdrop, "spray_word": new_spray, "border_style": new_border, "custom_css": raw_css, "custom_wall": ""})
         save_profile_to_cloud()
