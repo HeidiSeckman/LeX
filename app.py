@@ -963,7 +963,7 @@ with hub_col:
             st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};">{p_author_h}</span>{founder_badge_html(p_author_h)}<p style="margin-top:6px;">{clean_txt}</p>{lnk_tag}{img_tag}</div>', unsafe_allow_html=True)
             rx_map = p_meta["rx"]
             cm_list = p_meta["comments"]
-            rcols = st.columns(6)
+            rcols = st.columns(7)
             for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
                 emo_users = rx_map.get(emo) or {}
                 cnt_e = sum(int(v) if isinstance(v, int) else 1 for v in emo_users.values())
@@ -990,11 +990,10 @@ with hub_col:
                     block_or_report_member(p_author_h, "report", f"Reported post #{p['id']}")
                     st.toast("Reported post to LeX Safety")
             else:
-                ec1, ec2 = rcols.columns(2)
-                if ec1.button("✏️", key=f"ed_p_{p['id']}"):
+                if rcols.button("✏️", key=f"ed_p_{p['id']}"):
                     st.session_state[f"edit_open_{p['id']}"] = not st.session_state.get(f"edit_open_{p['id']}", False)
                     st.rerun()
-                if ec2.button("🗑️", key=f"del_p_{p['id']}") and sb:
+                if rcols.button("🗑️", key=f"del_p_{p['id']}") and sb:
                     sb.table("lex_posts").delete().eq("id", p["id"]).execute()
                     st.rerun()
 
