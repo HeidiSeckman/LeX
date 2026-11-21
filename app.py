@@ -648,6 +648,24 @@ if sb and user.get("handle"):
 last_seen_nid = int(th.get("notif_read_id") or 0)
 unread_n = sum(1 for x in my_notifs if x["id"] > last_seen_nid)
 n_lbl = f"🔔 Notifications ({unread_n})" if unread_n else "🔔 Notifications"
+unread_dms = []
+if sb and user.get("handle"):
+    try:
+        dm_rows = sb.table("lex_messages").select("*").ilike("recipient_handle", user["handle"]).order("id", desc=True).limit(60).execute().data or []
+        last_dm_id = int(th.get("dm_read_id") or 0)
+        for dr in dm_rows:
+            db_txt = dr.get("body") or ""
+            if not db_txt.startswith(("[LEX_F", "[LEX_NOTIF]")) and int(dr.get("id") or 0) > last_dm_id:
+                unread_dms.append(dr)
+    except Exception:
+        pass
+if unread_dms:
+    latest_dm = unread_dms[0]
+    st.info(f"✉️ **{len(unread_dms)} New Message(s)** — Latest from **{latest_dm.get('sender_handle')}**: “{(latest_dm.get('body') or '')[:60]}” (Open **✉️ Messages** tab to reply!)")
+    if st.button("✓ Dismiss Message Alert", key="dismiss_dm_alert"):
+        th["dm_read_id"] = max(int(x.get("id") or 0) for x in unread_dms)
+        save_profile_to_cloud()
+        st.rerun()
 
 top_c1, top_c2, top_c3 = st.columns([0.62, 0.23, 0.15])
 if st.session_state.viewing_handle and top_c1.button(f"← Back to My Profile ({user['handle']})"):
