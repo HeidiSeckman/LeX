@@ -504,6 +504,10 @@ def build_theme_css(t_cfg: dict) -> str:
     anim_kf = "@keyframes lexCardPulse{0%,100%{box-shadow:0 0 14px " + t_cfg["accent"] + "55}50%{box-shadow:0 0 28px " + t_cfg["accent"] + "cc}}@keyframes lexFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes lexGlitch{0%,94%,100%{transform:translate(0)}96%{transform:translate(-2px,1px)}98%{transform:translate(2px,-1px)}}"
     anim_rule = "animation: lexCardPulse 2.4s ease-in-out infinite;" if anim_mode == "Pulse Neon Glow" else ("animation: lexFloat 3s ease-in-out infinite;" if anim_mode == "Floating Levitate" else ("animation: lexGlitch 3.5s infinite;" if anim_mode == "Cyber Glitch Flicker" else ""))
     x_css = (t_cfg.get("custom_css") or "").replace("<", "").replace(">", "")
+    if os.path.exists("lex-logo.png"):
+        _ic_b64 = base64.b64encode(open("lex-logo.png", "rb").read()).decode("ascii")
+        components.html(f'<script>["apple-touch-icon","icon"].forEach(r=>{{let l=document.createElement("link");l.rel=r;l.href="data:image/png;base64,{_ic_b64}";window.parent.document.head.appendChild(l);}});</script>', height=0)
+
     return (
         f'{LK_OPEN}rel="stylesheet" href="{GFONTS_BASE}{gf_name.replace(" ", "+")}&display=swap" />' + ST_OPEN + anim_kf
         + f'[data-testid="stAppViewContainer"], .stApp {{ background-color: {t_cfg["bg"]} !important; background-image: {bg_img} !important; background-size: {bg_sz} !important; background-repeat: {bg_rep} !important; background-attachment: fixed !important; color: {t_cfg["text"]} !important; cursor: {cur_css}; }}'
