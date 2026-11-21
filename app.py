@@ -464,11 +464,24 @@ def render_popular_song_embed(url: str) -> bool:
         return True
     return False
 
-def render_mini_yt_audio_bar(yt_id: str, track_label: str, accent: str):
+def render_mini_yt_audio_bar(yt_id: str, track_label: str, accent: str, playlist_ref: list = None):
     if not yt_id:
         return
-    src = f"{YT_EMBED_BASE}{yt_id}?autoplay=1&controls=1&rel=0"
-    st.markdown(f'<div class="lex-card" style="padding:8px 10px;margin:8px 0;"><div style="font-size:12px;font-weight:800;color:{accent};margin-bottom:4px;">🎧 NOW SPINNING: {track_label}</div><div style="height:46px;overflow:hidden;border-radius:6px;"><iframe width="100%" height="140" src="{src}" frameborder="0" allow="autoplay; encrypted-media" style="margin-top:-92px;"></iframe></div></div>', unsafe_allow_html=True)
+    import random
+    loop_on = bool(st.session_state.get("yt_loop_on", False))
+    loop_q = f"&loop=1&playlist={yt_id}" if loop_on else ""
+    src = f"{YT_EMBED_BASE}{yt_id}?autoplay=1&controls=1&rel=0{loop_q}"
+    st.markdown(f'<div class="lex-card" style="padding:8px 10px;margin:8px 0;"><div style="font-size:12px;font-weight:800;color:{accent};margin-bottom:4px;">🎧 NOW SPINNING: {track_label} {"🔁" if loop_on else ""}</div><div style="height:46px;overflow:hidden;border-radius:6px;"><iframe width="100%" height="140" src="{src}" frameborder="0" allow="autoplay; encrypted-media" style="margin-top:-92px;"></iframe></div></div>', unsafe_allow_html=True)
+    mc1, mc2, mc3 = st.columns(3)
+    if mc1.button("⏹️ Stop", key="yt_stop_btn", use_container_width=True):
+        st.session_state.active_yt_track = None
+        st.rerun()
+    if mc2.button("🔁 Loop: ON" if loop_on else "🔁 Loop: OFF", key="yt_loop_btn", use_container_width=True):
+        st.session_state.yt_loop_on = not loop_on
+        st.rerun()
+    if mc3.button("🔀 Shuffle", key="yt_shuf_btn", use_container_width=True) and playlist_ref:
+        st.session_state.active_yt_track = random.choice(playlist_ref)
+        st.rerun()
 
 for k, v in [("lex_user", None), ("lex_theme", DEFAULT_THEME.copy()), ("lex_top8", []), ("lex_friends", []), ("viewing_handle", None), ("dm_target_override", ""), ("active_yt_track", None), ("show_notifs", False)]:
     if k not in st.session_state:
