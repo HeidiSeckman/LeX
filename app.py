@@ -539,8 +539,8 @@ with head_c2:
 
 sb = get_sb()
 if st.session_state.lex_user is None:
-    t_in, t_up = st.tabs(["🔐 Member Sign In", "✦ Create Account (13+ Required)"])
-       with t_in:
+    t_in, t_up = st.tabs(["🔐 Member Sign In", "+ Create Account"])
+    with t_in:
         with st.form("lex_login_form"):
             l_email, l_pass = st.text_input("Email"), st.text_input("Password", type="password")
             if st.form_submit_button("Sign In to My LeX Profile +", use_container_width=True):
@@ -568,9 +568,10 @@ if st.session_state.lex_user is None:
                         st.session_state.lex_user = {"user_id": uid, "name": cand, "handle": f"@{cand}"}
                         save_profile_to_cloud()
                     st.rerun()
-                 except Exception as e:
+                except Exception as e:
                     st.error(f"Sign in failed: {e}")
     with t_up:
+
         with st.form("lex_signup_form"):
             s_email, s_pass = st.text_input("Email"), st.text_input("Password (6+ chars)", type="password")
             d_name, r_handle = st.text_input("Display Name"), st.text_input("@handle (Must be unique)")
