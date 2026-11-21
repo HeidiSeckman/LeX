@@ -495,6 +495,8 @@ def build_theme_css(t_cfg: dict) -> str:
     bg_img = f'url("{c_wall}")' if c_wall else bg_pat
     bg_sz = "cover" if c_wall else ("56px 56px" if t_cfg.get("backdrop") == "Architectural Grid" else "260px 220px")
     bg_rep = "no-repeat" if c_wall else "repeat"
+    if not st.session_state.get("lex_user"):
+        bg_img, bg_sz, bg_rep = "radial-gradient(circle at 20% 15%, #1e293b 0%, #0f172a 48%, #07090f 100%)", "cover", "no-repeat"
     glw = f"box-shadow: 0 0 18px {t_cfg['accent']}66, inset 0 0 10px {t_cfg['accent']}22;" if t_cfg.get("glow_borders", True) else ""
     tglw = f"text-shadow: 0 0 14px {t_cfg['accent']};" if t_cfg.get("text_glow", True) else ""
     opv = max(40, min(100, int(t_cfg.get("card_opacity", 92)))) / 100.0
