@@ -554,11 +554,11 @@ if st.session_state.lex_user is None:
                     if isinstance(tj, str): tj = json.loads(tj or "{}")
                     st.session_state.lex_user = {"user_id": uid, "name": r.get("display_name", ...
                     st.session_state.lex_theme.update(tj)
-                        st.session_state.lex_top8 = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (r.get("top8_json") or [])]
-                        st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (tj.get("all_friends") or [])]
-                        if r.get("wall_json"):
-                            st.session_state.lex_wall = r["wall_json"]
-                    else:
+                    st.session_state.lex_top8 = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (r.get("top8_json") or [])]
+                    st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (tj.get("all_friends") or [])]
+                    if r.get("wall_json"):
+                        st.session_state.lex_wall = r["wall_json"]
+                else:
                         prefix, _, _ = l_email.strip().partition("@")
                         base_h = clean_handle_str(prefix) or "Member"
                         cand, sfx = base_h, 1
