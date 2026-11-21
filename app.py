@@ -549,10 +549,11 @@ if st.session_state.lex_user is None:
                     uid = res.user.id
                     prof = sb.table("lex_profiles").select("*").eq("user_id", uid).execute().data
                     r = next(iter(prof), None) if isinstance(prof, list) else prof
-                    if isinstance(r, dict):
-                        tj = r.get("theme_json") or {}
-                        st.session_state.lex_user = {"user_id": uid, "name": r.get("display_name", "LeX Member"), "handle": r.get("handle", "@Member"), "bio": r.get("bio", ""), "who_to_meet": r.get("who_to_meet", ""), "mood": r.get("mood", "Online Now • Vibing ⚡"), "anthem": r.get("anthem", "Y2K Cobalt Synth"), "custom_song_url": r.get("custom_song_url", ""), "custom_song_title": r.get("custom_song_title", ""), "avatar": tj.get("avatar", ""), "website": tj.get("website", "")}
-                        st.session_state.lex_theme.update(tj)
+                if isinstance(r, dict):
+                    tj = r.get("theme_json") or {}
+                    if isinstance(tj, str): tj = json.loads(tj or "{}")
+                    st.session_state.lex_user = {"user_id": uid, "name": r.get("display_name", ...
+                    st.session_state.lex_theme.update(tj)
                         st.session_state.lex_top8 = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (r.get("top8_json") or [])]
                         st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (tj.get("all_friends") or [])]
                         if r.get("wall_json"):
@@ -755,21 +756,22 @@ if st.session_state.viewing_handle and sb:
         st.warning(f"Could not load profile for {vh_clean}.")
         st.stop()
     vtj = vp.get("theme_json") or {}
+    if isinstance(vtj, str): vtj = json.loads(vtj or "{}")
     v_th = DEFAULT_THEME.copy()
     v_th.update(vtj)
-        if isinstance(st.session_state.get("lex_theme"), str):
+    if isinstance(st.session_state.get("lex_theme"), str):
         st.session_state.lex_theme = json.loads(st.session_state.lex_theme or "{}")
 
     now_ts = int(time.time())
     if sb and user and now_ts - int(st.session_state.lex_theme.get("last_seen", 0)) > 180:
         st.session_state.lex_theme["last_seen"] = now_ts
-        sb.table("lex_profiles").update({"theme_json": json.dumps(st.session_state.lex_theme)}).eq("handle", user["handle"]).execute()
+        sb.table("lex_profiles").update({"theme_json": st.session_state.lex_theme)}).eq("handle", user["handle"]).execute()
     v_h_str = (vp.get("handle") or "").strip()
     if sb and user and v_h_str and v_h_str.lower() != user["handle"].lower():
         t_vis = [v for v in vtj.get("visitors", []) if str(v.get("handle", "")).lower() != user["handle"].lower()]
         t_vis.insert(0, {"handle": user["handle"], "name": user.get("name", user["handle"]), "ts": now_ts})
         vtj["visitors"] = t_vis[:10]
-        sb.table("lex_profiles").update({"theme_json": json.dumps(vtj)}).eq("handle", v_h_str).execute()
+        sb.table("lex_profiles").update({"theme_json": vtj)}).eq("handle", v_h_str).execute()
 
     v_rad = int(v_th.get("card_radius", 12))
     st.markdown(build_theme_css(v_th), unsafe_allow_html=True)
