@@ -990,23 +990,19 @@ with hub_col:
                     block_or_report_member(p_author_h, "report", f"Reported post #{p['id']}")
                     st.toast("Reported post to LeX Safety")
             else:
-                if rcols[5].button("✏️", key=f"ed_p_{p['id']}"):
-                    st.session_state[f"edit_open_{p['id']}"] = not st.session_state.get(f"edit_open_{p['id']}", False)
-                    st.rerun()
+                with rcols[5].popover("✏️"):
+                    new_ed_txt = st.text_area("Edit post text", value=clean_txt, key=f"ed_ta_{p['id']}")
+                    if st.button("💾 Save Edit", key=f"sv_ed_{p['id']}") and sb:
+                        ok_e, msg_e = check_safety_and_dress_code(new_ed_txt)
+                        if not ok_e:
+                            st.error(msg_e)
+                        else:
+                            sb.table("lex_posts").update({"body": pack_post_blob(new_ed_txt, lnk_src, img_src, p_meta)}).eq("id", p["id"]).execute()
+                            st.rerun()
                 if rcols[6].button("🗑️", key=f"del_p_{p['id']}") and sb:
                     sb.table("lex_posts").delete().eq("id", p["id"]).execute()
                     st.rerun()
 
-        if p_author_h.lower() == my_h_low and st.session_state.get(f"edit_open_{p['id']}", False):
-            new_ed_txt = st.text_area("Edit your post", value=clean_txt, key=f"ed_ta_{p['id']}")
-            if st.button("💾 Save Post Edit", key=f"sv_ed_{p['id']}") and sb:
-                ok_e, msg_e = check_safety_and_dress_code(new_ed_txt)
-                if not ok_e:
-                    st.error(msg_e)
-                else:
-                    sb.table("lex_posts").update({"body": pack_post_blob(new_ed_txt, lnk_src, img_src, p_meta)}).eq("id", p["id"]).execute()
-                    st.session_state[f"edit_open_{p['id']}"] = False
-                    st.rerun()
             if st.session_state.get(c_open_key, False) or cm_list:
                 with st.expander(f"💬 Comments ({len(cm_list)})", expanded=st.session_state.get(c_open_key, False)):
                     for cm in cm_list[-20:]:
