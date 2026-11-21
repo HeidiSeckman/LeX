@@ -989,14 +989,15 @@ with hub_col:
                 if rcols[5].button("🚩 Report", key=f"rep_p_{p['id']}"):
                     block_or_report_member(p_author_h, "report", f"Reported post #{p['id']}")
                     st.toast("Reported post to LeX Safety")
-            else:
-            ec1, ec2 = rcols[5].columns(2)
-            if ec1.button("✏️", key=f"ed_p_{p['id']}"):
-                st.session_state[f"edit_open_{p['id']}"] = not st.session_state.get(f"edit_open_{p['id']}", False)
-                st.rerun()
-            if ec2.button("🗑️", key=f"del_p_{p['id']}") and sb:
-                sb.table("lex_posts").delete().eq("id", p["id"]).execute()
-                st.rerun()
+                        else:
+                ec1, ec2 = rcols.columns(2)
+                if ec1.button("✏️", key=f"ed_p_{p['id']}"):
+                    st.session_state[f"edit_open_{p['id']}"] = not st.session_state.get(f"edit_open_{p['id']}", False)
+                    st.rerun()
+                if ec2.button("🗑️", key=f"del_p_{p['id']}") and sb:
+                    sb.table("lex_posts").delete().eq("id", p["id"]).execute()
+                    st.rerun()
+
         if p_author_h.lower() == my_h_low and st.session_state.get(f"edit_open_{p['id']}", False):
             new_ed_txt = st.text_area("Edit your post", value=clean_txt, key=f"ed_ta_{p['id']}")
             if st.button("💾 Save Post Edit", key=f"sv_ed_{p['id']}") and sb:
