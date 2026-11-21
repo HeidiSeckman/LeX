@@ -419,26 +419,32 @@ def decline_friend_request(req_handle: str):
 
 def toggle_follow_user(my_handle: str, target_handle: str):
     sb = get_sb()
+    my_clean = "@" + clean_handle_str(my_handle)
+    tgt_clean = "@" + clean_handle_str(target_handle)
     following = list(st.session_state.lex_theme.get("following") or [])
-    adding = target_handle not in following
-    following.append(target_handle) if adding else following.remove(target_handle)
+    existing_idx = next((i for i, x in enumerate(following) if str(x).lower() == tgt_clean.lower()), None)
+    adding = existing_idx is None
+    if adding:
+        following.append(tgt_clean)
+    else:
+        following.pop(existing_idx)
     st.session_state.lex_theme["following"] = following
     save_profile_to_cloud()
     if sb:
         try:
-            res = sb.table("lex_profiles").select("user_id, theme_json").ilike("handle", target_handle).execute().data
-            t_row = next(iter(res), None) if isinstance(res, list) else res
+            res = sb.table("lex_profiles").select("user_id, handle, theme_json").ilike("handle", tgt_clean).execute().data or []
+            t_row = next(iter(res), None)
             if isinstance(t_row, dict):
-                tj = t_row.get("theme_json") or {}
+                tj = dict(t_row.get("theme_json") or {})
                 f_list = list(tj.get("followers") or [])
-                if adding and my_handle not in f_list:
-                    f_list.append(my_handle)
-                elif not adding and my_handle in f_list:
-                    f_list.remove(my_handle)
+                f_list = [x for x in f_list if str(x).lower() != my_clean.lower()]
+                if adding:
+                    f_list.append(my_clean)
                 tj["followers"] = f_list
                 sb.table("lex_profiles").update({"theme_json": tj}).eq("user_id", t_row["user_id"]).execute()
-        except Exception:
-            pass
+        except Exception as e:
+            st.warning(f"Follow sync notice: {e}")
+
 def render_popular_song_embed(url: str) -> bool:
     clean = (url or "").strip()
     if not clean:
