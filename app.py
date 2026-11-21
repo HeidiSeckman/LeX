@@ -512,8 +512,11 @@ def build_theme_css(t_cfg: dict) -> str:
         f'{LK_OPEN}rel="stylesheet" href="{GFONTS_BASE}{gf_name.replace(" ", "+")}&display=swap" />' + ST_OPEN + anim_kf
         + f'[data-testid="stAppViewContainer"], .stApp {{ background-color: {t_cfg["bg"]} !important; background-image: {bg_img} !important; background-size: {bg_sz} !important; background-repeat: {bg_rep} !important; background-attachment: fixed !important; color: {t_cfg["text"]} !important; cursor: {cur_css}; }}'
         + '[data-testid="stHeader"], [data-testid="stMain"] { background: transparent !important; }'
-        + f".lex-banner {{ background: radial-gradient(circle at 15% 50%, rgba(236,72,153,0.18), {t_cfg['card']} 65%); border: 2px {t_cfg['border_style']} {t_cfg['accent']}; border-radius: {rpx}px; padding: 18px 24px; margin-bottom: 16px; {glw} }}"
-        + f".lex-wordmark {{ font-family: {css_ff}; font-size: 38px; font-weight: 800; color: #FFFFFF; text-shadow: 0 0 22px {t_cfg['accent']}; }}"
+        + f"@keyframes lexBannerRoll {{ 0% {{ opacity:0; transform:translateX(-48px) scaleX(0.96); }} 100% {{ opacity:1; transform:translateX(0) scaleX(1); }} }}"
+        + f"@keyframes lexSilverGlint {{ 0%, 15% {{ left:-45%; opacity:0; }} 30% {{ opacity:0.95; }} 55% {{ left:115%; opacity:0; }} 100% {{ left:115%; opacity:0; }} }}"
+        + f".lex-banner {{ position:relative; overflow:hidden; padding:22px 26px; border-radius:18px; margin-bottom:14px; background:linear-gradient(125deg, rgba(12,14,22,0.94) 0%, rgba(26,30,44,0.92) 55%, rgba(14,16,24,0.96) 100%); border:1px solid rgba(226,232,240,0.38); box-shadow:0 12px 36px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.28); animation:lexBannerRoll 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }}"
+        + f".lex-banner::after {{ content:''; position:absolute; top:-40%; left:-45%; width:28%; height:180%; background:linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.12) 42%, rgba(255,255,255,0.85) 50%, rgba(203,213,225,0.18) 58%, transparent 80%); transform:rotate(18deg); pointer-events:none; animation:lexSilverGlint 4.2s ease-in-out 0.55s infinite; }}"
+        + f".lex-wordmark {{ position:relative; display:inline-block; font-family:'Cinzel','Playfair Display',Georgia,serif; font-size:44px; font-weight:900; letter-spacing:3px; line-height:1.05; background:linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 38%, #94A3B8 68%, #F8FAFC 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 14px rgba(226,232,240,0.55)) drop-shadow(0 2px 4px rgba(0,0,0,0.85)); }}"
         + f".lex-card {{ background: {t_cfg['card']}; opacity: {opv}; border: 1.5px {t_cfg['border_style']} {t_cfg['accent']}; border-radius: {rpx}px; padding: 16px 18px; margin-bottom: 12px; {glw} {anim_rule} }}"
         + f".lex-card h1, .lex-card h2, .lex-card h3 {{ font-family: {css_ff}; {tglw} }}"
         + f".lex-friend-card {{ background: linear-gradient(145deg, {t_cfg['card']}, #000000); opacity: {opv}; border: 1.5px {t_cfg['border_style']} {t_cfg['accent']}; border-radius: {rpx}px; padding: 12px; margin-bottom: 10px; {glw} }}"
@@ -527,7 +530,7 @@ with head_c1:
     if os.path.exists("lex-logo.png"):
         st.image("lex-logo.png", width=145)
 with head_c2:
-    st.markdown('<div class="lex-banner"><div class="lex-wordmark">LeX</div><div style="color:#A1A1AA;font-family:monospace;font-size:12px;">NEXT-GEN SOCIAL ARCHITECTURE // LEXITECH STUDIO // 13+ ONLY</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="lex-banner"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;"><div><div class="lex-wordmark">LeX</div><div style="height:2px;width:54px;margin:6px 0 8px 0;background:linear-gradient(90deg,#FFFFFF,#94A3B8,transparent);border-radius:99px;"></div><div style="color:#CBD5E1;font-family:\'Inter\',sans-serif;font-size:11px;font-weight:600;letter-spacing:2.4px;text-transform:uppercase;">Engineered by LexiTech Studio &bull; Algorithm-Free Social</div></div><div style="padding:5px 12px;border-radius:99px;border:1px solid rgba(226,232,240,0.32);background:rgba(255,255,255,0.06);color:#E2E8F0;font-size:10px;font-weight:700;letter-spacing:1.6px;">PUBLIC BETA // 13+</div></div></div>', unsafe_allow_html=True)
 
 sb = get_sb()
 if st.session_state.lex_user is None:
