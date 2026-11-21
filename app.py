@@ -268,7 +268,7 @@ def render_avatar_html(avatar_url: str, display_name: str, t_cfg: dict, size_px:
         return f'<div style="{wrap_st}"><img src="{avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:{rad};{clip_css}" /></div>'
     ini = ((display_name or "L")[:1] or "L").upper()
     return f'<div style="{wrap_st}"><div style="width:100%;height:100%;background:#09090d;color:{acc};font-weight:900;font-size:{int(size_px*0.38)}px;border-radius:{rad};{clip_css}display:flex;align-items:center;justify-content:center;">{ini}</div></div>'
-    def is_member_online(theme_data: dict) -> bool:
+def is_member_online(theme_data: dict) -> bool:
     last_ts = int((theme_data or {}).get("last_seen", 0))
     return (int(time.time()) - last_ts) < 600
 def parse_post_blob(raw_body: str, fallback_likes: int = 0):
