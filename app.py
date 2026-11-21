@@ -508,6 +508,10 @@ if st.session_state.lex_user is None:
                         }
                         save_profile_to_cloud()
                         st.rerun()
+                        except Exception as e:
+                        st.error(f"Signup error: {e}")
+    st.stop()
+
 user = st.session_state.lex_user
 top_c1, top_c2 = st.columns([0.85, 0.15])
 if st.session_state.viewing_handle and top_c1.button(f"← Back to My Profile ({user['handle']})"):
