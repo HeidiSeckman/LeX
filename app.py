@@ -550,7 +550,7 @@ if st.session_state.lex_user is None:
                     uid = res.user.id
                     prof = sb.table("lex_profiles").select("*").eq("user_id", uid).execute().data
                     r = next(iter(prof), None) if isinstance(prof, list) else prof
-                                       if isinstance(r, dict):
+                    if isinstance(r, dict):
                         tj = r.get("theme_json") or {}
                         if isinstance(tj, str): tj = json.loads(tj or "{}")
                         st.session_state.lex_user = {
@@ -566,8 +566,8 @@ if st.session_state.lex_user is None:
                         st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x)} for x in raw_fr]
                         if r.get("wall_json"):
                             st.session_state.lex_wall = r["wall_json"]
-
                     else:
+
                         prefix, _, _ = l_email.strip().partition("@")
                         base_h = clean_handle_str(prefix) or "Member"
                         cand, sfx = base_h, 1
