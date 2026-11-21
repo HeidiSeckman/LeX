@@ -989,7 +989,7 @@ with hub_col:
                 if rcols[5].button("🚩 Report", key=f"rep_p_{p['id']}"):
                     block_or_report_member(p_author_h, "report", f"Reported post #{p['id']}")
                     st.toast("Reported post to LeX Safety")
-                    else:
+            else:
             ec1, ec2 = rcols[5].columns(2)
             if ec1.button("✏️", key=f"ed_p_{p['id']}"):
                 st.session_state[f"edit_open_{p['id']}"] = not st.session_state.get(f"edit_open_{p['id']}", False)
