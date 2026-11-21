@@ -990,10 +990,10 @@ with hub_col:
                     block_or_report_member(p_author_h, "report", f"Reported post #{p['id']}")
                     st.toast("Reported post to LeX Safety")
             else:
-                if rcols.button("✏️", key=f"ed_p_{p['id']}"):
+                if rcols[5].button("✏️", key=f"ed_p_{p['id']}"):
                     st.session_state[f"edit_open_{p['id']}"] = not st.session_state.get(f"edit_open_{p['id']}", False)
                     st.rerun()
-                if rcols.button("🗑️", key=f"del_p_{p['id']}") and sb:
+                if rcols[6].button("🗑️", key=f"del_p_{p['id']}") and sb:
                     sb.table("lex_posts").delete().eq("id", p["id"]).execute()
                     st.rerun()
 
