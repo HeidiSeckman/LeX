@@ -765,13 +765,13 @@ if st.session_state.viewing_handle and sb:
     now_ts = int(time.time())
     if sb and user and now_ts - int(st.session_state.lex_theme.get("last_seen", 0)) > 180:
         st.session_state.lex_theme["last_seen"] = now_ts
-        sb.table("lex_profiles").update({"theme_json": st.session_state.lex_theme)}).eq("handle", user["handle"]).execute()
+        sb.table("lex_profiles").update({"theme_json": st.session_state.lex_theme}).eq("handle", user["handle"]).execute()
     v_h_str = (vp.get("handle") or "").strip()
     if sb and user and v_h_str and v_h_str.lower() != user["handle"].lower():
         t_vis = [v for v in vtj.get("visitors", []) if str(v.get("handle", "")).lower() != user["handle"].lower()]
         t_vis.insert(0, {"handle": user["handle"], "name": user.get("name", user["handle"]), "ts": now_ts})
         vtj["visitors"] = t_vis[:10]
-        sb.table("lex_profiles").update({"theme_json": vtj)}).eq("handle", v_h_str).execute()
+        sb.table("lex_profiles").update({"theme_json": vtj}).eq("handle", v_h_str).execute()
 
     v_rad = int(v_th.get("card_radius", 12))
     st.markdown(build_theme_css(v_th), unsafe_allow_html=True)
