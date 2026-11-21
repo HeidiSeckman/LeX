@@ -540,35 +540,35 @@ with head_c2:
 sb = get_sb()
 if st.session_state.lex_user is None:
     t_in, t_up = st.tabs(["🔐 Member Sign In", "✦ Create Account (13+ Required)"])
-    with t_in:
+       with t_in:
         with st.form("lex_login_form"):
             l_email, l_pass = st.text_input("Email"), st.text_input("Password", type="password")
-            if st.form_submit_button("Sign In to My LeX Profile ✦", use_container_width=True) and sb:
+            if st.form_submit_button("Sign In to My LeX Profile +", use_container_width=True):
                 try:
                     res = sb.auth.sign_in_with_password({"email": l_email.strip(), "password": l_pass})
                     uid = res.user.id
                     prof = sb.table("lex_profiles").select("*").eq("user_id", uid).execute().data
-                r = next(iter(prof), None) if isinstance(prof, list) else prof
-                if isinstance(r, dict):
-                    tj = r.get("theme_json") or {}
-                    if isinstance(tj, str): tj = json.loads(tj or "{}")
-                    st.session_state.lex_user = {"user_id": uid, "name": r.get("display_name", ...
-                    st.session_state.lex_theme.update(tj)
-                    st.session_state.lex_top8 = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (r.get("top8_json") or [])]
-                    st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (tj.get("all_friends") or [])]
-                    if r.get("wall_json"):
-                        st.session_state.lex_wall = r["wall_json"]
-                else:
+                    r = next(iter(prof), None) if isinstance(prof, list) else prof
+                    if isinstance(r, dict):
+                        tj = r.get("theme_json") or {}
+                        if isinstance(tj, str): tj = json.loads(tj or "{}")
+                        st.session_state.lex_user = {"user_id": uid, "name": r.get("display_name", "Member"), "handle": r.get("handle", "@Member")}
+                        st.session_state.lex_theme.update(tj)
+                        st.session_state.lex_top8 = [x if isinstance(x, dict) else {"handle": str(x)} for x in (r.get("top8_json") or [])]
+                        st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x)} for x in (r.get("friends_json") or [])]
+                        if r.get("wall_json"):
+                            st.session_state.lex_wall = r["wall_json"]
+                    else:
                         prefix, _, _ = l_email.strip().partition("@")
                         base_h = clean_handle_str(prefix) or "Member"
                         cand, sfx = base_h, 1
                         while is_handle_taken(sb, cand, uid):
                             cand = f"{base_h}{sfx}"
                             sfx += 1
-                        st.session_state.lex_user = {"user_id": uid, "name": cand.capitalize(), "handle": f"@{cand}", "avatar": "", "website": "", "mood": "Online Now • Vibing ⚡", "bio": "Back on LeX ✦", "who_to_meet": "Creators & music lovers.", "anthem": "Y2K Cobalt Synth", "custom_song_url": "", "custom_song_title": ""}
+                        st.session_state.lex_user = {"user_id": uid, "name": cand, "handle": f"@{cand}"}
                         save_profile_to_cloud()
                     st.rerun()
-                except Exception as e:
+                 except Exception as e:
                     st.error(f"Sign in failed: {e}")
     with t_up:
         with st.form("lex_signup_form"):
