@@ -433,7 +433,6 @@ with head_c1:
         st.image("lex-logo.png", width=145)
 with head_c2:
     st.markdown('<div class="lex-banner"><div class="lex-wordmark">LeX</div><div style="color:#A1A1AA;font-family:monospace;font-size:12px;">NEXT-GEN SOCIAL ARCHITECTURE // LEXITECH STUDIO // 13+ ONLY</div></div>', unsafe_allow_html=True)
-
 sb = get_sb()
 if st.session_state.lex_user is None:
     t_in, t_up = st.tabs(["🔐 Member Sign In", "✦ Create Account (13+ Required)"])
@@ -508,10 +507,9 @@ if st.session_state.lex_user is None:
                         }
                         save_profile_to_cloud()
                         st.rerun()
-                        except Exception as e:
+                    except Exception as e:
                         st.error(f"Signup error: {e}")
     st.stop()
-
 user = st.session_state.lex_user
 top_c1, top_c2 = st.columns([0.85, 0.15])
 if st.session_state.viewing_handle and top_c1.button(f"← Back to My Profile ({user['handle']})"):
