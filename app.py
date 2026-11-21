@@ -548,7 +548,7 @@ if st.session_state.lex_user is None:
                     res = sb.auth.sign_in_with_password({"email": l_email.strip(), "password": l_pass})
                     uid = res.user.id
                     prof = sb.table("lex_profiles").select("*").eq("user_id", uid).execute().data
-                    r = next(iter(prof), None) if isinstance(prof, list) else prof
+                r = next(iter(prof), None) if isinstance(prof, list) else prof
                 if isinstance(r, dict):
                     tj = r.get("theme_json") or {}
                     if isinstance(tj, str): tj = json.loads(tj or "{}")
