@@ -762,18 +762,7 @@ if st.session_state.viewing_handle and sb:
     v_th.update(vtj)
     if isinstance(st.session_state.get("lex_theme"), str):
         st.session_state.lex_theme = json.loads(st.session_state.lex_theme or "{}")
-
-    now_ts = int(time.time())
-    if sb and user and now_ts - int(st.session_state.lex_theme.get("last_seen", 0)) > 180:
-        st.session_state.lex_theme["last_seen"] = now_ts
-        sb.table("lex_profiles").update({"theme_json": st.session_state.lex_theme}).eq("handle", user["handle"]).execute()
     v_h_str = (vp.get("handle") or "").strip()
-    if sb and user and v_h_str and v_h_str.lower() != user["handle"].lower():
-        t_vis = [v for v in vtj.get("visitors", []) if str(v.get("handle", "")).lower() != user["handle"].lower()]
-        t_vis.insert(0, {"handle": user["handle"], "name": user.get("name", user["handle"]), "ts": now_ts})
-        vtj["visitors"] = t_vis[:10]
-        sb.table("lex_profiles").update({"theme_json": vtj}).eq("handle", v_h_str).execute()
-
     v_rad = int(v_th.get("card_radius", 12))
     st.markdown(build_theme_css(v_th), unsafe_allow_html=True)
     vb_html = build_live_banner_html(v_th.get("banner_live", "None"), v_th.get("banner_img", ""), v_th["accent"], v_rad)
@@ -792,7 +781,7 @@ if st.session_state.viewing_handle and sb:
     online_badge = "🟢 ONLINE" if is_member_online(v_th) else "⚫ OFFLINE"
 
     st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}<div><h2 style="margin:0;">{vp.get("display_name", "")} {founder_badge_html(vp.get("handle", ""))}</h2><div style="color:{v_th["accent"]};font-weight:700;">{vp.get("handle", "")}</div><div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_site}</div></div><div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {vp.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {vp.get("who_to_meet", "")}</p>{v_int_html}</div>', unsafe_allow_html=True)
-    if v_h_str.lower() == user["handle"].lower():
+    if v_h_str.lstrip("@").lower() == user["handle"].lstrip("@").lower():
         vis_list = st.session_state.lex_theme.get("visitors", [])
         vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:11px;">👀 {v.get("handle") if isinstance(v, dict) else v}</span>' for v in vis_list]) or '<span style="opacity:0.6;font-size:12px;">No profile views yet — share your card below!</span>'
         st.markdown(f'<div class="lex-card"><strong>👀 Recent Profile Visitors</strong><div style="margin-top:8px;">{vis_html}</div></div>', unsafe_allow_html=True)
