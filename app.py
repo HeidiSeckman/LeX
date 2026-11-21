@@ -787,22 +787,22 @@ if st.session_state.viewing_handle and sb:
 
     st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}<div><h2 style="margin:0;">{vp.get("display_name", "")} {founder_badge_html(vp.get("handle", ""))}</h2><div style="color:{v_th["accent"]};font-weight:700;">{vp.get("handle", "")}</div><div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_site}</div></div><div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {vp.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {vp.get("who_to_meet", "")}</p>{v_int_html}</div>', unsafe_allow_html=True)
     if v_h_str.lower() == user["handle"].lower():
-    vis_list = st.session_state.lex_theme.get("visitors", [])
-    vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:11px;">👀 {v.get("handle")}</span>' for v in vis_list]) or '<span style="opacity:0.6;font-size:12px;">No profile views yet — share your card below!</span>'
-    st.markdown(f'<div class="lex-card"><strong>👀 Recent Profile Visitors</strong><div style="margin-top:8px;">{vis_html}</div></div>', unsafe_allow_html=True)
-    with st.expander("🪪 Share My LeX Profile Card"):
-            c_acc = st.session_state.lex_theme.get("accent", "#94A3B8")
-            c_bg = st.session_state.lex_theme.get("card_bg", "rgba(15,23,42,0.92)")
-            av_s = st.session_state.lex_theme.get("avatar", "")
-            av_t = f'<img src="{av_s}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid {c_acc};">' if av_s else '<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:24px;">⚡</div>'
-            st.markdown(
-                f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,{c_bg},#090d16);border:1.5px solid {c_acc};box-shadow:0 10px 26px rgba(0,0,0,0.6);max-width:350px;margin:auto;">'
-                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-weight:900;letter-spacing:2px;font-size:13px;color:#F8FAFC;">LeX SOCIAL</span><span style="font-size:9px;padding:3px 8px;border-radius:99px;border:1px solid {c_acc};color:{c_acc};font-weight:700;">FOUNDING MEMBER</span></div>'
-                f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-size:17px;font-weight:800;color:#FFFFFF;">{user.get("name","Member")}</div><div style="font-size:12px;color:{c_acc};font-weight:600;">{user.get("handle","@member")}</div><div style="font-size:11px;color:#CBD5E1;margin-top:3px;">Mood: {st.session_state.lex_theme.get("mood","Vibing ⚡")}</div></div></div>'
-                f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.12);display:flex;justify-content:space-between;font-size:10px;color:#94A3B8;"><span>Algorithm-Free Social</span><strong style="color:#F8FAFC;">lexsocial.space</strong></div></div>',
-                unsafe_allow_html=True,
-            )
-            st.code(f"Come add me on LeX Social ({user.get('handle')}) — custom themes, profile songs & zero algorithms! 👉 https://lexsocial.space", language=None)
+        vis_list = st.session_state.lex_theme.get("visitors", [])
+        vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:11px;">👀 {v.get("handle")}</span>' for v in vis_list]) or '<span style="opacity:0.6;font-size:12px;">No profile views yet — share your card below!</span>'
+        st.markdown(f'<div class="lex-card"><strong>👀 Recent Profile Visitors</strong><div style="margin-top:8px;">{vis_html}</div></div>', unsafe_allow_html=True)
+        with st.expander("🪪 Share My LeX Profile Card"):
+                c_acc = st.session_state.lex_theme.get("accent", "#94A3B8")
+                c_bg = st.session_state.lex_theme.get("card_bg", "rgba(15,23,42,0.92)")
+                av_s = st.session_state.lex_theme.get("avatar", "")
+                av_t = f'<img src="{av_s}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid {c_acc};">' if av_s else '<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:24px;">⚡</div>'
+                st.markdown(
+                    f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,{c_bg},#090d16);border:1.5px solid {c_acc};box-shadow:0 10px 26px rgba(0,0,0,0.6);max-width:350px;margin:auto;">'
+                    f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-weight:900;letter-spacing:2px;font-size:13px;color:#F8FAFC;">LeX SOCIAL</span><span style="font-size:9px;padding:3px 8px;border-radius:99px;border:1px solid {c_acc};color:{c_acc};font-weight:700;">FOUNDING MEMBER</span></div>'
+                    f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-size:17px;font-weight:800;color:#FFFFFF;">{user.get("name","Member")}</div><div style="font-size:12px;color:{c_acc};font-weight:600;">{user.get("handle","@member")}</div><div style="font-size:11px;color:#CBD5E1;margin-top:3px;">Mood: {st.session_state.lex_theme.get("mood","Vibing ⚡")}</div></div></div>'
+                    f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.12);display:flex;justify-content:space-between;font-size:10px;color:#94A3B8;"><span>Algorithm-Free Social</span><strong style="color:#F8FAFC;">lexsocial.space</strong></div></div>',
+                    unsafe_allow_html=True,
+                )
+                st.code(f"Come add me on LeX Social ({user.get('handle')}) — custom themes, profile songs & zero algorithms! 👉 https://lexsocial.space", language=None)
 
     if v_th.get("vibe_sticker"):
         v_stk = v_th["vibe_sticker"] if v_th["vibe_sticker"].startswith("data:") else normalize_gif_url(v_th["vibe_sticker"])
