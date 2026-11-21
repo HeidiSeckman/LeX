@@ -1350,5 +1350,25 @@ with hub_col:
             with r_cols[idx_m % 3]:
                 st.markdown(friend_card_html(m_obj, "", th), unsafe_allow_html=True)
                 render_member_action_buttons(m_obj["handle"], key_prefix=f"rad_{idx_m}")
+with st.expander("⚠️ Account Safety & Permanent Deletion"):
+    st.caption("Permanently deletes your LeX profile, posts, messages, and account data.")
+    del_confirm = st.checkbox("I understand this action is permanent and cannot be undone.", key="del_acc_chk")
+    if st.button("🗑️ Permanently Delete My Account", type="primary", disabled=not del_confirm, key="del_acc_btn") and sb:
+        uid_del = str(user.get("user_id") or "")
+        h_del = user.get("handle", "")
+        try:
+            if h_del:
+                sb.table("lex_posts").delete().ilike("handle", h_del).execute()
+                sb.table("lex_messages").delete().ilike("sender_handle", h_del).execute()
+                sb.table("lex_messages").delete().ilike("recipient_handle", h_del).execute()
+            if uid_del:
+                sb.table("lex_profiles").delete().eq("user_id", uid_del).execute()
+            sb.auth.sign_out()
+        except Exception as e:
+            st.error(f"Deletion notice: {e}")
+        st.session_state.lex_user = None
+        st.session_state.viewing_handle = None
+        st.toast("Your LeX account and profile data have been deleted.")
+        st.rerun()
 
 st.markdown(f'<div style="text-align:center;opacity:0.55;font-size:11px;font-family:monospace;margin-top:24px;">LeX Social // Engineered by LexiTech Studio • 13+ Community</div>', unsafe_allow_html=True)
