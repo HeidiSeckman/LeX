@@ -327,6 +327,7 @@ def save_profile_to_cloud():
         theme_payload["avatar"] = u.get("avatar", "")
         theme_payload["website"] = u.get("website", "")
         theme_payload["all_friends"] = st.session_state.lex_friends
+        theme_payload["last_seen"] = int(time.time())
         payload = {
             "handle": u["handle"], "display_name": u["name"],
             "bio": u.get("bio", ""), "who_to_meet": u.get("who_to_meet", ""),
@@ -549,15 +550,23 @@ if st.session_state.lex_user is None:
                     uid = res.user.id
                     prof = sb.table("lex_profiles").select("*").eq("user_id", uid).execute().data
                     r = next(iter(prof), None) if isinstance(prof, list) else prof
-                    if isinstance(r, dict):
+                                       if isinstance(r, dict):
                         tj = r.get("theme_json") or {}
                         if isinstance(tj, str): tj = json.loads(tj or "{}")
-                        st.session_state.lex_user = {"user_id": uid, "name": r.get("display_name", "Member"), "handle": r.get("handle", "@Member")}
+                        st.session_state.lex_user = {
+                            "user_id": uid, "name": r.get("display_name", "Member"), "handle": r.get("handle", "@Member"),
+                            "avatar": tj.get("avatar", ""), "website": tj.get("website", ""),
+                            "bio": r.get("bio", ""), "who_to_meet": r.get("who_to_meet", ""),
+                            "mood": r.get("mood", "Online Now • Vibing ⚡"), "anthem": r.get("anthem", "Y2K Cobalt Synth"),
+                            "custom_song_url": r.get("custom_song_url", ""), "custom_song_title": r.get("custom_song_title", ""),
+                        }
                         st.session_state.lex_theme.update(tj)
                         st.session_state.lex_top8 = [x if isinstance(x, dict) else {"handle": str(x)} for x in (r.get("top8_json") or [])]
-                        st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x)} for x in (r.get("friends_json") or [])]
+                        raw_fr = tj.get("all_friends") or r.get("friends_json") or []
+                        st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x)} for x in raw_fr]
                         if r.get("wall_json"):
                             st.session_state.lex_wall = r["wall_json"]
+
                     else:
                         prefix, _, _ = l_email.strip().partition("@")
                         base_h = clean_handle_str(prefix) or "Member"
@@ -779,24 +788,19 @@ if st.session_state.viewing_handle and sb:
     v_ints = [(lbl, v_th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("TV", "int_tv"), ("Books & Heroes", "int_books")] if v_th.get(k)]
     v_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong style="color:{v_th["accent"]};">{l}:</strong> {val}</div>' for l, val in v_ints])
     online_badge = "🟢 ONLINE" if is_member_online(v_th) else "⚫ OFFLINE"
+    visit_key = f"logged_visit_{v_h_str.lower()}"
+    if v_h_str and v_h_str.lstrip("@").lower() != user["handle"].lstrip("@").lower() and not st.session_state.get(visit_key):
+        try:
+            t_vis = [v for v in vtj.get("visitors", []) if (str(v.get("handle", "") if isinstance(v, dict) else v)).lstrip("@").lower() != user["handle"].lstrip("@").lower()]
+            t_vis.insert(0, {"handle": user["handle"], "name": user.get("name", user["handle"]), "ts": int(time.time())})
+            vtj["visitors"] = t_vis[:10]
+            sb.table("lex_profiles").update({"theme_json": vtj}).eq("handle", v_h_str).execute()
+            st.session_state[visit_key] = True
+        except Exception:
+            pass
 
-    st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}<div><h2 style="margin:0;">{vp.get("display_name", "")} {founder_badge_html(vp.get("handle", ""))}</h2><div style="color:{v_th["accent"]};font-weight:700;">{vp.get("handle", "")}</div><div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_site}</div></div><div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {vp.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {vp.get("who_to_meet", "")}</p>{v_int_html}</div>', unsafe_allow_html=True)
-    if v_h_str.lstrip("@").lower() == user["handle"].lstrip("@").lower():
-        vis_list = st.session_state.lex_theme.get("visitors", [])
-        vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:11px;">👀 {v.get("handle") if isinstance(v, dict) else v}</span>' for v in vis_list]) or '<span style="opacity:0.6;font-size:12px;">No profile views yet — share your card below!</span>'
-        st.markdown(f'<div class="lex-card"><strong>👀 Recent Profile Visitors</strong><div style="margin-top:8px;">{vis_html}</div></div>', unsafe_allow_html=True)
-        with st.expander("🪪 Share My LeX Profile Card"):
-                c_acc = st.session_state.lex_theme.get("accent", "#94A3B8")
-                c_bg = st.session_state.lex_theme.get("card_bg", "rgba(15,23,42,0.92)")
-                av_s = st.session_state.lex_theme.get("avatar", "")
-                av_t = f'<img src="{av_s}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid {c_acc};">' if av_s else '<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:24px;">⚡</div>'
-                st.markdown(
-                    f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,{c_bg},#090d16);border:1.5px solid {c_acc};box-shadow:0 10px 26px rgba(0,0,0,0.6);max-width:350px;margin:auto;">'
-                    f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-weight:900;letter-spacing:2px;font-size:13px;color:#F8FAFC;">LeX SOCIAL</span><span style="font-size:9px;padding:3px 8px;border-radius:99px;border:1px solid {c_acc};color:{c_acc};font-weight:700;">FOUNDING MEMBER</span></div>'
-                    f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-size:17px;font-weight:800;color:#FFFFFF;">{user.get("name","Member")}</div><div style="font-size:12px;color:{c_acc};font-weight:600;">{user.get("handle","@member")}</div><div style="font-size:11px;color:#CBD5E1;margin-top:3px;">Mood: {st.session_state.lex_theme.get("mood","Vibing ⚡")}</div></div></div>'
-                    f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.12);display:flex;justify-content:space-between;font-size:10px;color:#94A3B8;"><span>Algorithm-Free Social</span><strong style="color:#F8FAFC;">lexsocial.space</strong></div></div>',
-                    unsafe_allow_html=True,
-                )
+    st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}<div><h2 style="margin:0;">{vp.get("display_name", "")} {founder_badge_html(vp.get("handle", ""))}</h2><div style="color:{v_th["accent"]};font-weight:700;">{vp.get("handle", "")} <span style="font-size:11px;margin-left:6px;">{online_badge}</span></div><div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_site}</div></div><div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {vp.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {vp.get("who_to_meet", "")}</p>{v_int_html}</div>', unsafe_allow_html=True)
+
                 st.code(f"Come add me on LeX Social ({user.get('handle')}) — custom themes, profile songs & zero algorithms! 👉 https://lexsocial.space", language=None)
 
     if v_th.get("vibe_sticker"):
@@ -894,6 +898,23 @@ def render_profile_module(mod_name: str):
         my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("TV", "int_tv"), ("Books & Heroes", "int_books")] if th.get(k)]
         my_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong style="color:{th["accent"]};">{l}:</strong> {val}</div>' for l, val in my_ints])
         st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><h2 style="margin:0;">{user.get("name", "")} {founder_badge_html(user.get("handle", ""))}</h2><div style="color:{th["accent"]};font-weight:700;">{user.get("handle", "")}</div><div style="color:#34D399;font-size:13px;">● {user.get("mood", "Online ⚡")}</div>{my_site}</div></div><div style="display:flex;gap:16px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(my_fol)} Followers</span><span>👥 {len(st.session_state.lex_friends)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {user.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {user.get("who_to_meet", "")}</p>{my_int_html}</div>', unsafe_allow_html=True)
+        vis_list = th.get("visitors", [])
+        vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:11px;">👀 {v.get("handle") if isinstance(v, dict) else v}</span>' for v in vis_list]) or '<span style="opacity:0.6;font-size:12px;">No profile views yet — share your card below!</span>'
+        st.markdown(f'<div class="lex-card"><strong>👀 Recent Profile Visitors</strong><div style="margin-top:8px;">{vis_html}</div></div>', unsafe_allow_html=True)
+        with st.expander("🪪 Share My LeX Profile Card"):
+            c_acc = th.get("accent", "#94A3B8")
+            c_bg = th.get("card_bg", "rgba(15,23,42,0.92)")
+            av_s = user.get("avatar", "")
+            av_t = f'<img src="{av_s}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid {c_acc};">' if av_s else '<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:24px;">⚡</div>'
+            st.markdown(
+                f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,{c_bg},#090d16);border:1.5px solid {c_acc};box-shadow:0 10px 26px rgba(0,0,0,0.6);max-width:350px;margin:auto;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-weight:900;letter-spacing:2px;font-size:13px;color:#F8FAFC;">LeX SOCIAL</span><span style="font-size:9px;padding:3px 8px;border-radius:99px;border:1px solid {c_acc};color:{c_acc};font-weight:700;">FOUNDING MEMBER</span></div>'
+                f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-size:17px;font-weight:800;color:#FFFFFF;">{user.get("name","Member")}</div><div style="font-size:12px;color:{c_acc};font-weight:600;">{user.get("handle","@member")}</div><div style="font-size:11px;color:#CBD5E1;margin-top:3px;">Mood: {user.get("mood","Online Now • Vibing ⚡")}</div></div></div>'
+                f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.12);display:flex;justify-content:space-between;font-size:10px;color:#94A3B8;"><span>Algorithm-Free Social</span><strong style="color:#F8FAFC;">lexsocial.space</strong></div></div>',
+                unsafe_allow_html=True,
+            )
+            st.code(f"Come add me on LeX Social ({user.get('handle')}) — custom themes, profile songs & zero algorithms! 👉 https://lexsocial.space", language=None)
+
     elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
         st.markdown(f'<div class="lex-card" style="text-align:center;"><img src="{my_stk}" style="max-width:100%;max-height:220px;border-radius:10px;" /></div>', unsafe_allow_html=True)
