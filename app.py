@@ -991,7 +991,7 @@ def render_profile_module(mod_name: str):
         c_bg = th.get("card_bg", "rgba(15,23,42,0.92)")
         av_s = user.get("avatar", "")
         av_t = f'<img src="{av_s}" style="width:64px;height:64px;border-radius:14px;object-fit:cover;border:2px solid {c_acc};">' if av_s else f'<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,0.08);border:2px solid {c_acc};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:{c_acc};">{user.get("name","M")[:1].upper()}</div>'
-        card_tier = "FOUNDER" if is_owner else "MEMBER"
+                card_tier = "FOUNDER" if is_owner else "MEMBER"
         if not is_owner and sb:
             try:
                 first_100 = sb.table("lex_profiles").select("handle").order("created_at", desc=False).limit(100).execute().data or []
@@ -1001,20 +1001,20 @@ def render_profile_module(mod_name: str):
                     card_tier = f"FOUNDING MEMBER #{handles_100.index(cur_h_l) + 1}/100"
             except Exception:
                 pass
-                    _sc_open = st.session_state.get("lex_share_card_open", True)
-                    _sc_lbl = "▲ Collapse Share Card" if _sc_open else "🪪 Show Share Card"
-                if st.button(_sc_lbl, key="toggle_share_card_btn"):
-                    st.session_state["lex_share_card_open"] = not _sc_open
-                    st.rerun()
-                if _sc_open:
-                    st.markdown(
-                f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,#0B0F1A,{c_bg});border:2px solid {c_acc};box-shadow:0 8px 28px rgba(0,0,0,0.45);margin-bottom:10px;">'
-                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-weight:900;letter-spacing:1.5px;color:{c_acc};font-size:12px;">⚡ LEX SOCIAL</span><span style="font-size:9px;padding:3px 8px;border-radius:99px;border:1px solid {c_acc};color:{c_acc};font-weight:700;">{card_tier}</span></div>'
-                f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-weight:900;font-size:18px;color:#F8FAFC;">{user.get("name","Member")}</div><div style="color:{c_acc};font-weight:700;font-size:13px;">{user.get("handle","@Member")}</div><div style="font-size:11px;color:#94A3B8;margin-top:3px;">{user.get("mood","Online Now")}</div></div></div>'
-                f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#CBD5E1;"><span>{len(my_fol)} Followers</span><span>lexsocial.space</span></div></div>',
+        _sc_open = st.session_state.get("lex_share_card_open", True)
+        _sc_lbl = "▲ Collapse Share Card" if _sc_open else "🪪 Show Share Card"
+        if st.button(_sc_lbl, key="toggle_share_card_btn"):
+            st.session_state["lex_share_card_open"] = not _sc_open
+            st.rerun()
+        if _sc_open:
+            st.markdown(
+                f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,#0B0F1A,{c_bg});border:2px solid {c_ac};box-shadow:0 0 24px {c_ac}44;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-weight:900;font-size:15px;color:{c_ac};">LeX // SOCIAL</span><span style="font-size:10px;padding:3px 8px;border-radius:99px;background:{c_ac}22;color:{c_ac};font-weight:800;">{card_tier}</span></div>'
+                f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-weight:900;font-size:18px;color:#FFF;">{user.get("name")}</div><div style="color:{c_ac};font-weight:700;font-size:13px;">{user.get("handle")}</div></div></div>'
+                f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#A1A1AA;"><span>lexsocial.space</span><span>{user.get("mood")}</span></div></div>',
                 unsafe_allow_html=True,
             )
-                st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
+            st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
 
     elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
