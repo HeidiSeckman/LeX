@@ -952,7 +952,10 @@ def render_profile_module(mod_name: str):
         my_site = founder_studio_link_html(user.get("handle", ""), th["accent"])
         my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("Books", "int_books")] if th.get(k, "")]
         my_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong>{lbl}:</strong> {val}</div>' for lbl, val in my_ints])
-        bio_h = f'<div style="margin-top:10px;font-size:13px;">{user.get("bio")}</div>' if user.get("bio") else ""
+        home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{th.get("hometown")}</strong></div>' if th.get("hometown") else ""
+        bio_h = f'{home_h}<div style="margin-top:10px;font-size:13px;">{user.get("bio")}</div>' if user.get("bio") else home_h
+
+
         st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><div style="font-size:20px;font-weight:900;">{user.get("name","Member")}</div><div style="color:{th["accent"]};font-weight:700;">{user.get("handle","@Member")}</div>{founder_badge_html(user.get("handle",""))}{my_site}<div style="font-size:12px;opacity:0.75;margin-top:4px;">{user.get("mood","Online Now")} • {len(my_fol)} Followers</div></div></div>{bio_h}{my_int_html}</div>', unsafe_allow_html=True)
 
         vis_list = th.get("visitors", [])
@@ -1308,8 +1311,10 @@ with hub_col:
             with st.form("studio_bio_form"):
                 b_name = st.text_input("Display Name", value=user.get("name", ""))
                 b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now • Vibing ⚡"))
+                b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Portsmouth, OH")
                 b_site = st.text_input("Profile Website / Link", value=user.get("website", ""))
                 b_bio = st.text_area("About Me (Bio)", value=user.get("bio", ""), height=90)
+
                 b_meet = st.text_area("Who I'd Like to Meet", value=user.get("who_to_meet", ""), height=68)
                 ic1, ic2 = st.columns(2)
                 i_gen = ic1.text_input("General Interests", value=th.get("int_general", ""))
@@ -1329,7 +1334,7 @@ with hub_col:
                 upd_stk = sk2.file_uploader("Or Upload Sticker / GIF File", type=["gif", "png", "jpg", "jpeg", "webp"], key="upd_stk_file")
                 clr_stk = st.checkbox("Remove current Vibe Sticker / GIF")
                 if st.form_submit_button("Save Profile, Bio & Sticker ✦", use_container_width=True):
-                    blob_chk = f"{b_name} {b_mood} {b_site} {b_bio} {b_meet} {i_gen} {i_mus} {i_mov} {i_tv} {i_bok} {stk_url_in}"
+                    blob_chk = f"{b_name} {b_mood} {b_home} {b_site} {b_bio} {b_meet} {i_gen} {i_mus} {i_mov} {i_tv} {i_bok} {stk_url_in}"
                     ok_b, msg_b = check_safety_and_dress_code(blob_chk)
                     ok_av, msg_av = scan_image_safely(upd_av, b_name)
                     ok_sk, msg_sk = scan_image_safely(upd_stk, "sticker")
@@ -1342,6 +1347,7 @@ with hub_col:
                     else:
                         user["name"] = b_name.strip() or user["name"]
                         user["mood"] = b_mood.strip()
+                        th["hometown"] = b_home.strip()
                         user["website"] = normalize_url(b_site)
                         user["bio"] = b_bio.strip()
                         user["who_to_meet"] = b_meet.strip()
