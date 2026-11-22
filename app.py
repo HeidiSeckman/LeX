@@ -282,8 +282,32 @@ def render_avatar_html(avatar_url: str, display_name: str, t_cfg: dict, size_px:
     ini = ((display_name or "L")[:1] or "L").upper()
     return f'<div style="{wrap_st}"><div style="width:100%;height:100%;background:#09090d;color:{acc};font-weight:900;font-size:{int(size_px*0.38)}px;border-radius:{rad};{clip_css}display:flex;align-items:center;justify-content:center;">{ini}</div></div>'
 def is_member_online(theme_data: dict) -> bool:
-    last_ts = int((theme_data or {}).get("last_seen", 0))
-    return (int(time.time()) - last_ts) < 600
+    try:
+        last_ts = int(float((theme_data or {}).get("last_seen") or 0))
+    except Exception:
+        last_ts = 0
+    if last_ts <= 0:
+        return False
+    return 0 <= (int(time.time()) - last_ts) < 180
+
+def ping_member_heartbeat():
+    u = st.session_state.get("lex_user")
+    if not u or not u.get("user_id"):
+        return
+    now_ts = int(time.time())
+    if now_ts - int(st.session_state.get("_lex_hb_ts", 0)) < 90:
+        return
+    st.session_state["_lex_hb_ts"] = now_ts
+    st.session_state.lex_theme["last_seen"] = now_ts
+    sb = get_sb()
+    if sb:
+        try:
+            th_copy = st.session_state.lex_theme.copy()
+            th_copy["last_seen"] = now_ts
+            sb.table("lex_profiles").update({"theme_json": th_copy}).eq("user_id", u["user_id"]).execute()
+        except Exception:
+            pass
+
 def parse_post_blob(raw_body: str, fallback_likes: int = 0):
     txt = raw_body or ""
     meta = {"rx": {"🔥": {}, "💖": {}, "🎸": {}, "💀": {}}, "comments": []}
