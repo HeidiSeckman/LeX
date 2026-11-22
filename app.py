@@ -903,14 +903,14 @@ if th.get("marquee_on") and th.get("marquee_text"):
 def render_profile_module(mod_name: str):
     if mod_name == "Profile Card":
         my_fol = list(th.get("followers") or [])
-        my_av = render_avatar_html(user.get("avatar", ""), user.get("name", "L"), th, 88)
+        my_av = render_avatar_html(user.get("avatar", ""), user.get("name", "M"), th.get("accent", "#94A3B8"), 76)
         is_owner = user.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"}
-        my_site = founder_studio_link_html(user.get("handle", ""), th["accent"]) if is_owner else (f'<div style="margin-top:6px;"><a href="{user["website"]}" target="_blank" style="color:{th["accent"]};font-weight:700;">🔗 {user["website"]}</a></div>' if user.get("website") else "")
-        my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("TV", "int_tv"), ("Books & Heroes", "int_books")] if th.get(k)]
-        my_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong style="color:{th["accent"]};">{l}:</strong> {val}</div>' for l, val in my_ints])
-        st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><h2 style="margin:0;">{user.get("name", "")} {founder_badge_html(user.get("handle", ""))}</h2><div style="color:{th["accent"]};font-weight:700;">{user.get("handle", "")}</div><div style="color:#34D399;font-size:13px;">● {user.get("mood", "Online ⚡")}</div>{my_site}</div></div><div style="display:flex;gap:16px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(my_fol)} Followers</span><span>👥 {len(st.session_state.lex_friends)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {user.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {user.get("who_to_meet", "")}</p>{my_int_html}</div>', unsafe_allow_html=True)
+        my_site = founder_studio_link_html(user.get("handle", ""), th["accent"])
+        my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("Books", "int_books")] if th.get(k, "")]
+        my_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong>{lbl}:</strong> {val}</div>' for lbl, val in my_ints])
+        st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><div style="font-size:20px;font-weight:900;">{user.get("name","Member")}</div><div style="color:{th["accent"]};font-weight:700;">{user.get("handle","@Member")}</div>{founder_badge_html(user.get("handle",""))}{my_site}<div style="font-size:12px;opacity:0.75;margin-top:4px;">{user.get("mood","Online Now")} • {len(my_fol)} Followers</div></div></div>{f"<div style=\'margin-top:10px;font-size:13px;\'>{user.get(\'bio\')}</div>" if user.get("bio") else ""}{my_int_html}</div>', unsafe_allow_html=True)
         vis_list = th.get("visitors", [])
-        vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:11px;">👀 {v.get("handle") if isinstance(v, dict) else v}</span>' for v in vis_list]) or '<span style="opacity:0.6;font-size:12px;">No profile views yet — share your card below!</span>'
+        vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);font-size:12px;">{v}</span>' for v in vis_list[-12:]]) or '<span style="opacity:0.6;font-size:12px;">No recent profile visitors yet.</span>'
         st.markdown(f'<div class="lex-card"><strong>👀 Recent Profile Visitors</strong><div style="margin-top:8px;">{vis_html}</div></div>', unsafe_allow_html=True)
         c_acc = th.get("accent", "#94A3B8")
         c_bg = th.get("card_bg", "rgba(15,23,42,0.92)")
@@ -933,7 +933,8 @@ def render_profile_module(mod_name: str):
             f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#CBD5E1;"><span>{len(my_fol)} Followers</span><span>lexsocial.space</span></div></div>',
             unsafe_allow_html=True,
         )
-   st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
+        st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
+
     elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
         st.markdown(f'<div class="lex-card" style="text-align:center;"><img src="{my_stk}" style="max-width:100%;max-height:220px;border-radius:10px;" /></div>', unsafe_allow_html=True)
