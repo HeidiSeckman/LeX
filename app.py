@@ -1008,12 +1008,13 @@ def render_profile_module(mod_name: str):
             f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#CBD5E1;"><span>{len(my_fol)} Followers</span><span>lexsocial.space</span></div></div>',
             unsafe_allow_html=True,
         )
-_sc_open = st.session_state.get("lex_share_card_open", True)
-_sc_lbl = "▲ Collapse Share Card" if _sc_open else "🪪 Show Share Card"
-if st.button(_sc_lbl, key="toggle_share_card_btn"):
-        st.session_state["lex_share_card_open"] = not _sc_open
-        st.rerun()
-if st.session_state.get("lex_share_card_open", True):
+        _sh_open = st.session_state.get("lex_share_bar_open", True)
+        _sh_lbl = "▲ Collapse Share Link" if _sh_open else "🔗 Share Profile Link"
+        if st.button(_sh_lbl, key="toggle_share_bar_btn"):
+                st.session_state["lex_share_bar_open"] = not _sh_open
+                st.rerun()
+        if st.session_state.get("lex_share_bar_open", True):
+                st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
 
     elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
