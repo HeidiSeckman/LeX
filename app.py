@@ -1138,58 +1138,75 @@ with hub_col:
                 if fb2.button("✉️ Message", key=f"fdm_{fh}_{idx_f}"):
                     st.session_state.dm_target_override = fh
                     st.toast(f"Selected {fh} in Messages tab!")
-        with t_dm:
-            all_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(200).execute().data or []
-            blocked_set = get_blocked_handles()
-            member_opts, avatar_map = {}, {}
-            for mr in all_rows:
-                mh = "@" + clean_handle_str(mr.get("handle", ""))
-                if len(mh) > 1 and mh.lower() != user["handle"].lower() and mh.lower() not in blocked_set:
-                    member_opts[mh] = f"{mr.get('display_name', mh)} ({mh})"
-                    mtj = mr.get("theme_json") or {}
-                    if isinstance(mtj, str):
-                        try: mtj = json.loads(mtj or "{}")
-                        except Exception: mtj = {}
-                    avatar_map[mh] = mtj.get("avatar", "") if isinstance(mtj, dict) else ""
-            ov_raw = st.session_state.get("dm_target_override", "")
-            ov_clean = "@" + clean_handle_str(ov_raw) if ov_raw else ""
-            if ov_clean and len(ov_clean) > 1 and ov_clean not in member_opts and ov_clean.lower() != user["handle"].lower():
-                member_opts[ov_clean] = ov_clean
-            if ov_clean:
-                st.session_state["dm_active_chat"] = ov_clean
-                st.session_state["dm_target_override"] = ""
-            if not member_opts:
-                st.info("No other members available to message yet.")
-            else:
-                msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(400).execute().data or []
-                my_l = user["handle"].lower()
-                clean_dms = [m for m in msgs if not (m.get("body") or "").startswith(("[LEX_F", "[LEX_NOTIF]"))]
-                recent_peers, last_msg_map = [], {}
-                for m in reversed(clean_dms):
-                    sh = "@" + clean_handle_str(m.get("sender_handle", ""))
-                    rh = "@" + clean_handle_str(m.get("recipient_handle", ""))
-                    peer = rh if sh.lower() == my_l else (sh if rh.lower() == my_l else "")
-                    if peer and peer in member_opts and peer not in last_msg_map:
-                        last_msg_map[peer] = (m.get("body") or "")[:36]
-                        recent_peers.append(peer)
-                handles_list = recent_peers + [h for h in member_opts if h not in recent_peers]
-                if st.session_state.get("dm_active_chat") not in handles_list:
-                    st.session_state["dm_active_chat"] = handles_list[0]
-                sel_h = st.session_state["dm_active_chat"]
-                c_inbox, c_chat = st.columns([1.05, 2.15])
-                with c_inbox:
-                    st.markdown(f'<div class="lex-card" style="padding:10px 12px;margin-bottom:8px;"><strong>💬 Inbox</strong><div style="font-size:11px;opacity:0.7;">{len(recent_peers)} active thread(s)</div></div>', unsafe_allow_html=True)
-                    pick_new = st.selectbox("Start / Jump to Chat", handles_list, index=handles_list.index(sel_h), format_func=lambda x: member_opts.get(x, x), key="dm_quick_pick")
-                    if pick_new != sel_h:
-                        st.session_state["dm_active_chat"] = pick_new
+if sb and user and user.get("handle"):
+    try:
+        im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
+        im_blk = get_blocked_handles()
+        im_peers, im_avs = {}, {}
+        for mr in im_rows:
+            mh = "@" + clean_handle_str(mr.get("handle", ""))
+            if len(mh) > 1 and mh.lower() != user["handle"].lower() and mh.lower() not in im_blk:
+                im_peers[mh] = f"{mr.get('display_name', mh)} ({mh})"
+                mtj = mr.get("theme_json") or {}
+                if isinstance(mtj, str):
+                    try: mtj = json.loads(mtj or "{}")
+                    except Exception: mtj = {}
+                im_avs[mh] = mtj.get("avatar", "") if isinstance(mtj, dict) else ""
+        if im_peers:
+            im_list = list(im_peers.keys())
+            im_act = st.session_state.get("lex_im_peer")
+            if im_act not in im_peers:
+                im_act = im_list
+                st.session_state["lex_im_peer"] = im_act
+            im_msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(300).execute().data or []
+            my_l, tg_l = user["handle"].lower(), im_act.lower()
+            im_thread = [
+                m for m in im_msgs
+                if not (m.get("body") or "").startswith(("[LEX_F", "[LEX_NOTIF]"))
+                and {str(m.get("sender_handle", "")).lower(), str(m.get("recipient_handle", "")).lower()} == {my_l, tg_l}
+            ]
+            av_u = im_avs.get(im_act, "")
+            av_h = f'<img src="{av_u}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1.5px solid {th["accent"]};">' if av_u else f'<div style="width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:900;">{im_act.lstrip("@")[:1].upper()}</div>'
+            rows_h = "".join([
+                f'<div style="margin-bottom:4px;font-size:12px;line-height:1.35;"><strong style="color:{th["accent"] if str(m.get("sender_handle","")).lower()==my_l else "#34D399"};">{user["handle"] if str(m.get("sender_handle","")).lower()==my_l else im_act}:</strong> <span>{m.get("body","")}</span></div>'
+                for m in im_thread[-30:]
+            ]) or '<div style="opacity:0.55;font-size:12px;padding:38px 8px;text-align:center;">No messages yet — say hey below! ⚡</div>'
+            win_html = (
+                f'<div id="lex-im-win" style="position:fixed;bottom:16px;right:16px;width:310px;z-index:99999;border-radius:10px;overflow:hidden;border:1.5px solid {th["accent"]};background:#0B0F1A;color:#F8FAFC;box-shadow:0 12px 32px rgba(0,0,0,0.75);font-family:sans-serif;">'
+                f'<div id="lex-im-bar" style="cursor:move;padding:6px 10px;background:linear-gradient(90deg,{th["accent"]},#1E293B);color:#06060A;font-weight:900;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none;">'
+                f'<span>⚡ {im_act} — LeX Instant</span>'
+                f'<span id="lex-im-min" style="cursor:pointer;padding:0 6px;font-size:14px;font-weight:900;">_</span></div>'
+                f'<div id="lex-im-body">'
+                f'<div style="padding:8px 10px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px;">{av_h}<div><div style="font-weight:800;font-size:13px;">{im_peers.get(im_act, im_act)}</div><div style="font-size:10px;color:#34D399;">● Online • LeX Instant</div></div></div>'
+                f'<div id="lex-im-log" style="height:175px;overflow-y:auto;padding:8px 10px;background:#070A12;">{rows_h}</div>'
+                f'</div></div>'
+            )
+            st.markdown(win_html, unsafe_allow_html=True)
+            st.components.v1.html(
+                "<" + "script>"
+                + "const p=window.parent.document,w=p.getElementById('lex-im-win'),b=p.getElementById('lex-im-bar'),m=p.getElementById('lex-im-min'),bd=p.getElementById('lex-im-body'),lg=p.getElementById('lex-im-log');"
+                + "if(lg){lg.scrollTop=lg.scrollHeight;}"
+                + "if(m&&bd){m.onclick=()=>{bd.style.display=bd.style.display==='none'?'block':'none';};}"
+                + "if(w&&b){let dx=0,dy=0,drag=false;b.onmousedown=(e)=>{drag=true;dx=e.clientX-w.offsetLeft;dy=e.clientY-w.offsetTop;};p.onmousemove=(e)=>{if(!drag)return;w.style.left=(e.clientX-dx)+'px';w.style.top=(e.clientY-dy)+'px';w.style.right='auto';w.style.bottom='auto';};p.onmouseup=()=>{drag=false;};}"
+                + "</" + "script>",
+                height=0,
+            )
+            with st.expander("⚡ LeX Instant Quick Send / Switch Friend", expanded=False):
+                c_p, c_m, c_s = st.columns([1.4, 2.4, 0.8])
+                pk = c_p.selectbox("Friend", im_list, index=im_list.index(im_act), format_func=lambda x: im_peers.get(x, x), label_visibility="collapsed", key="lex_im_sel")
+                if pk != im_act:
+                    st.session_state["lex_im_peer"] = pk
+                    st.rerun()
+                im_in = c_m.text_input("IM", placeholder=f"IM {im_act}...", label_visibility="collapsed", key="lex_im_txt")
+                if c_s.button("SEND", key="lex_im_go", use_container_width=True) and im_in.strip():
+                    ok_i, msg_i = check_safety_and_dress_code(im_in)
+                    if ok_i:
+                        sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": im_act, "body": im_in.strip()}).execute()
                         st.rerun()
-                    for ph in handles_list[:12]:
-                        is_act = (ph == sel_h)
-                        prev_txt = last_msg_map.get(ph, "Start a conversation...")
-                        btn_lbl = f"{'🟢 ' if is_act else ''}{member_opts.get(ph, ph)}\n{prev_txt}"
-                        if st.button(btn_lbl, key=f"dm_thr_{ph}", use_container_width=True, type="primary" if is_act else "secondary"):
-                            st.session_state["dm_active_chat"] = ph
-                            st.rerun()
+                    else:
+                        st.error(msg_i)
+    except Exception:
+        pass
 
 
     with t_top8:
