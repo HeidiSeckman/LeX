@@ -143,7 +143,7 @@ ALL_PROFILE_MODULES = [
 ]
 
 DEFAULT_THEME = {
-    "bg": "#06060A", "card": "#0E0E16", "accent": "#EC4899", "text": "#F4F4F5",
+    "bg": "#06060A", "card": "#0E0E16", "accent": "#FFFFFF", "text": "#F4F4F5",
     "font": "Clean Studio Sans", "backdrop": "Y2K Stars & Sparkles", "spray_word": "LeX!",
     "border_style": "solid", "card_radius": 14, "card_opacity": 94,
     "glow_borders": True, "text_glow": True, "cursor_style": "Default System Pointer",
