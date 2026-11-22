@@ -1138,8 +1138,10 @@ with hub_col:
                 if fb2.button("✉️ Message", key=f"fdm_{fh}_{idx_f}"):
                     st.session_state.dm_target_override = fh
                     st.toast(f"Selected {fh} in Messages tab!")
-if sb and user and user.get("handle"):
-    try:
+        with t_dm:
+            if sb and user and user.get("handle"):
+                try:
+
         im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
         im_blk = get_blocked_handles()
         im_peers, im_avs = {}, {}
@@ -1156,7 +1158,7 @@ if sb and user and user.get("handle"):
             im_list = list(im_peers.keys())
             im_act = st.session_state.get("lex_im_peer")
             if im_act not in im_peers:
-                im_act = im_list
+                im_act = im_list[0]
                 st.session_state["lex_im_peer"] = im_act
             im_msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(300).execute().data or []
             my_l, tg_l = user["handle"].lower(), im_act.lower()
