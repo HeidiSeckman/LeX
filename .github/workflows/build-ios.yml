@@ -16,14 +16,23 @@ jobs:
       - run: |
           mkdir -p ios-app && cd ios-app
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/ios
-          npx cap init "LeX Social" "com.heidiseckman.lexsocial" --web-dir www
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/ios@6
           mkdir -p www
           echo '<html><body style="background:#06060A;"></body></html>' > www/index.html
+          cat << 'EOF' > capacitor.config.json
+          {
+            "appId": "com.heidiseckman.lexsocial",
+            "appName": "LeX Social",
+            "webDir": "www",
+            "server": {
+              "url": "https://lexsocial.space",
+              "cleartext": false
+            }
+          }
+          EOF
           npx cap add ios
-          python3 -c 'import json; d=json.load(open("capacitor.config.json")); d["server"]={"url":"https:"+"//lexsocial.space","cleartext":False}; json.dump(d,open("capacitor.config.json","w"),indent=2)'
           npx cap sync ios
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR="$PWD/build/Payload" build
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR="$PWD/build/Payload" build
           cd build && zip -r LeXSocial.ipa Payload
       - name: Upload iOS App to v1.0 Release
         uses: softprops/action-gh-release@v2
