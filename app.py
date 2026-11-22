@@ -991,7 +991,7 @@ def render_profile_module(mod_name: str):
         c_bg = th.get("card_bg", "rgba(15,23,42,0.92)")
         av_s = user.get("avatar", "")
         av_t = f'<img src="{av_s}" style="width:64px;height:64px;border-radius:14px;object-fit:cover;border:2px solid {c_acc};">' if av_s else f'<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,0.08);border:2px solid {c_acc};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:{c_acc};">{user.get("name","M")[:1].upper()}</div>'
-                card_tier = "FOUNDER" if is_owner else "MEMBER"
+        card_tier = "FOUNDER" if is_owner else "MEMBER"
         if not is_owner and sb:
             try:
                 first_100 = sb.table("lex_profiles").select("handle").order("created_at", desc=False).limit(100).execute().data or []
