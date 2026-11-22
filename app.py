@@ -1137,41 +1137,60 @@ with hub_col:
                     st.rerun()
                 if fb2.button("✉️ Message", key=f"fdm_{fh}_{idx_f}"):
                     st.session_state.dm_target_override = fh
-                        st.to 
-            with c_chat:
-                tg_l = sel_h.lower()
-                thread = [m for m in clean_dms if {str(m.get("sender_handle", "")).lower(), str(m.get("recipient_handle", "")).lower()} == {my_l, tg_l}]
-                av_peer = avatar_map.get(sel_h, "")
-                av_badge = f'<img src="{av_peer}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid {th["accent"]};">' if av_peer else f'<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-weight:800;">{sel_h.lstrip("@")[:1].upper()}</div>'
-                st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">{av_badge}<div><div style="font-weight:800;font-size:15px;">{member_opts.get(sel_h, sel_h)}</div><div style="font-size:11px;color:#34D399;">● Direct Messenger Window</div></div></div>', unsafe_allow_html=True)
-                with st.container(height=360):
-                    if not thread:
-                        st.markdown(f'<div style="text-align:center;opacity:0.6;padding:60px 12px;font-size:13px;">No messages with <strong>{sel_h}</strong> yet. Say hey below! 👋</div>', unsafe_allow_html=True)
-                    for m in thread[-50:]:
-                        is_me = str(m.get("sender_handle", "")).lower() == my_l
-                        align = "flex-end" if is_me else "flex-start"
-                        bg_b = th["accent"] if is_me else "rgba(255,255,255,0.09)"
-                        fg_b = "#06060A" if is_me else th["text"]
-                        rad_b = "16px 16px 4px 16px" if is_me else "16px 16px 16px 4px"
-                        ts_raw = str(m.get("created_at") or "")[:16].replace("T", " ")
-                        st.markdown(
-                            f'<div style="display:flex;justify-content:{align};margin-bottom:8px;">'
-                            f'<div style="max-width:78%;padding:9px 13px;border-radius:{rad_b};background:{bg_b};color:{fg_b};font-size:13px;line-height:1.4;box-shadow:0 2px 8px rgba(0,0,0,0.25);">'
-                            f'<div>{m.get("body", "")}</div>'
-                            f'<div style="font-size:10px;opacity:0.65;margin-top:3px;text-align:right;">{ts_raw}</div>'
-                            f'</div></div>',
-                            unsafe_allow_html=True,
-                        )
-                with st.form("dm_send_form", clear_on_submit=True):
-                    c_in, c_btn = st.columns([4.2, 1.1])
-                    dm_txt = c_in.text_input("Message", placeholder=f"Write a message to {sel_h}...", label_visibility="collapsed", key="dm_msg_in")
-                    if c_btn.form_submit_button("Send ➤", use_container_width=True) and dm_txt.strip() and sb:
-                        ok_d, msg_d = check_safety_and_dress_code(dm_txt)
-                        if not ok_d:
-                            st.error(msg_d)
-                        else:
-                            sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": sel_h, "body": dm_txt.strip()}).execute()
+                    st.toast(f"Selected {fh} in Messages tab!")
+        with t_dm:
+            all_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(200).execute().data or []
+            blocked_set = get_blocked_handles()
+            member_opts, avatar_map = {}, {}
+            for mr in all_rows:
+                mh = "@" + clean_handle_str(mr.get("handle", ""))
+                if len(mh) > 1 and mh.lower() != user["handle"].lower() and mh.lower() not in blocked_set:
+                    member_opts[mh] = f"{mr.get('display_name', mh)} ({mh})"
+                    mtj = mr.get("theme_json") or {}
+                    if isinstance(mtj, str):
+                        try: mtj = json.loads(mtj or "{}")
+                        except Exception: mtj = {}
+                    avatar_map[mh] = mtj.get("avatar", "") if isinstance(mtj, dict) else ""
+            ov_raw = st.session_state.get("dm_target_override", "")
+            ov_clean = "@" + clean_handle_str(ov_raw) if ov_raw else ""
+            if ov_clean and len(ov_clean) > 1 and ov_clean not in member_opts and ov_clean.lower() != user["handle"].lower():
+                member_opts[ov_clean] = ov_clean
+            if ov_clean:
+                st.session_state["dm_active_chat"] = ov_clean
+                st.session_state["dm_target_override"] = ""
+            if not member_opts:
+                st.info("No other members available to message yet.")
+            else:
+                msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(400).execute().data or []
+                my_l = user["handle"].lower()
+                clean_dms = [m for m in msgs if not (m.get("body") or "").startswith(("[LEX_F", "[LEX_NOTIF]"))]
+                recent_peers, last_msg_map = [], {}
+                for m in reversed(clean_dms):
+                    sh = "@" + clean_handle_str(m.get("sender_handle", ""))
+                    rh = "@" + clean_handle_str(m.get("recipient_handle", ""))
+                    peer = rh if sh.lower() == my_l else (sh if rh.lower() == my_l else "")
+                    if peer and peer in member_opts and peer not in last_msg_map:
+                        last_msg_map[peer] = (m.get("body") or "")[:36]
+                        recent_peers.append(peer)
+                handles_list = recent_peers + [h for h in member_opts if h not in recent_peers]
+                if st.session_state.get("dm_active_chat") not in handles_list:
+                    st.session_state["dm_active_chat"] = handles_list[0]
+                sel_h = st.session_state["dm_active_chat"]
+                c_inbox, c_chat = st.columns([1.05, 2.15])
+                with c_inbox:
+                    st.markdown(f'<div class="lex-card" style="padding:10px 12px;margin-bottom:8px;"><strong>💬 Inbox</strong><div style="font-size:11px;opacity:0.7;">{len(recent_peers)} active thread(s)</div></div>', unsafe_allow_html=True)
+                    pick_new = st.selectbox("Start / Jump to Chat", handles_list, index=handles_list.index(sel_h), format_func=lambda x: member_opts.get(x, x), key="dm_quick_pick")
+                    if pick_new != sel_h:
+                        st.session_state["dm_active_chat"] = pick_new
+                        st.rerun()
+                    for ph in handles_list[:12]:
+                        is_act = (ph == sel_h)
+                        prev_txt = last_msg_map.get(ph, "Start a conversation...")
+                        btn_lbl = f"{'🟢 ' if is_act else ''}{member_opts.get(ph, ph)}\n{prev_txt}"
+                        if st.button(btn_lbl, key=f"dm_thr_{ph}", use_container_width=True, type="primary" if is_act else "secondary"):
+                            st.session_state["dm_active_chat"] = ph
                             st.rerun()
+
 
     with t_top8:
         st.markdown(f'<div class="lex-card" style="padding:12px 16px;"><strong style="color:{th["accent"]};font-size:16px;">✦ Manage Your Top 8 Friends ({len(st.session_state.lex_top8)} / 8)</strong></div>', unsafe_allow_html=True)
