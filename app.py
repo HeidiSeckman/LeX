@@ -632,38 +632,36 @@ if st.session_state.lex_user is None:
         + "border: 1px solid #F2F4F8; color: #111318 !important; text-decoration: none !important; "
         + "font-size: 12px; font-weight: 700; letter-spacing: 0.02em; }"
         + ".lex-app-btn:hover { background: linear-gradient(180deg, #E8EBF0 0%, #C2C7D2 100%); }"
-        + ".lex-steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); "
+        + ".lex-steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); "
         + "gap: 10px; margin-top: 14px; text-align: left; }"
         + ".lex-step-card { padding: 10px 11px; border-radius: 10px; background: #121418; "
         + "border: 1px solid #2E333E; color: #B8BECB; font-size: 11px; line-height: 1.45; }"
         + ".lex-step-head { font-weight: 800; color: #E2E5EC; font-size: 11px; "
         + "letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }"
-        + ".lex-step-card a { color: #E2E5EC !important; text-decoration: underline !important; }"
+        + ".lex-app-note { font-size: 10.5px; color: #888F9E; margin-top: 10px; }"
         + f"{ST_CLOSE}",
         unsafe_allow_html=True,
     )
     rel_base = "https://" + ".".join(["github", "com"]) + "/HeidiSeckman/LeX/releases/download/v1.0/"
-    side_site = "https://" + ".".join(["sideloadly", "io"])
     ic_and = f"{SV_OPEN}width='16' height='16' viewBox='0 0 24 24' fill='#111318' xmlns='{SVG_NS}'><path d='M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.26 6 5.01 6 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z'/>{SV_CLOSE}"
     ic_win = f"{SV_OPEN}width='15' height='15' viewBox='0 0 24 24' fill='#111318' xmlns='{SVG_NS}'><path d='M3 5.5L10.5 4.4V11.5H3V5.5ZM11.5 4.3L21 3V11.5H11.5V4.3ZM3 12.5H10.5V19.6L3 18.5V12.5ZM11.5 12.5H21V21L11.5 19.7V12.5Z'/>{SV_CLOSE}"
-    ic_ios = f"{SV_OPEN}width='16' height='16' viewBox='0 0 24 24' fill='#111318' xmlns='{SVG_NS}'><path d='M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.33c.64-.78 1.08-1.86.96-2.94-.93.04-2.06.62-2.72 1.4-.58.68-1.1 1.78-.96 2.84 1.04.08 2.08-.52 2.72-1.3z'/>{SV_CLOSE}"
     a_and = "<" + f"a class='lex-app-btn' href='{rel_base}LeXSocial.apk' download>{ic_and}<span>Android (.APK)</span><" + "/a>"
     a_win = "<" + f"a class='lex-app-btn' href='{rel_base}LeXSocial.msi' download>{ic_win}<span>Windows (.MSI)</span><" + "/a>"
-    a_ios = "<" + f"a class='lex-app-btn' href='{rel_base}LeXSocial.ipa' download>{ic_ios}<span>iPhone / iPad (.IPA)</span><" + "/a>"
-    a_side = "<" + f"a href='{side_site}' target='_blank' rel='noopener'>sideloadly.io<" + "/a>"
     st.markdown(
         "<div class='lex-app-dock'>"
         + "<div class='lex-app-title'>Get the Official LeX Social App</div>"
-        + "<div class='lex-app-sub'>Native mobile &amp; desktop apps &bull; Zero algorithms</div>"
-        + f"<div class='lex-app-row'>{a_and}{a_win}{a_ios}</div>"
+        + "<div class='lex-app-sub'>One-tap install for Android &amp; Windows &bull; Zero algorithms</div>"
+        + f"<div class='lex-app-row'>{a_and}{a_win}</div>"
         + "<div class='lex-steps-grid'>"
         + "<div class='lex-step-card'><div class='lex-step-head'>Android / Samsung</div>1. Tap <strong>Android (.APK)</strong> above.<br/>2. Open the downloaded file.<br/>3. Tap <strong>Install</strong> (allow unknown apps if asked).</div>"
         + "<div class='lex-step-card'><div class='lex-step-head'>Windows PC</div>1. Click <strong>Windows (.MSI)</strong> above.<br/>2. Double-click <strong>LeXSocial.msi</strong>.<br/>3. Click <strong>More info &rarr; Run anyway</strong> to finish.</div>"
-        + f"<div class='lex-step-card'><div class='lex-step-head'>iPhone / iPad</div>1. Download <strong>LeXSocial.ipa</strong> on Mac/PC.<br/>2. Install via {a_side} (free).<br/>3. Trust your Apple ID in Settings.</div>"
-        + "</div></div>",
+        + "</div>"
+        + "<div class='lex-app-note'>iPhone &amp; iPad: App Store release coming soon &bull; Full experience live right here in Safari.</div>"
+        + "</div>",
         unsafe_allow_html=True,
     )
     st.stop()
+
 
 user = st.session_state.lex_user
 st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (st.session_state.lex_friends or [])]
