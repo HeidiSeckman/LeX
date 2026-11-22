@@ -933,9 +933,8 @@ def render_profile_module(mod_name: str):
             f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#CBD5E1;"><span>{len(my_fol)} Followers</span><span>lexsocial.space</span></div></div>',
             unsafe_allow_html=True,
         )
-        st.code(f"Come add me on LeX Social ({user.get('handle')}) — custom themes, profile anthems & real friends, zero algorithms: https://lexsocial.space", language=None)
-
-        elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
+    st.code(f"Come add me on LeX Social ({user.get('handle')}) — custom themes, profile anthems & real friends, zero algorithms: https://lexsocial.space", language=None)
+    elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
         st.markdown(f'<div class="lex-card" style="text-align:center;"><img src="{my_stk}" style="max-width:100%;max-height:220px;border-radius:10px;" /></div>', unsafe_allow_html=True)
     elif mod_name == "Profile Song / Playlist":
