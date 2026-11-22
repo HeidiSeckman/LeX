@@ -1,3 +1,4 @@
+
 name: Build iOS App
 on:
   workflow_dispatch:
@@ -31,6 +32,7 @@ jobs:
           }
           EOF
           npx cap add ios
+          sips -z 1024 1024 ../icon.png --out ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           npx cap sync ios
           xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR="$PWD/build/Payload" build
           cd build && zip -r LeXSocial.ipa Payload
