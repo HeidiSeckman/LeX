@@ -1001,20 +1001,20 @@ def render_profile_module(mod_name: str):
                     card_tier = f"FOUNDING MEMBER #{handles_100.index(cur_h_l) + 1}/100"
             except Exception:
                 pass
-        st.markdown(
+                _sc_open = st.session_state.get("lex_share_card_open", True)
+                _sc_lbl = "▲ Collapse Share Card" if _sc_open else "🪪 Show Share Card"
+            if st.button(_sc_lbl, key="toggle_share_card_btn"):
+                st.session_state["lex_share_card_open"] = not _sc_open
+                st.rerun()
+            if _sc_open:
+                st.markdown(
             f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,#0B0F1A,{c_bg});border:2px solid {c_acc};box-shadow:0 8px 28px rgba(0,0,0,0.45);margin-bottom:10px;">'
             f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-weight:900;letter-spacing:1.5px;color:{c_acc};font-size:12px;">⚡ LEX SOCIAL</span><span style="font-size:9px;padding:3px 8px;border-radius:99px;border:1px solid {c_acc};color:{c_acc};font-weight:700;">{card_tier}</span></div>'
             f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-weight:900;font-size:18px;color:#F8FAFC;">{user.get("name","Member")}</div><div style="color:{c_acc};font-weight:700;font-size:13px;">{user.get("handle","@Member")}</div><div style="font-size:11px;color:#94A3B8;margin-top:3px;">{user.get("mood","Online Now")}</div></div></div>'
             f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#CBD5E1;"><span>{len(my_fol)} Followers</span><span>lexsocial.space</span></div></div>',
             unsafe_allow_html=True,
         )
-        _sh_open = st.session_state.get("lex_share_bar_open", True)
-        _sh_lbl = "▲ Collapse Share Link" if _sh_open else "🔗 Share Profile Link"
-        if st.button(_sh_lbl, key="toggle_share_bar_btn"):
-                st.session_state["lex_share_bar_open"] = not _sh_open
-                st.rerun()
-        if st.session_state.get("lex_share_bar_open", True):
-                st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
+            st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
 
     elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
