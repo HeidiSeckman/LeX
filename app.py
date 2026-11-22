@@ -908,7 +908,7 @@ def render_profile_module(mod_name: str):
         my_site = founder_studio_link_html(user.get("handle", ""), th["accent"])
         my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("Books", "int_books")] if th.get(k, "")]
         my_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong>{lbl}:</strong> {val}</div>' for lbl, val in my_ints])
-               bio_h = f'<div style="margin-top:10px;font-size:13px;">{user.get("bio")}</div>' if user.get("bio") else ""
+        bio_h = f'<div style="margin-top:10px;font-size:13px;">{user.get("bio")}</div>' if user.get("bio") else ""
         st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><div style="font-size:20px;font-weight:900;">{user.get("name","Member")}</div><div style="color:{th["accent"]};font-weight:700;">{user.get("handle","@Member")}</div>{founder_badge_html(user.get("handle",""))}{my_site}<div style="font-size:12px;opacity:0.75;margin-top:4px;">{user.get("mood","Online Now")} • {len(my_fol)} Followers</div></div></div>{bio_h}{my_int_html}</div>', unsafe_allow_html=True)
 
         vis_list = th.get("visitors", [])
