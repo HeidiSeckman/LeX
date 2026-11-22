@@ -903,7 +903,7 @@ if th.get("marquee_on") and th.get("marquee_text"):
 def render_profile_module(mod_name: str):
     if mod_name == "Profile Card":
         my_fol = list(th.get("followers") or [])
-        my_av = render_avatar_html(user.get("avatar", ""), user.get("name", "M"), th.get("accent", "#94A3B8"), 76)
+        my_av = render_avatar_html(user.get("avatar", ""), user.get("name", "M"), th, 76)
         is_owner = user.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"}
         my_site = founder_studio_link_html(user.get("handle", ""), th["accent"])
         my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("Books", "int_books")] if th.get(k, "")]
