@@ -12,6 +12,19 @@ import time
 st.set_page_config(page_title="LeX // Social by LexiTech Studio", page_icon="✦", layout="wide")
 ST_OPEN = "<" + "style>"
 ST_CLOSE = "<" + "/style>"
+st.markdown(
+    f"{ST_OPEN}@media (max-width: 768px) {{"
+    + ".block-container { padding-left: 0.65rem !important; padding-right: 0.65rem !important; padding-top: 1.2rem !important; max-width: 100vw !important; overflow-x: hidden !important; }"
+    + ".lex-card { padding: 12px !important; margin-bottom: 10px !important; }"
+    + ".lex-card h2 { font-size: 1.25rem !important; }"
+    + "div[data-testid='stHorizontalBlock'] { flex-wrap: wrap !important; gap: 0.4rem !important; }"
+    + "div[data-testid='stHorizontalBlock'] > div[data-testid='column'] { min-width: 46% !important; flex: 1 1 46% !important; }"
+    + ".stTabs [data-baseweb='tab-list'] { flex-wrap: wrap !important; gap: 4px !important; }"
+    + ".stTabs [data-baseweb='tab'] { font-size: 12px !important; padding: 6px 10px !important; }"
+    + f"}}{ST_CLOSE}",
+    unsafe_allow_html=True,
+)
+
 LK_OPEN = "<" + "link "
 SV_OPEN = "<" + "svg "
 SV_CLOSE = "<" + "/svg>"
