@@ -1529,3 +1529,78 @@ with st.expander("⚠️ Account Safety & Permanent Deletion"):
         st.rerun()
 
 st.markdown(f'<div style="text-align:center;opacity:0.55;font-size:11px;font-family:monospace;margin-top:24px;">LeX Social // Engineered by LexiTech Studio • 13+ Community</div>', unsafe_allow_html=True)
+
+if sb and user and user.get("handle"):
+    try:
+        im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
+        im_blk = get_blocked_handles()
+        im_peers, im_avs = {}, {}
+        for mr in im_rows:
+            mh = "@" + clean_handle_str(mr.get("handle", ""))
+            if len(mh) > 1 and mh.lower() != user["handle"].lower() and mh.lower() not in im_blk:
+                im_peers[mh] = f"{mr.get('display_name', mh)} ({mh})"
+                mtj = mr.get("theme_json") or {}
+                if isinstance(mtj, str):
+                    try: mtj = json.loads(mtj or "{}")
+                    except Exception: mtj = {}
+                im_avs[mh] = mtj.get("avatar", "") if isinstance(mtj, dict) else ""
+        ov_im = st.session_state.get("dm_target_override", "")
+        ov_im_c = "@" + clean_handle_str(ov_im) if ov_im else ""
+        if ov_im_c and ov_im_c in im_peers:
+            st.session_state["lex_im_peer"] = ov_im_c
+            st.session_state["dm_target_override"] = ""
+        if im_peers:
+            im_list = list(im_peers.keys())
+            im_act = st.session_state.get("lex_im_peer")
+            if im_act not in im_peers:
+                im_act = im_list[0]
+                st.session_state["lex_im_peer"] = im_act
+            im_msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(300).execute().data or []
+            my_l, tg_l = user["handle"].lower(), im_act.lower()
+            im_thread = [
+                m for m in im_msgs
+                if not (m.get("body") or "").startswith(("[LEX_F", "[LEX_NOTIF]"))
+                and {str(m.get("sender_handle", "")).lower(), str(m.get("recipient_handle", "")).lower()} == {my_l, tg_l}
+            ]
+            av_u = im_avs.get(im_act, "")
+            av_h = f'<img src="{av_u}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1.5px solid {th["accent"]};">' if av_u else f'<div style="width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:900;">{im_act.lstrip("@")[:1].upper()}</div>'
+            rows_h = "".join([
+                f'<div style="margin-bottom:4px;font-size:12px;line-height:1.35;"><strong style="color:{th["accent"] if str(m.get("sender_handle","")).lower()==my_l else "#34D399"};">{user["handle"] if str(m.get("sender_handle","")).lower()==my_l else im_act}:</strong> <span>{m.get("body","")}</span></div>'
+                for m in im_thread[-30:]
+            ]) or '<div style="opacity:0.55;font-size:12px;padding:38px 8px;text-align:center;">No messages yet — say hey below! ⚡</div>'
+            win_html = (
+                f'<div id="lex-im-win" style="position:fixed;bottom:16px;right:16px;width:310px;z-index:99999;border-radius:10px;overflow:hidden;border:1.5px solid {th["accent"]};background:#0B0F1A;color:#F8FAFC;box-shadow:0 12px 32px rgba(0,0,0,0.75);font-family:sans-serif;">'
+                f'<div id="lex-im-bar" style="cursor:move;padding:6px 10px;background:linear-gradient(90deg,{th["accent"]},#1E293B);color:#06060A;font-weight:900;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none;">'
+                f'<span>⚡ {im_act} — LeX Instant</span>'
+                f'<span id="lex-im-min" style="cursor:pointer;padding:0 6px;font-size:14px;font-weight:900;">_</span></div>'
+                f'<div id="lex-im-body">'
+                f'<div style="padding:8px 10px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px;">{av_h}<div><div style="font-weight:800;font-size:13px;">{im_peers.get(im_act, im_act)}</div><div style="font-size:10px;color:#34D399;">● Online • LeX Instant</div></div></div>'
+                f'<div id="lex-im-log" style="height:175px;overflow-y:auto;padding:8px 10px;background:#070A12;">{rows_h}</div>'
+                f'</div></div>'
+            )
+            st.markdown(win_html, unsafe_allow_html=True)
+            st.components.v1.html(
+                "<" + "script>"
+                + "const p=window.parent.document,w=p.getElementById('lex-im-win'),b=p.getElementById('lex-im-bar'),m=p.getElementById('lex-im-min'),bd=p.getElementById('lex-im-body'),lg=p.getElementById('lex-im-log');"
+                + "if(lg){lg.scrollTop=lg.scrollHeight;}"
+                + "if(m&&bd){m.onclick=()=>{bd.style.display=bd.style.display==='none'?'block':'none';};}"
+                + "if(w&&b){let dx=0,dy=0,drag=false;b.onmousedown=(e)=>{drag=true;dx=e.clientX-w.offsetLeft;dy=e.clientY-w.offsetTop;};p.onmousemove=(e)=>{if(!drag)return;w.style.left=(e.clientX-dx)+'px';w.style.top=(e.clientY-dy)+'px';w.style.right='auto';w.style.bottom='auto';};p.onmouseup=()=>{drag=false;};}"
+                + "</" + "script>",
+                height=0,
+            )
+            with st.expander("⚡ LeX Instant Quick Send / Switch Friend", expanded=True):
+                c_p, c_m, c_s = st.columns([1.4, 2.4, 0.8])
+                pk = c_p.selectbox("Friend", im_list, index=im_list.index(im_act), format_func=lambda x: im_peers.get(x, x), label_visibility="collapsed", key="lex_im_sel_dock")
+                if pk != im_act:
+                    st.session_state["lex_im_peer"] = pk
+                    st.rerun()
+                im_in = c_m.text_input("IM", placeholder=f"IM {im_act}...", label_visibility="collapsed", key="lex_im_txt_dock")
+                if c_s.button("SEND", key="lex_im_go_dock", use_container_width=True) and im_in.strip():
+                    ok_i, msg_i = check_safety_and_dress_code(im_in)
+                    if ok_i:
+                        sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": im_act, "body": im_in.strip()}).execute()
+                        st.rerun()
+                    else:
+                        st.error(msg_i)
+    except Exception as e:
+        st.warning(f"LeX Instant notice: {e}")
