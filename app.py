@@ -1007,10 +1007,12 @@ def render_profile_module(mod_name: str):
             st.session_state["lex_share_card_open"] = not _sc_open
             st.rerun()
         if _sc_open:
+            _sc_bg = th.get("bg_color", "#0F172A")
+            _sc_ac = th.get("accent_color", "#38BDF8")
             st.markdown(
-                f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,#0B0F1A,{c_bg});border:2px solid {c_ac};box-shadow:0 0 24px {c_ac}44;">'
-                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-weight:900;font-size:15px;color:{c_ac};">LeX // SOCIAL</span><span style="font-size:10px;padding:3px 8px;border-radius:99px;background:{c_ac}22;color:{c_ac};font-weight:800;">{card_tier}</span></div>'
-                f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-weight:900;font-size:18px;color:#FFF;">{user.get("name")}</div><div style="color:{c_ac};font-weight:700;font-size:13px;">{user.get("handle")}</div></div></div>'
+                f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,#0B0F1A,{_sc_bg});border:2px solid {_sc_ac};box-shadow:0 0 24px {_sc_ac}44;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-weight:900;font-size:15px;color:{_sc_ac};">LeX // SOCIAL</span><span style="font-size:10px;padding:3px 8px;border-radius:99px;background:{_sc_ac}22;color:{_sc_ac};font-weight:800;">{card_tier}</span></div>'
+                f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-weight:900;font-size:18px;color:#FFF;">{user.get("name")}</div><div style="color:{_sc_ac};font-weight:700;font-size:13px;">{user.get("handle")}</div></div></div>'
                 f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#A1A1AA;"><span>lexsocial.space</span><span>{user.get("mood")}</span></div></div>',
                 unsafe_allow_html=True,
             )
