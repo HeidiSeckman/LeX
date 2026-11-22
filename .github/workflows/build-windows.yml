@@ -14,9 +14,11 @@ jobs:
         with:
           node-version: 20
       - run: npm install -g pake-cli
-      - run: pake https://lexsocial.space --name "LeX Social" --icon icon.png --width 1280 --height 840 --hide-title-bar
+      - run: pake https://lexsocial.space --name "LeXSocial" --icon icon.png --width 1280 --height 840 --hide-title-bar
       - name: Upload Windows App to v1.0 Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0
-          files: "**/*.exe"
+          files: |
+            **/*.msi
+            **/*.exe
