@@ -909,6 +909,9 @@ if st.session_state.viewing_handle and sb:
         if ac2.button("✕ Cancel Request", key="pub_can_req", use_container_width=True):
             cancel_friend_request(vp["handle"])
             st.rerun()
+        if bool(v_th.get("is_private", False)) and not is_fr and not is_founder:
+            st.markdown('<div class="lex-card" style="text-align:center;padding:24px;"><div style="font-size:28px;">🔒</div><div style="font-weight:800;font-size:16px;margin-top:6px;">This Profile is Private</div><div style="font-size:13px;opacity:0.8;margin-top:4px;">Send a friend request above to view their bio, Top 8, and guestbook wall.</div></div>', unsafe_allow_html=True)
+            st.stop()
     elif len(st.session_state.lex_friends) >= MAX_FRIENDS:
         ac2.button(f"Max {MAX_FRIENDS}", disabled=True, use_container_width=True)
     elif ac2.button("+ Add Friend", key="pub_add_fr", use_container_width=True):
@@ -1346,6 +1349,7 @@ with hub_col:
                 b_name = st.text_input("Display Name", value=user.get("name", ""))
                 b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now • Vibing ⚡"))
                 b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Portsmouth, OH")
+                b_priv = st.checkbox("🔒 Private Profile (Only approved friends can see your bio, Top 8 & wall)", value=bool(th.get("is_private", False)))
                 b_site = st.text_input("Profile Website / Link", value=user.get("website", ""))
                 b_bio = st.text_area("About Me (Bio)", value=user.get("bio", ""), height=90)
 
@@ -1382,6 +1386,7 @@ with hub_col:
                         user["name"] = b_name.strip() or user["name"]
                         user["mood"] = b_mood.strip()
                         th["hometown"] = b_home.strip()
+                        th["is_private"] = bool(b_priv)                        
                         user["website"] = normalize_url(b_site)
                         user["bio"] = b_bio.strip()
                         user["who_to_meet"] = b_meet.strip()
