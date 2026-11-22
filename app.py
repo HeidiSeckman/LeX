@@ -1138,7 +1138,7 @@ with hub_col:
                 if fb2.button("✉️ Message", key=f"fdm_{fh}_{idx_f}"):
                     st.session_state.dm_target_override = fh
                     st.toast(f"Selected {fh} in Messages tab!")
-                 with t_dm:
+                     with t_dm:
                     if sb and user and user.get("handle"):
                         try:
                             im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
