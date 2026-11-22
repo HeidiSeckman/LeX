@@ -1016,7 +1016,6 @@ def render_profile_module(mod_name: str):
             if st.session_state.get("lex_share_bar_open", True):
                 st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
 
-
     elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
         st.markdown(f'<div class="lex-card" style="text-align:center;"><img src="{my_stk}" style="max-width:100%;max-height:220px;border-radius:10px;" /></div>', unsafe_allow_html=True)
