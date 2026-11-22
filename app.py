@@ -912,7 +912,7 @@ def render_profile_module(mod_name: str):
         vis_list = th.get("visitors", [])
         vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:11px;">👀 {v.get("handle") if isinstance(v, dict) else v}</span>' for v in vis_list]) or '<span style="opacity:0.6;font-size:12px;">No profile views yet — share your card below!</span>'
         st.markdown(f'<div class="lex-card"><strong>👀 Recent Profile Visitors</strong><div style="margin-top:8px;">{vis_html}</div></div>', unsafe_allow_html=True)
-               c_acc = th.get("accent", "#94A3B8")
+        c_acc = th.get("accent", "#94A3B8")
         c_bg = th.get("card_bg", "rgba(15,23,42,0.92)")
         av_s = user.get("avatar", "")
         av_t = f'<img src="{av_s}" style="width:64px;height:64px;border-radius:14px;object-fit:cover;border:2px solid {c_acc};">' if av_s else f'<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,0.08);border:2px solid {c_acc};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:{c_acc};">{user.get("name","M")[:1].upper()}</div>'
@@ -935,7 +935,6 @@ def render_profile_module(mod_name: str):
         )
         st.code(f"Come add me on LeX Social ({user.get('handle')}) — custom themes, profile anthems & real friends, zero algorithms: https://lexsocial.space", language=None)
 
-                    st.code(f"Come add me on LeX Social ({user.get('handle')}) — custom themes, profile anthems & real friends, zero algorithms: https://lexsocial.space", language=None)
         elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
         st.markdown(f'<div class="lex-card" style="text-align:center;"><img src="{my_stk}" style="max-width:100%;max-height:220px;border-radius:10px;" /></div>', unsafe_allow_html=True)
