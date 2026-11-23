@@ -206,7 +206,7 @@ def earned_badges_html(t_cfg: dict, friends_cnt: int, top8_cnt: int, handle_str:
     pills = "".join([f'<span style="display:inline-block;margin:4px 6px 0 0;padding:2px 9px;border-radius:99px;background:linear-gradient(90deg,{grad});color:#05050A;font-size:10px;font-weight:900;letter-spacing:0.5px;box-shadow:0 0 10px rgba(255,255,255,0.35);">{lbl}</span>' for lbl, grad in badges])
     return f'<div style="margin-top:6px;">{pills}</div>'
     def build_profile_link_html(raw_url: str, raw_label: str, accent: str) -> str:
-    clean = normalize_url(raw_url)
+        clean = normalize_url(raw_url)
     if not clean:
         return ""
     lbl = (raw_label or "").strip() or "My Website ↗"
