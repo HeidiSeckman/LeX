@@ -288,11 +288,15 @@ def build_live_banner_html(mode: str, custom_img: str, accent: str, rad_px: int)
 def calc_age(dob: date) -> int:
     today = date.today()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-
 def encode_image_data_url(uploaded_file) -> str:
     if uploaded_file is None:
         return ""
     raw_bytes = uploaded_file.getvalue()
+    ftype = (uploaded_file.type or "").lower()
+    fname = (getattr(uploaded_file, "name", "") or "").lower()
+    if "gif" in ftype or fname.endswith(".gif"):
+        b64 = base64.b64encode(raw_bytes).decode("ascii")
+        return f"data:image/gif;base64,{b64}"
     try:
         from PIL import Image
         im = Image.open(io.BytesIO(raw_bytes))
