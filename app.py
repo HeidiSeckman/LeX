@@ -181,7 +181,7 @@ def founder_studio_link_html(handle: str, accent: str) -> str:
         return f'<div style="margin-top:6px;"><a href="{LEXITECH_HUB_URL}" target="_blank" style="display:inline-block;padding:3px 10px;border-radius:99px;background:{accent}22;border:1px solid {accent};color:{accent};font-size:11px;font-weight:800;text-decoration:none;">✦ LexiTech Studio ↗</a></div>'
     return ""
     def build_profile_link_html(raw_url: str, raw_label: str, accent: str) -> str:
-    clean = normalize_url(raw_url)
+        clean = normalize_url(raw_url)
     if not clean:
         return ""
     lbl = (raw_label or "").strip() or "My Website ↗"
