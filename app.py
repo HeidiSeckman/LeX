@@ -970,7 +970,7 @@ if st.session_state.viewing_handle and sb:
             pass
 
         st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}<div><h2 style="margin:0;">{vp.get("display_name", "")} {founder_badge_html(vp.get("handle", ""))}</h2><div style="color:{v_th["accent"]};font-weight:700;">{vp.get("handle", "")} <span style="font-size:11px;margin-left:6px;">{online_badge}</span></div><div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_badges}{v_site}</div></div><div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {vp.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {vp.get("who_to_meet", "")}</p>{v_int_html}</div>', unsafe_allow_html=True)
-     if v_th.get("allow_css_remix", True):
+    if v_th.get("allow_css_remix", True):
         if st.button(f"✨ Steal This Look (Remix {vp.get('handle', '')}'s Theme)", key="steal_look_btn"):
             credit_tag = f'html body .lex-banner::after{{content:"Theme inspired by {vp.get("handle", "@Member")}";position:absolute;bottom:6px;right:12px;font-size:10px;opacity:0.85;font-weight:800;}}'
             th.update({
