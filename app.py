@@ -1108,10 +1108,10 @@ def render_profile_module(mod_name: str):
                 f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,#0B0F1A,{_sc_bg});border:2px solid {_sc_ac};box-shadow:0 0 24px {_sc_ac}44;">'
                 f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-weight:900;font-size:15px;color:{_sc_ac};">LeX // SOCIAL</span><span style="font-size:10px;padding:3px 8px;border-radius:99px;background:{_sc_ac}22;color:{_sc_ac};font-weight:800;">{card_tier}</span></div>'
                 f'<div style="display:flex;align-items:center;gap:12px;">{av_t}<div><div style="font-weight:900;font-size:18px;color:#FFF;">{user.get("name")}</div><div style="color:{_sc_ac};font-weight:700;font-size:13px;">{user.get("handle")}</div></div></div>'
-                f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#A1A1AA;"><span>lexsocial.space</span><span>{user.get("mood")}</span></div></div>',
+                f'<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:11px;color:#A1A1AA;"><span>lexsocial.streamlit.app</span><span>{user.get("mood")}</span></div></div>',
                 unsafe_allow_html=True,
             )
-            st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.space", language=None)
+            st.code(f"Add me on LeX Social ({user.get('handle')}) — https://lexsocial.streamlit.app", language=None)
 
     elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
