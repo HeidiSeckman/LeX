@@ -1053,6 +1053,53 @@ if st.session_state.viewing_handle and sb:
         va_cols = st.columns(3)
         for idx_p, ph in enumerate(va_obj.get("photos") or []):
             va_cols[idx_p % 3].markdown(f'<div class="lex-card" style="padding:6px;"><img src="{ph["img"]}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;" /><div style="font-size:11px;margin-top:4px;">{ph.get("caption","")}</div></div>', unsafe_allow_html=True)
+    v_aux = list(vtj.get("guest_queue") or [])
+    st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{v_th["accent"]};">🎶 Pass the Aux — Guest Queue ({len(v_aux)})</strong></div>', unsafe_allow_html=True)
+    for idx_ax, ax in enumerate(v_aux[-8:]):
+        if st.button(f"▶ {ax.get('title', 'Track')} (added by {ax.get('by', '@Friend')})", key=f"vax_btn_{idx_ax}"):
+            st.session_state.active_yt_track = ax
+    if is_fr or v_is_founder:
+        with st.form("pub_aux_form", clear_on_submit=True):
+            ax1, ax2 = st.columns(2)
+            ax_title = ax1.text_input("Drop a Track Title")
+            ax_url = ax2.text_input("YouTube Link / 11-char ID")
+            if st.form_submit_button("Drop on Guest Queue 🎧") and ax_title.strip() and ax_url.strip():
+                ayid = extract_yt_id(ax_url)
+                ok_ax, msg_ax = check_safety_and_dress_code(ax_title)
+                if not ok_ax:
+                    st.error(msg_ax)
+                elif not ayid:
+                    st.error("Enter a valid YouTube link or 11-char ID.")
+                else:
+                    v_aux.append({"title": ax_title.strip(), "yt_id": ayid, "by": user["handle"]})
+                    vtj["guest_queue"] = v_aux[-20:]
+                    sb.table("lex_profiles").update({"theme_json": vtj}).eq("user_id", vp["user_id"]).execute()
+                    st.toast("Dropped track onto their Aux Queue!")
+                    st.rerun()
+                    
+    v_scrap = [s for s in (vtj.get("scrapbook_photos") or []) if s.get("approved", True)]
+    st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{v_th["accent"]};">🎞️ Collaborative Scrapbook Collage ({len(v_scrap)})</strong></div>', unsafe_allow_html=True)
+    if v_scrap:
+        sc_cols = st.columns(3)
+        for idx_sc, scp in enumerate(v_scrap[-12:]):
+            sc_cols[idx_sc % 3].markdown(f'<div class="lex-card" style="padding:6px;"><img src="{scp["img"]}" style="width:100%;height:130px;object-fit:cover;border-radius:8px;" /><div style="font-size:11px;margin-top:4px;"><strong>{scp.get("by","@Friend")}:</strong> {scp.get("caption","")}</div></div>', unsafe_allow_html=True)
+    if is_fr or v_is_founder:
+        with st.form("pub_scrap_form", clear_on_submit=True):
+            sp1, sp2 = st.columns(2)
+            sp_file = sp1.file_uploader("Add Memory / Meme to Scrapbook", type=["png", "jpg", "jpeg", "webp"], key="pub_sp_up")
+            sp_cap = sp2.text_input("Caption")
+            if st.form_submit_button("Submit to Scrapbook 📸") and sp_file is not None:
+                ok_sp, msg_sp = scan_image_safely(sp_file, sp_cap)
+                if not ok_sp:
+                    st.error(msg_sp)
+                else:
+                    all_sp = list(vtj.get("scrapbook_photos") or [])
+                    needs_app = bool(v_th.get("scrapbook_require_approval", True))
+                    all_sp.append({"img": encode_image_data_url(sp_file), "caption": sp_cap.strip(), "by": user["handle"], "approved": not needs_app})
+                    vtj["scrapbook_photos"] = all_sp[-30:]
+                    sb.table("lex_profiles").update({"theme_json": vtj}).eq("user_id", vp["user_id"]).execute()
+                    st.toast("Submitted! Waiting for approval." if needs_app else "Added to Scrapbook Wall!")
+                    st.rerun()
     st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{v_th["accent"]};">💬 Sign {vp.get("display_name", "")}\'s Wall</strong></div>', unsafe_allow_html=True)
     vw_msg = st.text_input("Leave a guestbook note...", key="pub_wall_in")
     if st.button("Post to Wall ✦", key="pub_wall_btn") and vw_msg.strip():
