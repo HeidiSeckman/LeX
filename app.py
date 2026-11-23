@@ -1517,6 +1517,7 @@ with hub_col:
                             'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 18% 25%,#00F0FFcc 0 6px,transparent 28px),radial-gradient(circle at 82% 20%,#3B82F6cc 0 7px,transparent 32px),radial-gradient(circle at 75% 75%,#38BDF8cc 0 6px,transparent 28px);animation:orbFloat 5s ease-in-out infinite}\n'
                             'html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important}\n'
                             'html body .lex-banner{background:linear-gradient(90deg,#020617,#0369A1,#00F0FF,#020617)!important;border:2px solid #7DD3FC!important}\n'
+                        )
 
                 if st.form_submit_button("Save All Visual Customizations ✦", use_container_width=True):
                     ok_w, msg_w = scan_image_safely(wall_up, "wallpaper")
