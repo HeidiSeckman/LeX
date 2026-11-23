@@ -1317,7 +1317,7 @@ with hub_col:
         for p in my_posts:
             render_feed_post(p, "my")
 
-       with t_ffeed:
+    with t_ffeed:
         _ff_blocked = get_blocked_handles()
         _ff_my_h = "@" + clean_handle_str(user.get("handle") or "").lower()
         _ff_handles = set()
