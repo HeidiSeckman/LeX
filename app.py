@@ -1317,9 +1317,18 @@ with hub_col:
         for p in my_posts:
             render_feed_post(p, "my")
 
-    with t_ffeed:
-        st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">👯 Friends-Only Feed</strong><div style="font-size:12px;opacity:0.8;">Showing posts exclusively from your {len(friend_handles)} accepted friends.</div></div>', unsafe_allow_html=True)
-        fr_posts = [p for p in posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) in friend_handles and ("@" + clean_handle_str(p.get("handle") or "").lower()) not in blocked_set]
+       with t_ffeed:
+        _ff_blocked = get_blocked_handles()
+        _ff_my_h = "@" + clean_handle_str(user.get("handle") or "").lower()
+        _ff_handles = set()
+        for _fr in (st.session_state.get("lex_friends") or []) + (st.session_state.get("lex_top8") or []):
+            _fh = _fr if isinstance(_fr, str) else (_fr.get("handle") or _fr.get("friend_handle") or "" if isinstance(_fr, dict) else "")
+            if _fh.strip():
+                _ff_handles.add("@" + clean_handle_str(_fh).lower())
+        _ff_handles.discard(_ff_my_h)
+        _ff_posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(80).execute().data or [] if sb else []
+        st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">👯 Friends-Only Feed</strong><div style="font-size:12px;opacity:0.8;">Showing posts exclusively from your {len(_ff_handles)} accepted friends.</div></div>', unsafe_allow_html=True)
+        fr_posts = [p for p in _ff_posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) in _ff_handles and ("@" + clean_handle_str(p.get("handle") or "").lower()) not in _ff_blocked]
         if not fr_posts:
             st.info("No posts from your accepted friends yet! Add friends in Radar or All Friends to see their updates here.")
         for p in fr_posts:
