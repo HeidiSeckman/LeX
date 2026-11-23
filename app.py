@@ -1462,7 +1462,7 @@ with hub_col:
                 pin_txt = st.text_input("Pinned Bulletin Note", value=th.get("pinned_note", ""))
                 x_css_in = st.text_area("Custom Profile CSS", value=th.get("custom_css", ""), height=68)
                 with st.expander("🎨 Custom CSS Starter Codes & Color Cheat Sheet"):
-                    st.caption("Copy a layout code below, paste it into Custom Profile CSS above, and tweak the #HEX colors to make it yours:")
+                    st.caption("Copy any starter code below, paste it into Custom Profile CSS above, and tweak the #HEX colors to make it yours:")
                     st.markdown("**1. Electric Cyan Cyber Grid & Floating Orbs** *(Swap `#00F0FF` & `#3B82F6` to change glow colors)*")
                     st.code(
                         '@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.08)}}\n'
@@ -1471,19 +1471,40 @@ with hub_col:
                         'html body .lex-card{background:rgba(6,12,26,.86)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #00F0FF!important;box-shadow:0 0 20px #00F0FF44!important}',
                         language="css",
                     )
-                    st.markdown("**2. Obsidian & Liquid Gold Luxury** *(Swap `#F59E0B` & `#FDE68A` for custom metallic tint)*")
+                    st.markdown("**2. Molten Gold Lava Lamp & Obsidian** *(Swap `#F59E0B` & `#D97706` for custom lava colors)*")
                     st.code(
-                        'html body [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 80% 15%,#F59E0B33,transparent 45%),linear-gradient(135deg,#070709,#18140C,#09090B)!important}\n'
+                        '@keyframes goldLava{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(18px,-32px) scale(1.12)}66%{transform:translate(-16px,-18px) scale(0.95)}}\n'
+                        'html body [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 75% 20%,#B4530944,transparent 50%),linear-gradient(145deg,#060608,#171209,#09090B)!important}\n'
+                        'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 20% 75%,#F59E0B55 0 45px,transparent 95px),radial-gradient(circle at 78% 30%,#D9770655 0 60px,transparent 120px),radial-gradient(circle at 52% 58%,#FDE68A44 0 35px,transparent 85px),radial-gradient(circle at 85% 82%,#F59E0B44 0 50px,transparent 105px);animation:goldLava 9s ease-in-out infinite}\n'
                         'html body .lex-banner{background:linear-gradient(90deg,#09090B,#78350F,#F59E0B,#09090B)!important;border:2px solid #FDE68A!important}\n'
-                        'html body .lex-card,html body .lex-friend-card{background:rgba(14,12,10,.88)!important;backdrop-filter:blur(16px)!important;border:1.5px solid #F59E0B!important;box-shadow:0 0 22px #F59E0B44!important}',
+                        'html body .lex-card,html body .lex-friend-card{background:rgba(14,12,9,.88)!important;backdrop-filter:blur(16px)!important;border:1.5px solid #F59E0B!important;box-shadow:0 0 22px #F59E0B44!important}',
                         language="css",
                     )
-                    st.markdown("**3. Toxic Matrix & Arcade Grid** *(Swap `#22C55E` to `#38BDF8` for Ice Blue)*")
+                    st.markdown("**3. Deep-Space Starfield & Arctic Aurora** *(Swap `#38BDF8` & `#818CF8` for custom nebula glow)*")
                     st.code(
-                        'html body [data-testid="stAppViewContainer"]{background-color:#030805!important;background-image:linear-gradient(#22C55E28 1px,transparent 1px),linear-gradient(90deg,#22C55E28 1px,transparent 1px)!important;background-size:36px 36px!important}\n'
-                        'html body .lex-card,html body .lex-friend-card{background:rgba(4,14,8,.9)!important;border:1.5px solid #22C55E!important;box-shadow:0 0 18px #22C55E44!important}',
+                        '@keyframes starTwinkle{0%,100%{opacity:.55;transform:translateY(0)}50%{opacity:1;transform:translateY(-14px)}}\n'
+                        'html body [data-testid="stAppViewContainer"]{background:radial-gradient(ellipse at 50% 0%,#1E3A8A66,transparent 60%),radial-gradient(ellipse at 85% 90%,#0E749055,transparent 55%),#03050C!important}\n'
+                        'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(#FFFFFF 1.5px,transparent 1.5px),radial-gradient(#38BDF8 2px,transparent 2px),radial-gradient(#818CF8 1.5px,transparent 1.5px);background-size:110px 110px,170px 170px,230px 230px;background-position:0 0,40px 60px,90px 20px;animation:starTwinkle 6s ease-in-out infinite}\n'
+                        'html body .lex-card,html body .lex-friend-card{background:rgba(7,11,24,.84)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #38BDF8!important;box-shadow:0 0 20px #38BDF833!important}',
                         language="css",
                     )
+                    st.markdown("**4. Crimson Ember & Smoked Obsidian** *(Swap `#EF4444` & `#F97316` to change ember heat)*")
+                    st.code(
+                        '@keyframes emberRise{0%,100%{transform:translateY(0) scale(1);opacity:.75}50%{transform:translateY(-35px) scale(1.1);opacity:1}}\n'
+                        'html body [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 50% 100%,#991B1B55,transparent 55%),linear-gradient(160deg,#070506,#1A080A,#090708)!important}\n'
+                        'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 22% 85%,#EF4444cc 0 4px,transparent 20px),radial-gradient(circle at 48% 72%,#F97316cc 0 5px,transparent 24px),radial-gradient(circle at 76% 88%,#DC2626cc 0 4px,transparent 22px),radial-gradient(circle at 65% 35%,#FDBA7499 0 3px,transparent 15px);animation:emberRise 4.5s ease-in-out infinite}\n'
+                        'html body .lex-banner{background:linear-gradient(90deg,#090708,#7F1D1D,#DC2626,#090708)!important;border:2px solid #F87171!important}\n'
+                        'html body .lex-card,html body .lex-friend-card{background:rgba(16,8,10,.88)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #EF4444!important;box-shadow:0 0 22px #EF444444!important}',
+                        language="css",
+                    )
+                    st.markdown("**5. Emerald Matrix Grid & CRT Scanlines** *(Swap `#22C55E` to `#EAB308` for Retro Amber)*")
+                    st.code(
+                        'html body [data-testid="stAppViewContainer"]{background-color:#020704!important;background-image:repeating-linear-gradient(0deg,rgba(34,197,94,.07) 0px,rgba(34,197,94,.07) 1px,transparent 1px,transparent 4px),linear-gradient(#22C55E22 1px,transparent 1px),linear-gradient(90deg,#22C55E22 1px,transparent 1px)!important;background-size:100% 4px,38px 38px,38px 38px!important}\n'
+                        'html body .lex-banner{background:linear-gradient(90deg,#020704,#14532D,#16A34A,#020704)!important;border:2px solid #4ADE80!important}\n'
+                        'html body .lex-card,html body .lex-friend-card{background:rgba(3,12,7,.9)!important;border:1.5px solid #22C55E!important;box-shadow:0 0 20px #22C55E44!important}',
+                        language="css",
+                    )
+
 
                 if st.form_submit_button("Save All Visual Customizations ✦", use_container_width=True):
                     ok_w, msg_w = scan_image_safely(wall_up, "wallpaper")
