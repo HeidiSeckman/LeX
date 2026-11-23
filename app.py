@@ -180,6 +180,31 @@ def founder_studio_link_html(handle: str, accent: str) -> str:
     if (handle or "").strip().lower() in {"@heidi", "@heidiseckman"}:
         return f'<div style="margin-top:6px;"><a href="{LEXITECH_HUB_URL}" target="_blank" style="display:inline-block;padding:3px 10px;border-radius:99px;background:{accent}22;border:1px solid {accent};color:{accent};font-size:11px;font-weight:800;text-decoration:none;">✦ LexiTech Studio ↗</a></div>'
     return ""
+    def build_profile_link_html(raw_url: str, raw_label: str, accent: str) -> str:
+    clean = normalize_url(raw_url)
+    if not clean:
+        return ""
+    lbl = (raw_label or "").strip() or "My Website ↗"
+    safe_u = clean.replace('"', "&quot;").replace("<", "").replace(">", "")
+    safe_l = lbl.replace("<", "&lt;").replace(">", "&gt;")
+    return f'<div style="margin-top:6px;"><a href="{safe_u}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:3px 11px;border-radius:99px;background:{accent}22;border:1px solid {accent};color:{accent};font-size:11px;font-weight:800;text-decoration:none;">🔗 {safe_l} ↗</a></div>'
+
+def earned_badges_html(t_cfg: dict, friends_cnt: int, top8_cnt: int, handle_str: str) -> str:
+    badges = []
+    h_low = (handle_str or "").strip().lower()
+    if h_low in {"@heidi", "@heidiseckman"} or int(t_cfg.get("is_og", 0)) == 1 or len(t_cfg.get("followers") or []) >= 1:
+        badges.append(("✨ OG EARLY ADOPTER", "#38BDF8,#818CF8"))
+    if len((t_cfg.get("custom_css") or "").strip()) >= 25:
+        badges.append(("🎨 CSS ARCHITECT", "#EC4899,#A855F7"))
+    if friends_cnt >= 8 or top8_cnt >= 8:
+        badges.append(("👑 TOP 8 ROYALTY", "#F59E0B,#FDE047"))
+    last_ts = int(float(t_cfg.get("last_seen") or 0))
+    if last_ts > 0 and ((last_ts // 3600) % 24) in {0, 1, 2, 3, 4, 5, 6, 7}:
+        badges.append(("🦉 NIGHT OWL", "#6366F1,#14B8A6"))
+    if not badges:
+        return ""
+    pills = "".join([f'<span style="display:inline-block;margin:4px 6px 0 0;padding:2px 9px;border-radius:99px;background:linear-gradient(90deg,{grad});color:#05050A;font-size:10px;font-weight:900;letter-spacing:0.5px;box-shadow:0 0 10px rgba(255,255,255,0.35);">{lbl}</span>' for lbl, grad in badges])
+    return f'<div style="margin-top:6px;">{pills}</div>'
 def build_backdrop_url(style_name: str, accent: str, spray_word: str = "LeX!") -> str:
     w = (spray_word or "LeX!").replace("<", "").replace(">", "")[:14]
     if style_name == "Architectural Grid":
@@ -893,9 +918,9 @@ if st.session_state.viewing_handle and sb:
     if v_th.get("pinned_note"):
         st.markdown(f'<div class="lex-card" style="border-width:2.5px;"><span style="color:{v_th["accent"]};font-weight:900;font-size:11px;">📌 PINNED BULLETIN</span><div style="margin-top:4px;">{v_th["pinned_note"]}</div></div>', unsafe_allow_html=True)
     v_fol, v_fr = list(vtj.get("followers") or []), list(vtj.get("all_friends") or [])
-    v_av = render_avatar_html(vtj.get("avatar", ""), vp.get("display_name", "L"), v_th, 84)
     v_is_founder = vp.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"}
-    v_site = founder_studio_link_html(vp.get("handle", ""), v_th["accent"]) if v_is_founder else (f'<div style="margin-top:6px;"><a href="{vtj["website"]}" target="_blank" style="color:{v_th["accent"]};font-weight:700;">🔗 {vtj["website"]}</a></div>' if vtj.get("website") else "")
+    v_site = founder_studio_link_html(vp.get("handle", ""), v_th["accent"]) if v_is_founder else build_profile_link_html(vtj.get("website", ""), vtj.get("website_label", ""), v_th["accent"])
+    v_badges = earned_badges_html(v_th, len(v_fr), len(vp.get("top8_json") or []), vp.get("handle", ""))
     v_ints = [(lbl, v_th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("TV", "int_tv"), ("Books & Heroes", "int_books")] if v_th.get(k)]
     v_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong style="color:{v_th["accent"]};">{l}:</strong> {val}</div>' for l, val in v_ints])
     online_badge = "🟢 ONLINE" if is_member_online(v_th) else "⚫ OFFLINE"
@@ -910,7 +935,20 @@ if st.session_state.viewing_handle and sb:
         except Exception:
             pass
 
-    st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}<div><h2 style="margin:0;">{vp.get("display_name", "")} {founder_badge_html(vp.get("handle", ""))}</h2><div style="color:{v_th["accent"]};font-weight:700;">{vp.get("handle", "")} <span style="font-size:11px;margin-left:6px;">{online_badge}</span></div><div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_site}</div></div><div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {vp.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {vp.get("who_to_meet", "")}</p>{v_int_html}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}<div><h2 style="margin:0;">{vp.get("display_name", "")} {founder_badge_html(vp.get("handle", ""))}</h2><div style="color:{v_th["accent"]};font-weight:700;">{vp.get("handle", "")} <span style="font-size:11px;margin-left:6px;">{online_badge}</span></div><div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_badges}{v_site}</div></div><div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {vp.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {vp.get("who_to_meet", "")}</p>{v_int_html}</div>', unsafe_allow_html=True)
+    if v_th.get("allow_css_remix") and (v_th.get("custom_css") or "").strip():
+        if st.button(f"✨ Steal This Look (Remix {vp.get('handle', '')}'s Theme)", key="steal_look_btn"):
+            credit_tag = f'html body .lex-banner::after{{content:"Theme inspired by {vp.get("handle", "@Member")}";position:absolute;bottom:6px;right:12px;font-size:10px;opacity:0.85;font-weight:800;}}'
+            th.update({
+                "bg": v_th.get("bg", th["bg"]), "card": v_th.get("card", th["card"]),
+                "accent": v_th.get("accent", th["accent"]), "text": v_th.get("text", th["text"]),
+                "font": v_th.get("font", th["font"]), "backdrop": v_th.get("backdrop", th["backdrop"]),
+                "custom_css": (v_th.get("custom_css", "") + "\n" + credit_tag).strip(),
+            })
+            st.session_state.lex_theme = th
+            save_profile_to_cloud()
+            st.toast(f"Remixed {vp.get('handle', '')}'s layout with credit badge!")
+            st.rerun()
 
     if v_th.get("vibe_sticker"):
         v_stk = v_th["vibe_sticker"] if v_th["vibe_sticker"].startswith("data:") else normalize_gif_url(v_th["vibe_sticker"])
@@ -1087,7 +1125,34 @@ def render_profile_module(mod_name: str):
                 save_profile_to_cloud()
                 st.rerun()
         for w_item in (st.session_state.lex_wall or [])[:8]:
-            st.markdown(f'<div class="lex-card" style="padding:10px;"><strong>{w_item.get("sender", "@LeX")}:</strong> {w_item.get("msg", "")}</div>', unsafe_allow_html=True)
+            my_aux = list(th.get("guest_queue") or [])
+        if my_aux:
+            st.markdown(f'<div class="lex-card" style="padding:10px 14px;"><strong style="color:{th["accent"]};">🎶 Friends\' Pass-the-Aux Queue ({len(my_aux)})</strong></div>', unsafe_allow_html=True)
+            for idx_ma, max_tr in enumerate(my_aux[-8:]):
+                if st.button(f"▶ {max_tr.get('title', 'Track')} (from {max_tr.get('by', '@Friend')})", key=f"myax_btn_{idx_ma}"):
+                    st.session_state.active_yt_track = max_tr
+        all_my_sp = list(th.get("scrapbook_photos") or [])
+        approved_sp = [s for s in all_my_sp if s.get("approved", True)]
+        pending_sp = [s for s in all_my_sp if not s.get("approved", True)]
+        if approved_sp or pending_sp:
+            st.markdown(f'<div class="lex-card" style="padding:10px 14px;"><strong style="color:{th["accent"]};">🎞️ My Collaborative Scrapbook ({len(approved_sp)} Live • {len(pending_sp)} Pending)</strong></div>', unsafe_allow_html=True)
+            if approved_sp:
+                msc_cols = st.columns(2)
+                for idx_ms, msp in enumerate(approved_sp[-12:]):
+                    msc_cols[idx_ms % 2].markdown(f'<div class="lex-card" style="padding:6px;"><img src="{msp["img"]}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;" /><div style="font-size:11px;margin-top:4px;"><strong>{msp.get("by","@Friend")}:</strong> {msp.get("caption","")}</div></div>', unsafe_allow_html=True)
+            for idx_pd, psp in enumerate(pending_sp):
+                st.image(psp["img"], caption=f"Pending from {psp.get('by','@Friend')}: {psp.get('caption','')}", width=180)
+                ap_c1, ap_c2 = st.columns(2)
+                if ap_c1.button("✓ Approve Photo", key=f"app_sp_{idx_pd}"):
+                    psp["approved"] = True
+                    th["scrapbook_photos"] = all_my_sp
+                    save_profile_to_cloud()
+                    st.rerun()
+                if ap_c2.button("✕ Reject", key=f"rej_sp_{idx_pd}"):
+                    all_my_sp.remove(psp)
+                    th["scrapbook_photos"] = all_my_sp
+                    save_profile_to_cloud()
+                    st.rerun()
     elif mod_name == "Pinned Bulletin" and th.get("pinned_note"):
         st.markdown(f'<div class="lex-card" style="border-width:2.5px;"><span style="color:{th["accent"]};font-weight:900;font-size:11px;">📌 PINNED BULLETIN</span><div style="margin-top:4px;">{th["pinned_note"]}</div></div>', unsafe_allow_html=True)
     elif mod_name == "Top 8" and st.session_state.lex_top8:
@@ -1135,11 +1200,17 @@ with hub_col:
                     sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
                     st.rerun()
         blocked_set = get_blocked_handles()
-        posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(25).execute().data or [] if sb else []
+        posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(60).execute().data or [] if sb else []
         my_h_low = user["handle"].lower()
+        allowed_handles = {my_h_low}
+        for _fr in (st.session_state.lex_friends or []) + (st.session_state.lex_top8 or []):
+            if isinstance(_fr, dict) and _fr.get("handle"):
+                allowed_handles.add("@" + clean_handle_str(_fr["handle"]).lower())
         for p in posts:
             p_author_h = (p.get("handle") or "").strip()
-            if p_author_h.lower() in blocked_set:
+            p_low = "@" + clean_handle_str(p_author_h).lower()
+            if p_low in blocked_set or p_low not in allowed_handles:
+
                 continue
             clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body") or "", int(p.get("likes") or 0))
             img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:10px;border:1px solid {th["accent"]};" />' if img_src else ""
@@ -1378,7 +1449,9 @@ with hub_col:
                 b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now • Vibing ⚡"))
                 b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Portsmouth, OH")
                 b_priv = st.checkbox("🔒 Private Profile (Only approved friends can see your bio, Top 8 & wall)", value=bool(th.get("is_private", False)))
-                b_site = st.text_input("Profile Website / Link", value=user.get("website", ""))
+                ws1, ws2 = st.columns(2)
+                b_site_lbl = ws1.text_input("Link Display Name (Shown on Profile)", value=th.get("website_label", ""), placeholder="e.g., My Portfolio / YouTube")
+                b_site = ws2.text_input("Profile Website / Link URL", value=user.get("website") or th.get("website", ""), placeholder="https://...")
                 b_bio = st.text_area("About Me (Bio)", value=user.get("bio", ""), height=90)
 
                 b_meet = st.text_area("Who I'd Like to Meet", value=user.get("who_to_meet", ""), height=68)
@@ -1416,6 +1489,8 @@ with hub_col:
                         th["hometown"] = b_home.strip()
                         th["is_private"] = bool(b_priv)                        
                         user["website"] = normalize_url(b_site)
+                        th["website"] = user["website"]
+                        th["website_label"] = b_site_lbl.strip()
                         user["bio"] = b_bio.strip()
                         user["who_to_meet"] = b_meet.strip()
                         th["int_general"], th["int_music"], th["int_movies"], th["int_tv"], th["int_books"] = i_gen.strip(), i_mus.strip(), i_mov.strip(), i_tv.strip(), i_bok.strip()
@@ -1488,6 +1563,9 @@ with hub_col:
                 mq_on = st.checkbox("Enable Scrolling Marquee Ticker", value=bool(th.get("marquee_on", False)))
                 mq_txt = st.text_input("Marquee Ticker Text", value=th.get("marquee_text", ""))
                 pin_txt = st.text_input("Pinned Bulletin Note", value=th.get("pinned_note", ""))
+                rmx_c1, rmx_c2 = st.columns(2)
+                allow_rmx = rmx_c1.checkbox("✨ Allow CSS Remix ('Steal This Look' button)", value=bool(th.get("allow_css_remix", True)))
+                scrap_app = rmx_c2.checkbox("🎞️ Require Approval for Friend Scrapbook Photos", value=bool(th.get("scrapbook_require_approval", True)))
                 x_css_in = st.text_area("Custom Profile CSS", value=th.get("custom_css", ""), height=68)
                 with st.expander("🎨 10 Total Package CSS Themes & Color Cheat Sheet"):
                     st.caption("Pick a full-page animated layout below, tap the copy icon in the top-right corner of the box, paste it into Custom Profile CSS above, and tweak any #HEX colors to make it yours!")
@@ -1622,7 +1700,7 @@ with hub_col:
                     elif not ok_tx:
                         st.error(msg_tx)
                     else:
-                        th.update({"bg": c_bg, "card": c_cd, "accent": c_ac, "text": c_tx, "font": sel_font, "backdrop": sel_bd, "spray_word": spray_in.strip() or "LeX!", "border_style": sel_bst, "card_radius": rad_val, "card_opacity": op_val, "cursor_style": sel_cur, "card_anim": sel_anim, "glow_borders": glow_b, "text_glow": glow_t, "banner_live": sel_bn, "marquee_on": mq_on, "marquee_text": mq_txt.strip(), "pinned_note": pin_txt.strip(), "custom_css": x_css_in})
+                        th.update({"bg": c_bg, "card": c_cd, "accent": c_ac, "text": c_tx, "font": sel_font, "backdrop": sel_bd, "spray_word": spray_in.strip() or "LeX!", "border_style": sel_bst, "card_radius": rad_val, "card_opacity": op_val, "cursor_style": sel_cur, "card_anim": sel_anim, "glow_borders": glow_b, "text_glow": glow_t, "banner_live": sel_bn, "marquee_on": mq_on, "marquee_text": mq_txt.strip(), "pinned_note": pin_txt.strip(), "allow_css_remix": allow_rmx, "scrapbook_require_approval": scrap_app, "custom_css": x_css_in})
                         if clr_wall:
                             th["custom_wall"] = ""
                         elif wall_up is not None:
