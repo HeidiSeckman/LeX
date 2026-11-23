@@ -409,13 +409,20 @@ def save_profile_to_cloud():
     u = st.session_state.get("lex_user")
     if not sb or not u or not u.get("user_id"):
         return
-    try:
-        theme_payload = st.session_state.lex_theme.copy()
-        theme_payload["avatar"] = u.get("avatar", "")
-        theme_payload["website"] = u.get("website", "")
+        try:
+        theme_payload = dict(st.session_state.get("lex_theme") or {})
+        if u.get("avatar"):
+            theme_payload["avatar"] = u["avatar"]
+        elif theme_payload.get("avatar"):
+            u["avatar"] = theme_payload["avatar"]
+        clean_w = u.get("website") or theme_payload.get("website") or ""
+        u["website"] = clean_w
+        theme_payload["website"] = clean_w
+        st.session_state["lex_user"] = u
+        st.session_state["lex_theme"] = theme_payload
         theme_payload["all_friends"] = st.session_state.lex_friends
         theme_payload["last_seen"] = int(time.time())
-        payload = {
+
             "handle": u["handle"], "display_name": u["name"],
             "bio": u.get("bio", ""), "who_to_meet": u.get("who_to_meet", ""),
             "mood": u.get("mood", "Online Now • Vibing ⚡"), "anthem": u.get("anthem", "Y2K Cobalt Synth"),
@@ -430,6 +437,7 @@ def save_profile_to_cloud():
             sb.table("lex_profiles").insert(payload).execute()
     except Exception as e:
         st.warning(f"Cloud sync notice: {e}")
+    
 def get_blocked_handles() -> set:
     bl = st.session_state.lex_theme.get("blocked_users") or []
     return {str(x).strip().lower() for x in bl if x}
@@ -1255,23 +1263,28 @@ with hub_col:
             rx_map = p_meta["rx"]
             cm_list = p_meta["comments"]
             rcols = st.columns(7)
+            _rx_me = "@" + clean_handle_str(user.get("handle") or "").lower()
             for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
-                emo_users = rx_map.get(emo) or {}
+                emo_users = dict(rx_map.get(emo) or {})
                 cnt_e = sum(int(v) if isinstance(v, int) else 1 for v in emo_users.values())
-                i_reacted = my_h_low in {str(k).lower() for k in emo_users.keys()}
+                i_reacted = _rx_me in {"@" + clean_handle_str(k).lower() for k in emo_users.keys()}
                 lbl_e = f"{emo} {cnt_e} ✓" if i_reacted else f"{emo} {cnt_e}"
                 if rcols[idx_e].button(lbl_e, key=f"{k_pfx}_b_{p['id']}_{emo}") and sb:
-                    existing_k = next((k for k in emo_users.keys() if str(k).lower() == my_h_low), None)
+                    existing_k = next((k for k in emo_users.keys() if ("@" + clean_handle_str(k).lower()) == _rx_me), None)
                     if existing_k:
                         emo_users.pop(existing_k, None)
                     else:
-                        emo_users[user["handle"]] = 1
+                        emo_users[_rx_me] = 1
                         push_activity_notif(p_author_h, user["handle"], "react", emo)
                     rx_map[emo] = emo_users
                     p_meta["rx"] = rx_map
                     fire_total = sum(int(v) if isinstance(v, int) else 1 for v in (rx_map.get("🔥") or {}).values())
-                    sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta), "fires": fire_total}).eq("id", p["id"]).execute()
-                    st.rerun()
+                    res_rx = sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta), "fires": fire_total}).eq("id", p["id"]).execute()
+                    if not (res_rx.data if hasattr(res_rx, "data") else None):
+                        st.warning("Supabase RLS blocked updating this post's reaction count — run `ALTER TABLE lex_posts DISABLE ROW LEVEL SECURITY;` or allow authenticated updates in Supabase SQL.")
+                    else:
+                        st.rerun()
+
             c_open_key = f"{k_pfx}_open_cm_{p['id']}"
             if rcols[4].button(f"💬 {len(cm_list)}", key=f"{k_pfx}_cbtn_{p['id']}"):
                 st.session_state[c_open_key] = not st.session_state.get(c_open_key, False)
