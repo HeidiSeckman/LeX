@@ -1688,7 +1688,7 @@ with hub_col:
                 allow_rmx = rmx_c1.checkbox("✨ Allow CSS Remix ('Steal This Look' button)", value=bool(th.get("allow_css_remix", True)))
                 scrap_app = rmx_c2.checkbox("🎞️ Require Approval for Friend Scrapbook Photos", value=bool(th.get("scrapbook_require_approval", True)))
                 x_css_in = st.text_area("Custom Profile CSS", value=th.get("custom_css", ""), height=68)
-                with st.expander("🎨 10 Total Package CSS Themes & Color Cheat Sheet"):
+                with st.expander("🎨 15 Total Package CSS Themes & Color Cheat Sheet"):
                     st.caption("Pick a full-page animated layout below, tap the copy icon in the top-right corner of the box, paste it into Custom Profile CSS above, and tweak any #HEX colors to make it yours!")
                     _css_packs = {
                         "1. Liquid Mercury & Chrome Y2K (Floating Squares + Chrome Wave)": (
