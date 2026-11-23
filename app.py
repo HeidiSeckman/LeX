@@ -1021,8 +1021,8 @@ def render_profile_module(mod_name: str):
             st.session_state["lex_share_card_open"] = not _sc_open
             st.rerun()
         if _sc_open:
-            _sc_bg = th.get("bg_color", "#0F172A")
-            _sc_ac = th.get("accent_color", "#38BDF8")
+            _sc_bg = th.get("bg") or th.get("bg_color") or "#0F172A"
+            _sc_ac = th.get("accent") or th.get("accent_color") or "#38BDF8"
             st.markdown(
                 f'<div style="padding:18px;border-radius:18px;background:linear-gradient(135deg,#0B0F1A,{_sc_bg});border:2px solid {_sc_ac};box-shadow:0 0 24px {_sc_ac}44;">'
                 f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-weight:900;font-size:15px;color:{_sc_ac};">LeX // SOCIAL</span><span style="font-size:10px;padding:3px 8px;border-radius:99px;background:{_sc_ac}22;color:{_sc_ac};font-weight:800;">{card_tier}</span></div>'
