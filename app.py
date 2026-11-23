@@ -265,7 +265,7 @@ def build_backdrop_url(style_name: str, accent: str, spray_word: str = "LeX!") -
     return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
 def build_live_banner_html(mode: str, custom_img: str, accent: str, rad_px: int) -> str:
     if custom_img:
-        return f'<div style="width:100%;height:155px;border-radius:{rad_px}px;overflow:hidden;margin-bottom:12px;border:1.5px solid {accent};box-shadow:0 0 16px {accent}55;"><img src="{custom_img}" style="width:100%;height:100%;object-fit:cover;" /></div>'
+        return f'<div style="width:100%;border-radius:{rad_px}px;overflow:hidden;margin-bottom:12px;border:1.5px solid {accent};box-shadow:0 0 18px {accent}44;background:rgba(10,6,24,0.55);"><img src="{custom_img}" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block;" /></div>'
     if not mode or mode == "None":
         return ""
     kf = "@keyframes lexFall{0%{transform:translate(0,-30px);opacity:1}100%{transform:translate(-140px,170px);opacity:0}}@keyframes lexRise{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-14px) scaleY(1.18)}}@keyframes lexOrbit{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes lexRain{0%{transform:translateY(-140px)}100%{transform:translateY(160px)}}@keyframes lexPulse{0%,100%{opacity:.25}50%{opacity:1}}"
