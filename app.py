@@ -1270,7 +1270,6 @@ with hub_col:
                 i_reacted = _rx_me in {"@" + clean_handle_str(k).lower() for k in emo_users.keys()}
                 lbl_e = f"{emo} {cnt_e} ✓" if i_reacted else f"{emo} {cnt_e}"
                 if rcols[idx_e].button(lbl_e, key=f"{k_pfx}_b_{p['id']}_{emo}") and sb:
-                if rcols[idx_e].button(lbl_e, key=f"{k_pfx}_b_{p['id']}_{emo}") and sb:
                     try:
                         existing_k = next((k for k in emo_users.keys() if ("@" + clean_handle_str(k).lower()) == _rx_me), None)
                         if existing_k:
