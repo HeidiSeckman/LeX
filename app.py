@@ -576,6 +576,22 @@ with head_c2:
     st.markdown('<div class="lex-banner"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;"><div><div class="lex-wordmark">LeX</div><div style="height:2px;width:54px;margin:6px 0 8px 0;background:linear-gradient(90deg,#FFFFFF,#94A3B8,transparent);border-radius:99px;"></div><div style="color:#CBD5E1;font-family:\'Inter\',sans-serif;font-size:11px;font-weight:600;letter-spacing:2.4px;text-transform:uppercase;">Engineered by LexiTech Studio &bull; Algorithm-Free Social</div></div><div style="padding:5px 12px;border-radius:99px;border:1px solid rgba(226,232,240,0.32);background:rgba(255,255,255,0.06);color:#E2E8F0;font-size:10px;font-weight:700;letter-spacing:1.6px;">PUBLIC BETA // 13+</div></div></div>', unsafe_allow_html=True)
 
 sb = get_sb()
+if st.session_state.get("show_confirm_email_popup"):
+    _pop_c1, _pop_c2 = st.columns([0.92, 0.08])
+    with _pop_c1:
+        st.markdown(
+            '<div style="background:linear-gradient(135deg,#120724,#2E1065);border:2px solid #A855F7;border-radius:16px;padding:16px 18px;box-shadow:0 0 28px rgba(168,85,247,0.65);margin:10px 0;">'
+            '<div style="font-size:16px;font-weight:900;color:#F3E8FF;margin-bottom:6px;">📩 Please Confirm Your Email Address</div>'
+            '<div style="font-size:13.5px;color:#E9D5FF;line-height:1.45;">We just sent a confirmation link to your inbox. Tap the link inside that email to verify your <b>LeX Social</b> account!</div>'
+            '<div style="margin-top:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.08);font-size:11.5px;color:#FDE68A;line-height:1.4;">'
+            '⚠️ <b>Heads up:</b> When you click the confirmation link in your email, the page it opens may act broken or show an error—<b>don’t worry!</b> Clicking it still confirms your email automatically. Just come back here and sign in!'
+            '</div></div>',
+            unsafe_allow_html=True,
+        )
+    with _pop_c2:
+        if st.button("✕", key="close_confirm_email_popup", help="Close notice"):
+            st.session_state["show_confirm_email_popup"] = False
+            st.rerun()
 if st.session_state.lex_user is None:
     t_in, t_up = st.tabs(["🔐 Member Sign In", "+ Create Account"])
     with t_in:
@@ -639,6 +655,7 @@ if st.session_state.lex_user is None:
                         ares = sb.auth.sign_up({"email": s_email.strip(), "password": s_pass})
                         st.session_state.lex_user = {"user_id": ares.user.id, "name": d_name.strip(), "handle": f"@{ch}", "avatar": "", "website": normalize_url(site_in), "mood": "Online Now • Vibing ⚡", "bio": "Zero algorithms. Custom vibes on LeX.", "who_to_meet": "Creators & music lovers.", "anthem": "Y2K Cobalt Synth", "custom_song_url": "", "custom_song_title": ""}
                         save_profile_to_cloud()
+                        st.session_state["show_confirm_email_popup"] = True
                         st.rerun()
                     except Exception as e:
                         st.error(f"Signup error: {e}")
