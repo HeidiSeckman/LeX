@@ -1463,24 +1463,24 @@ with hub_col:
                 x_css_in = st.text_area("Custom Profile CSS", value=th.get("custom_css", ""), height=68)
                 with st.expander("🎨 Custom CSS Starter Codes & Color Cheat Sheet"):
                     st.caption("Copy a layout code below, paste it into Custom Profile CSS above, and tweak the #HEX colors to make it yours:")
-                    st.markdown("**1. Cyberpunk Floating Orbs & Grid** *(Change `#EC4899` & `#38BDF8` to swap glow colors)*")
+                    st.markdown("**1. Electric Cyan Cyber Grid & Floating Orbs** *(Swap `#00F0FF` & `#3B82F6` to change glow colors)*")
                     st.code(
-                        '@keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}\n'
-                        'html body .stApp{background:radial-gradient(circle at 20% 20%,#EC489955,transparent 45%),linear-gradient(125deg,#05050B,#1B092B,#07192E)!important}\n'
-                        'html body .stApp::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle at 20% 25%,#EC4899aa 0 6px,transparent 28px),radial-gradient(circle at 80% 70%,#38BDF8aa 0 7px,transparent 30px);animation:orbFloat 5s ease-in-out infinite}\n'
-                        'html body .lex-card{background:rgba(12,12,22,.85)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #EC4899!important}',
+                        '@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.08)}}\n'
+                        'html body [data-testid="stAppViewContainer"]{background-color:#020617!important;background-image:linear-gradient(#00F0FF22 1px,transparent 1px),linear-gradient(90deg,#00F0FF22 1px,transparent 1px),radial-gradient(circle at 20% 20%,#00F0FF33,transparent 45%),linear-gradient(135deg,#020617,#0F172A,#042F2E)!important;background-size:42px 42px,42px 42px,100% 100%,100% 100%!important}\n'
+                        'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 18% 25%,#00F0FFcc 0 6px,transparent 28px),radial-gradient(circle at 82% 20%,#3B82F6cc 0 7px,transparent 32px),radial-gradient(circle at 75% 75%,#38BDF8cc 0 6px,transparent 28px),radial-gradient(circle at 24% 80%,#E2E8F0aa 0 4px,transparent 18px);animation:orbFloat 5s ease-in-out infinite}\n'
+                        'html body .lex-card{background:rgba(6,12,26,.86)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #00F0FF!important;box-shadow:0 0 20px #00F0FF44!important}',
                         language="css",
                     )
-                    st.markdown("**2. Y2K Chrome & Iridescent Glass** *(Change `#A855F7` & `#F472B6` for custom tint)*")
+                    st.markdown("**2. Obsidian & Liquid Gold Luxury** *(Swap `#F59E0B` & `#FDE68A` for custom metallic tint)*")
                     st.code(
-                        'html body .stApp{background:linear-gradient(135deg,#09090F,#2E1065,#4C0519)!important}\n'
-                        'html body .lex-banner{background:linear-gradient(90deg,#18181B,#A855F7,#F472B6,#18181B)!important;border:2px solid #F9A8D4!important}\n'
-                        'html body .lex-card{background:rgba(24,24,36,.78)!important;backdrop-filter:blur(16px)!important;border:1.5px solid #F472B6!important;box-shadow:0 0 22px #A855F766!important}',
+                        'html body [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 80% 15%,#F59E0B33,transparent 45%),linear-gradient(135deg,#070709,#18140C,#09090B)!important}\n'
+                        'html body .lex-banner{background:linear-gradient(90deg,#09090B,#78350F,#F59E0B,#09090B)!important;border:2px solid #FDE68A!important}\n'
+                        'html body .lex-card,html body .lex-friend-card{background:rgba(14,12,10,.88)!important;backdrop-filter:blur(16px)!important;border:1.5px solid #F59E0B!important;box-shadow:0 0 22px #F59E0B44!important}',
                         language="css",
                     )
-                    st.markdown("**3. Toxic Matrix & Arcade Neon** *(Change `#22C55E` to `#F59E0B` for Gold)*")
+                    st.markdown("**3. Toxic Matrix & Arcade Grid** *(Swap `#22C55E` to `#38BDF8` for Ice Blue)*")
                     st.code(
-                        'html body .stApp{background-color:#030805!important;background-image:linear-gradient(#22C55E22 1px,transparent 1px),linear-gradient(90deg,#22C55E22 1px,transparent 1px)!important;background-size:36px 36px!important}\n'
+                        'html body [data-testid="stAppViewContainer"]{background-color:#030805!important;background-image:linear-gradient(#22C55E28 1px,transparent 1px),linear-gradient(90deg,#22C55E28 1px,transparent 1px)!important;background-size:36px 36px!important}\n'
                         'html body .lex-card,html body .lex-friend-card{background:rgba(4,14,8,.9)!important;border:1.5px solid #22C55E!important;box-shadow:0 0 18px #22C55E44!important}',
                         language="css",
                     )
