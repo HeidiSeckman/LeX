@@ -1,5 +1,6 @@
 import os
 import json
+import io
 import base64
 import urllib.parse
 from datetime import date
@@ -291,8 +292,20 @@ def calc_age(dob: date) -> int:
 def encode_image_data_url(uploaded_file) -> str:
     if uploaded_file is None:
         return ""
-    b64 = base64.b64encode(uploaded_file.getvalue()).decode("ascii")
-    return f"data:{uploaded_file.type or 'image/png'};base64,{b64}"
+    raw_bytes = uploaded_file.getvalue()
+    try:
+        from PIL import Image
+        im = Image.open(io.BytesIO(raw_bytes))
+        if im.mode in ("RGBA", "P"):
+            im = im.convert("RGB")
+        im.thumbnail((520, 520))
+        buf = io.BytesIO()
+        im.save(buf, format="JPEG", quality=62, optimize=True)
+        b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+        return f"data:image/jpeg;base64,{b64}"
+    except Exception:
+        b64 = base64.b64encode(raw_bytes).decode("ascii")
+        return f"data:{uploaded_file.type or 'image/png'};base64,{b64}"
 
 def normalize_url(raw_url: str) -> str:
     clean = (raw_url or "").strip()
@@ -1281,7 +1294,11 @@ with hub_col:
                     sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
                     st.rerun()
                 blocked_set = get_blocked_handles()
-        posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(80).execute().data or [] if sb else []
+                @st.cache_data(ttl=25, show_spinner=False)
+                def _cached_feed_posts():
+                    return sb.table("lex_posts").select("id, author, handle, body").order("id", desc=True).limit(45).execute().data or [] if sb else []
+                posts = _cached_feed_posts()
+
         my_h_low = "@" + clean_handle_str(user["handle"]).lower()
         friend_handles = set()
         for _fr in (st.session_state.lex_friends or []) + (st.session_state.lex_top8 or []):
@@ -1388,7 +1405,7 @@ with hub_col:
             if _fh.strip():
                 _ff_handles.add("@" + clean_handle_str(_fh).lower())
         _ff_handles.discard(_ff_my_h)
-        _ff_posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(80).execute().data or [] if sb else []
+        _ff_posts = posts
         st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">👯 Friends-Only Feed</strong><div style="font-size:12px;opacity:0.8;">Showing posts exclusively from your {len(_ff_handles)} accepted friends.</div></div>', unsafe_allow_html=True)
         fr_posts = [p for p in _ff_posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) in _ff_handles and ("@" + clean_handle_str(p.get("handle") or "").lower()) not in _ff_blocked]
         if not fr_posts:
