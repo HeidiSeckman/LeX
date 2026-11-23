@@ -1204,8 +1204,8 @@ with col_right:
 
 hub_col = col_left if "Social Hub" in active_left else col_right
 with hub_col:
-    t_feed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
-        "📰 Feed", "👥 All Friends", "✉️ Messages", "✦ Top 8", "🎨 LeX Studio", "📡 Radar"
+    t_feed, t_ffeed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
+        "📝 My Feed", "👯 Friends Feed", "👥 All Friends", "✉️ Messages", "✦ Top 8", "🎨 LeX Studio", "📡 Radar"
     ])
     with t_feed:
         with st.form("feed_post_form", clear_on_submit=True):
@@ -1225,23 +1225,33 @@ with hub_col:
                     packed = pack_post_blob(new_post, normalize_url(post_link) if post_link.strip() else "", encode_image_data_url(post_img) if post_img is not None else "", init_meta)
                     sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
                     st.rerun()
-        blocked_set = get_blocked_handles()
-        posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(60).execute().data or [] if sb else []
-        my_h_low = user["handle"].lower()
-        allowed_handles = {my_h_low}
+                blocked_set = get_blocked_handles()
+        posts = sb.table("lex_posts").select("*").order("id", desc=True).limit(80).execute().data or [] if sb else []
+        my_h_low = "@" + clean_handle_str(user["handle"]).lower()
+        friend_handles = set()
         for _fr in (st.session_state.lex_friends or []) + (st.session_state.lex_top8 or []):
-            if isinstance(_fr, dict) and _fr.get("handle"):
-                allowed_handles.add("@" + clean_handle_str(_fr["handle"]).lower())
-        for p in posts:
+            _fh = _fr if isinstance(_fr, str) else (_fr.get("handle") or _fr.get("friend_handle") or "" if isinstance(_fr, dict) else "")
+            if _fh.strip():
+                friend_handles.add("@" + clean_handle_str(_fh).lower())
+        friend_handles.discard(my_h_low)
+        if sb and not friend_handles:
+            try:
+                _db_fr = sb.table("lex_friends").select("*").or_(f"user_handle.ilike.{my_h_low},friend_handle.ilike.{my_h_low}").execute().data or []
+                for _row in _db_fr:
+                    for _col in ("user_handle", "friend_handle", "handle"):
+                        if _row.get(_col):
+                            _cand = "@" + clean_handle_str(_row[_col]).lower()
+                            if _cand != my_h_low:
+                                friend_handles.add(_cand)
+            except Exception:
+                pass
+                
+        def render_feed_post(p: dict, k_pfx: str):
             p_author_h = (p.get("handle") or "").strip()
-            p_low = "@" + clean_handle_str(p_author_h).lower()
-            if p_low in blocked_set or p_low not in allowed_handles:
-
-                continue
-            clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body") or "", int(p.get("likes") or 0))
-            img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:10px;border:1px solid {th["accent"]};" />' if img_src else ""
-            lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="display:inline-block;padding:6px 12px;border-radius:8px;background:{th["accent"]}22;border:1px solid {th["accent"]};color:{th["accent"]};font-weight:700;text-decoration:none;">🔗 {lnk_src}</a></div>' if lnk_src else ""
-            st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};">{p_author_h}</span>{founder_badge_html(p_author_h)}<p style="margin-top:6px;">{clean_txt}</p>{lnk_tag}{img_tag}</div>', unsafe_allow_html=True)
+            clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body"))
+            img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:8px;" />' if img_src else ""
+            lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="color:{th["accent"]};font-weight:800;">🔗 {lnk_src}</a></div>' if lnk_src else ""
+            st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};font-size:12px;">{p_author_h}</span><div style="margin-top:6px;">{clean_txt}</div>{img_tag}{lnk_tag}</div>', unsafe_allow_html=True)
             rx_map = p_meta["rx"]
             cm_list = p_meta["comments"]
             rcols = st.columns(7)
@@ -1250,47 +1260,46 @@ with hub_col:
                 cnt_e = sum(int(v) if isinstance(v, int) else 1 for v in emo_users.values())
                 i_reacted = my_h_low in {str(k).lower() for k in emo_users.keys()}
                 lbl_e = f"{emo} {cnt_e} ✓" if i_reacted else f"{emo} {cnt_e}"
-                if rcols[idx_e].button(lbl_e, key=f"b_{p['id']}_{emo}") and sb:
+                if rcols[idx_e].button(lbl_e, key=f"{k_pfx}_b_{p['id']}_{emo}") and sb:
                     existing_k = next((k for k in emo_users.keys() if str(k).lower() == my_h_low), None)
                     if existing_k:
                         emo_users.pop(existing_k, None)
                     else:
                         emo_users[user["handle"]] = 1
-                        push_activity_notif(p_author_h, user["handle"], "react", emo, p["id"])
+                        push_activity_notif(p_author_h, user["handle"], "react", emo)
                     rx_map[emo] = emo_users
                     p_meta["rx"] = rx_map
                     fire_total = sum(int(v) if isinstance(v, int) else 1 for v in (rx_map.get("🔥") or {}).values())
-                    sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta), "likes": fire_total}).eq("id", p["id"]).execute()
+                    sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta), "fires": fire_total}).eq("id", p["id"]).execute()
                     st.rerun()
-            c_open_key = f"open_cm_{p['id']}"
-            if rcols[4].button(f"💬 {len(cm_list)}", key=f"cbtn_{p['id']}"):
+            c_open_key = f"{k_pfx}_open_cm_{p['id']}"
+            if rcols[4].button(f"💬 {len(cm_list)}", key=f"{k_pfx}_cbtn_{p['id']}"):
                 st.session_state[c_open_key] = not st.session_state.get(c_open_key, False)
                 st.rerun()
-            if p_author_h.lower() != my_h_low:
-                if rcols[5].button("🚩 Report", key=f"rep_p_{p['id']}"):
+            if ("@" + clean_handle_str(p_author_h).lower()) != my_h_low:
+                if rcols[5].button("🚩 Report", key=f"{k_pfx}_rep_p_{p['id']}"):
                     block_or_report_member(p_author_h, "report", f"Reported post #{p['id']}")
                     st.toast("Reported post to LeX Safety")
             else:
                 with rcols[5].popover("✏️"):
-                    new_ed_txt = st.text_area("Edit post text", value=clean_txt, key=f"ed_ta_{p['id']}")
-                    if st.button("💾 Save Edit", key=f"sv_ed_{p['id']}") and sb:
+                    new_ed_txt = st.text_area("Edit post text", value=clean_txt, key=f"{k_pfx}_ed_{p['id']}")
+                    if st.button("💾 Save Edit", key=f"{k_pfx}_sv_ed_{p['id']}"):
                         ok_e, msg_e = check_safety_and_dress_code(new_ed_txt)
                         if not ok_e:
                             st.error(msg_e)
                         else:
                             sb.table("lex_posts").update({"body": pack_post_blob(new_ed_txt, lnk_src, img_src, p_meta)}).eq("id", p["id"]).execute()
                             st.rerun()
-                if rcols[6].button("🗑️", key=f"del_p_{p['id']}") and sb:
-                    sb.table("lex_posts").delete().eq("id", p["id"]).execute()
-                    st.rerun()
-
+            if rcols[6].button("🗑️", key=f"{k_pfx}_del_p_{p['id']}") and sb:
+                sb.table("lex_posts").delete().eq("id", p["id"]).execute()
+                st.rerun()
             if st.session_state.get(c_open_key, False) or cm_list:
                 with st.expander(f"💬 Comments ({len(cm_list)})", expanded=st.session_state.get(c_open_key, False)):
                     for cm in cm_list[-20:]:
-                        st.markdown(f'<div style="padding:6px 10px;border-left:2px solid {th["accent"]};margin-bottom:6px;background:rgba(255,255,255,0.03);border-radius:6px;"><strong style="color:{th["accent"]};">{cm.get("author", "@Member")}:</strong> {cm.get("text", "")}</div>', unsafe_allow_html=True)
-                    with st.form(f"cm_form_{p['id']}", clear_on_submit=True):
-                        c_in = st.text_input("Write a comment...", key=f"cin_{p['id']}")
-                        if st.form_submit_button("Post Comment ✦") and c_in.strip() and sb:
+                        st.markdown(f'<div style="padding:6px 10px;border-left:2px solid {th["accent"]};margin-bottom:4px;"><strong>{cm.get("author","Member")}:</strong> {cm.get("text","")}</div>', unsafe_allow_html=True)
+                    with st.form(f"{k_pfx}_cm_form_{p['id']}", clear_on_submit=True):
+                        c_in = st.text_input("Write a comment...", key=f"{k_pfx}_cin_{p['id']}")
+                        if st.form_submit_button("Post Comment +") and c_in.strip() and sb:
                             ok_c, msg_c = check_safety_and_dress_code(c_in)
                             if not ok_c:
                                 st.error(msg_c)
@@ -1298,9 +1307,24 @@ with hub_col:
                                 cm_list.append({"author": user["handle"], "text": c_in.strip()[:280]})
                                 p_meta["comments"] = cm_list
                                 sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta)}).eq("id", p["id"]).execute()
-                                push_activity_notif(p_author_h, user["handle"], "comment", c_in.strip(), p["id"])
+                                push_activity_notif(p_author_h, user["handle"], "comment", c_in.strip()[:80])
                                 st.session_state[c_open_key] = True
                                 st.rerun()
+
+        my_posts = [p for p in posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) == my_h_low]
+        if not my_posts:
+            st.caption("No status updates from you yet — post your first one above!")
+        for p in my_posts:
+            render_feed_post(p, "my")
+
+    with t_ffeed:
+        st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">👯 Friends-Only Feed</strong><div style="font-size:12px;opacity:0.8;">Showing posts exclusively from your {len(friend_handles)} accepted friends.</div></div>', unsafe_allow_html=True)
+        fr_posts = [p for p in posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) in friend_handles and ("@" + clean_handle_str(p.get("handle") or "").lower()) not in blocked_set]
+        if not fr_posts:
+            st.info("No posts from your accepted friends yet! Add friends in Radar or All Friends to see their updates here.")
+        for p in fr_posts:
+            render_feed_post(p, "fr")
+
     with t_friends:
         inc_reqs = list(th.get("incoming_requests") or [])
         sent_reqs = list(th.get("sent_requests") or [])
