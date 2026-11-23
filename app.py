@@ -1,6 +1,7 @@
 import os
 import json
 import io
+import re
 import base64
 import urllib.parse
 from datetime import date
@@ -1703,6 +1704,9 @@ with hub_col:
                 sel_bn = up2.selectbox("Animated Live Banner", LIVE_BANNERS, index=LIVE_BANNERS.index(th.get("banner_live")) if th.get("banner_live") in LIVE_BANNERS else 0)
                 ban_up = up2.file_uploader("Or Upload Custom Banner Image", type=["png", "jpg", "jpeg", "webp", "gif"], key="th_ban_up")
                 clr_ban = up2.checkbox("Remove Custom Banner Image")
+                g_c1, g_c2 = st.columns(2)
+                wall_gif_in = g_c1.text_input("Or Paste Moving GIF URL / Embed Code (Wallpaper)", value=th.get("custom_wall", "") if str(th.get("custom_wall", "")).startswith("http") else "", placeholder="Paste Giphy/Tenor link, .gif URL, or <iframe>/<img> embed code...")
+                ban_gif_in = g_c2.text_input("Or Paste Moving GIF URL / Embed Code (Banner)", value=th.get("banner_img", "") if str(th.get("banner_img", "")).startswith("http") else "", placeholder="Paste Giphy/Tenor link, .gif URL, or <iframe>/<img> embed code...")
                 mq_on = st.checkbox("Enable Scrolling Marquee Ticker", value=bool(th.get("marquee_on", False)))
                 mq_txt = st.text_input("Marquee Ticker Text", value=th.get("marquee_text", ""))
                 pin_txt = st.text_input("Pinned Bulletin Note", value=th.get("pinned_note", ""))
@@ -1915,14 +1919,30 @@ with hub_col:
                         st.error(msg_tx)
                     else:
                         th.update({"bg": c_bg, "card": c_cd, "accent": c_ac, "text": c_tx, "font": sel_font, "backdrop": sel_bd, "spray_word": spray_in.strip() or "LeX!", "border_style": sel_bst, "card_radius": rad_val, "card_opacity": op_val, "cursor_style": sel_cur, "card_anim": sel_anim, "glow_borders": glow_b, "text_glow": glow_t, "banner_live": sel_bn, "marquee_on": mq_on, "marquee_text": mq_txt.strip(), "pinned_note": pin_txt.strip(), "allow_css_remix": allow_rmx, "scrapbook_require_approval": scrap_app, "custom_css": x_css_in})
-                        if clr_wall:
-                            th["custom_wall"] = ""
-                        elif wall_up is not None:
-                            th["custom_wall"] = encode_image_data_url(wall_up)
-                        if clr_ban:
-                            th["banner_img"] = ""
-                        elif ban_up is not None:
-                            th["banner_img"] = encode_image_data_url(ban_up)
+                    def _extract_gif_src(raw_val: str) -> str:
+                        s = (raw_val or "").strip()
+                        if not s:
+                            return ""
+                        m_src = re.search(r'src=["\']([^"\']+)["\']', s, flags=re.IGNORECASE)
+                        if m_src:
+                            s = m_src.group(1).strip()
+                        m_gp = re.search(r'giphy\.com/(?:gifs|embed)/(?:[a-zA-Z0-9_-]+-)?([a-zA-Z0-9]+)', s, flags=re.IGNORECASE)
+                        if m_gp:
+                            return f"https://giphy.com{m_gp.group(1)}/giphy.gif"
+                        return safe_http_url(s)
+
+                    if clr_wall:
+                        th["custom_wall"] = ""
+                    elif wall_up is not None:
+                        th["custom_wall"] = encode_image_data_url(wall_up)
+                    elif wall_gif_in.strip():
+                        th["custom_wall"] = _extract_gif_src(wall_gif_in)
+                    if clr_ban:
+                        th["banner_img"] = ""
+                    elif ban_up is not None:
+                        th["banner_img"] = encode_image_data_url(ban_up)
+                    elif ban_gif_in.strip():
+                        th["banner_img"] = _extract_gif_src(ban_gif_in)
                         st.session_state.lex_theme = th
                         save_profile_to_cloud()
                         st.toast("All visual customizations saved ✦")
