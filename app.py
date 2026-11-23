@@ -428,7 +428,6 @@ def save_profile_to_cloud():
         "mood": u.get("mood", "Online Now • Vibing ⚡"), "anthem": u.get("anthem", "Y2K Cobalt Synth"),
         "custom_song_url": u.get("custom_song_url", ""), "custom_song_title": u.get("custom_song_title", ""),
         "theme_json": theme_payload, "top8_json": st.session_state.lex_top8, "wall_json": st.session_state.lex_wall,
-    }
         exists = sb.table("lex_profiles").select("user_id").eq("user_id", u["user_id"]).execute().data
         if exists:
             sb.table("lex_profiles").update(payload).eq("user_id", u["user_id"]).execute()
