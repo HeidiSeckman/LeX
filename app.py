@@ -1293,11 +1293,12 @@ with hub_col:
                     packed = pack_post_blob(new_post, normalize_url(post_link) if post_link.strip() else "", encode_image_data_url(post_img) if post_img is not None else "", init_meta)
                     sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
                     st.rerun()
-                blocked_set = get_blocked_handles()
-                @st.cache_data(ttl=25, show_spinner=False)
-                def _cached_feed_posts():
-                    return sb.table("lex_posts").select("id, author, handle, body").order("id", desc=True).limit(45).execute().data or [] if sb else []
-                posts = _cached_feed_posts()
+        blocked_set = get_blocked_handles()
+        @st.cache_data(ttl=25, show_spinner=False)
+        def _cached_feed_posts():
+            return sb.table("lex_posts").select("id, author, handle, body").order("id", desc=True).limit(45).execute().data or [] if sb else []
+        posts = _cached_feed_posts()
+
 
         my_h_low = "@" + clean_handle_str(user["handle"]).lower()
         friend_handles = set()
