@@ -1276,7 +1276,7 @@ with hub_col:
                             emo_users.pop(existing_k, None)
                         else:
                             emo_users[_rx_me] = 1
-                            push_activity_notif(p_author_h, user["handle"], "react", emo)
+                            push_activity_notif(p_author_h, user["handle"], "react", emo, p["id"])
                         rx_map[emo] = emo_users
                         p_meta["rx"] = rx_map
                         res_rx = sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta)}).eq("id", p["id"]).execute()
