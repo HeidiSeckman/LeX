@@ -1472,50 +1472,51 @@ with hub_col:
                 mq_txt = st.text_input("Marquee Ticker Text", value=th.get("marquee_text", ""))
                 pin_txt = st.text_input("Pinned Bulletin Note", value=th.get("pinned_note", ""))
                 x_css_in = st.text_area("Custom Profile CSS", value=th.get("custom_css", ""), height=68)
-                with st.expander("🎨 Custom CSS Starter Codes & Color Cheat Sheet"):
-                    st.caption("Copy any starter code below, paste it into Custom Profile CSS above, and tweak the #HEX colors to make it yours:")
-                    st.markdown("**1. Electric Cyan Cyber Grid & Floating Orbs** *(Swap `#00F0FF` & `#3B82F6` to change glow colors)*")
-                    st.code(
-                        '@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.08)}}\n'
-                        'html body [data-testid="stAppViewContainer"]{background-color:#020617!important;background-image:linear-gradient(#00F0FF22 1px,transparent 1px),linear-gradient(90deg,#00F0FF22 1px,transparent 1px),radial-gradient(circle at 20% 20%,#00F0FF33,transparent 45%),linear-gradient(135deg,#020617,#0F172A,#042F2E)!important;background-size:42px 42px,42px 42px,100% 100%,100% 100%!important}\n'
-                        'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 18% 25%,#00F0FFcc 0 6px,transparent 28px),radial-gradient(circle at 82% 20%,#3B82F6cc 0 7px,transparent 32px),radial-gradient(circle at 75% 75%,#38BDF8cc 0 6px,transparent 28px),radial-gradient(circle at 24% 80%,#E2E8F0aa 0 4px,transparent 18px);animation:orbFloat 5s ease-in-out infinite}\n'
-                        'html body .lex-card{background:rgba(6,12,26,.86)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #00F0FF!important;box-shadow:0 0 20px #00F0FF44!important}',
-                        language="css",
-                    )
-                    st.markdown("**2. Molten Gold Lava Lamp & Obsidian** *(Swap `#F59E0B` & `#D97706` for custom lava colors)*")
-                    st.code(
-                        '@keyframes goldLava{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(18px,-32px) scale(1.12)}66%{transform:translate(-16px,-18px) scale(0.95)}}\n'
-                        'html body [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 75% 20%,#B4530944,transparent 50%),linear-gradient(145deg,#060608,#171209,#09090B)!important}\n'
-                        'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 20% 75%,#F59E0B55 0 45px,transparent 95px),radial-gradient(circle at 78% 30%,#D9770655 0 60px,transparent 120px),radial-gradient(circle at 52% 58%,#FDE68A44 0 35px,transparent 85px),radial-gradient(circle at 85% 82%,#F59E0B44 0 50px,transparent 105px);animation:goldLava 9s ease-in-out infinite}\n'
-                        'html body .lex-banner{background:linear-gradient(90deg,#09090B,#78350F,#F59E0B,#09090B)!important;border:2px solid #FDE68A!important}\n'
-                        'html body .lex-card,html body .lex-friend-card{background:rgba(14,12,9,.88)!important;backdrop-filter:blur(16px)!important;border:1.5px solid #F59E0B!important;box-shadow:0 0 22px #F59E0B44!important}',
-                        language="css",
-                    )
-                    st.markdown("**3. Deep-Space Starfield & Arctic Aurora** *(Swap `#38BDF8` & `#818CF8` for custom nebula glow)*")
-                    st.code(
-                        '@keyframes starTwinkle{0%,100%{opacity:.55;transform:translateY(0)}50%{opacity:1;transform:translateY(-14px)}}\n'
-                        'html body [data-testid="stAppViewContainer"]{background:radial-gradient(ellipse at 50% 0%,#1E3A8A66,transparent 60%),radial-gradient(ellipse at 85% 90%,#0E749055,transparent 55%),#03050C!important}\n'
-                        'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(#FFFFFF 1.5px,transparent 1.5px),radial-gradient(#38BDF8 2px,transparent 2px),radial-gradient(#818CF8 1.5px,transparent 1.5px);background-size:110px 110px,170px 170px,230px 230px;background-position:0 0,40px 60px,90px 20px;animation:starTwinkle 6s ease-in-out infinite}\n'
-                        'html body .lex-card,html body .lex-friend-card{background:rgba(7,11,24,.84)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #38BDF8!important;box-shadow:0 0 20px #38BDF833!important}',
-                        language="css",
-                    )
-                    st.markdown("**4. Crimson Ember & Smoked Obsidian** *(Swap `#EF4444` & `#F97316` to change ember heat)*")
-                    st.code(
-                        '@keyframes emberRise{0%,100%{transform:translateY(0) scale(1);opacity:.75}50%{transform:translateY(-35px) scale(1.1);opacity:1}}\n'
-                        'html body [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 50% 100%,#991B1B55,transparent 55%),linear-gradient(160deg,#070506,#1A080A,#090708)!important}\n'
-                        'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 22% 85%,#EF4444cc 0 4px,transparent 20px),radial-gradient(circle at 48% 72%,#F97316cc 0 5px,transparent 24px),radial-gradient(circle at 76% 88%,#DC2626cc 0 4px,transparent 22px),radial-gradient(circle at 65% 35%,#FDBA7499 0 3px,transparent 15px);animation:emberRise 4.5s ease-in-out infinite}\n'
-                        'html body .lex-banner{background:linear-gradient(90deg,#090708,#7F1D1D,#DC2626,#090708)!important;border:2px solid #F87171!important}\n'
-                        'html body .lex-card,html body .lex-friend-card{background:rgba(16,8,10,.88)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #EF4444!important;box-shadow:0 0 22px #EF444444!important}',
-                        language="css",
-                    )
-                    st.markdown("**5. Emerald Matrix Grid & CRT Scanlines** *(Swap `#22C55E` to `#EAB308` for Retro Amber)*")
-                    st.code(
-                        'html body [data-testid="stAppViewContainer"]{background-color:#020704!important;background-image:repeating-linear-gradient(0deg,rgba(34,197,94,.07) 0px,rgba(34,197,94,.07) 1px,transparent 1px,transparent 4px),linear-gradient(#22C55E22 1px,transparent 1px),linear-gradient(90deg,#22C55E22 1px,transparent 1px)!important;background-size:100% 4px,38px 38px,38px 38px!important}\n'
-                        'html body .lex-banner{background:linear-gradient(90deg,#020704,#14532D,#16A34A,#020704)!important;border:2px solid #4ADE80!important}\n'
-                        'html body .lex-card,html body .lex-friend-card{background:rgba(3,12,7,.9)!important;border:1.5px solid #22C55E!important;box-shadow:0 0 20px #22C55E44!important}',
-                        language="css",
-                    )
-
+                with st.expander("🎨 10 Total Package CSS Themes & Color Cheat Sheet"):
+                    st.caption("Pick a full-page animated layout below, tap the copy icon in the top-right corner of the box, paste it into Custom Profile CSS above, and tweak any #HEX colors to make it yours!")
+                    _css_packs = {
+                        "1. Liquid Mercury & Chrome Y2K (Floating Silver Sparks + Chrome Wave)": (
+                            '@keyframes lexSilverFloat{0%{background-position:0 0,50px 0,90px 0}100%{background-position:0 -380px,50px -560px,90px -260px}}\n'
+                            '@keyframes lexChromeWave{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}\n'
+                            '@keyframes lexMercuryPulse{0%,100%{border-color:#94A3B8;box-shadow:0 0 18px #94A3B877}50%{border-color:#F8FAFC;box-shadow:0 0 34px #E2E8F0dd,0 0 52px #38BDF866}}\n'
+                            'html body [data-testid="stAppViewContainer"]{background-color:#040507!important;background-image:radial-gradient(circle at 20% 20%,#64748B33,transparent 48%),linear-gradient(180deg,#020305,#0D1117,#020305)!important}\n'
+                            'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,#F8FAFCee 0 2.5px,transparent 12px),radial-gradient(circle,#94A3B8dd 0 4px,transparent 18px);background-size:130px 190px,200px 280px;animation:lexSilverFloat 6s linear infinite}\n'
+                            'html body .lex-card h1,html body .lex-card h2,html body .lex-card h3,html body h1,html body h2,html body h3{font-family:"Trebuchet MS","Avenir Next",sans-serif!important;text-transform:uppercase!important;color:#F8FAFC!important;text-shadow:0 0 14px #E2E8F0cc!important}\n'
+                            'html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important}\n'
+                            'html body .lex-banner{background:linear-gradient(115deg,#090B10,#334155,#94A3B8,#E2E8F0,#090B10)!important;background-size:300% 300%!important;border:2px solid #F8FAFC!important;animation:lexChromeWave 6s ease-in-out infinite,lexMercuryPulse 4s ease-in-out infinite!important}\n'
+                            'html body .lex-banner::before{content:"✦ LIQUID MERCURY EDITION ✦"!important;display:inline-block!important;margin-bottom:6px!important;padding:3px 12px!important;border-radius:999px!important;background:rgba(15,23,42,.75)!important;border:1px solid #F8FAFC!important;color:#F8FAFC!important;font-size:11px!important;font-weight:800!important}\n'
+                            'html body .lex-card,html body .lex-friend-card{background:linear-gradient(125deg,#06080D,#1E293B,#475569,#06080D)!important;background-size:300% 300%!important;border:2px solid #CBD5E1!important;animation:lexChromeWave 7s ease-in-out infinite,lexMercuryPulse 3.8s ease-in-out infinite!important}'
+                        ),
+                        "2. Inferno Ember & Molten Gold Lava (Rising Sparks + Gold-Crimson Wave)": (
+                            '@keyframes lexEmberUp{0%{background-position:0 0,35px 0}100%{background-position:0 -400px,35px -600px}}\n'
+                            '@keyframes lexLavaFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}\n'
+                            '@keyframes lexGoldPulse{0%,100%{border-color:#F59E0B;box-shadow:0 0 18px #F59E0B88}50%{border-color:#FDE68A;box-shadow:0 0 36px #FBBF24ee,0 0 55px #DC262677}}\n'
+                            'html body [data-testid="stAppViewContainer"]{background-color:#060302!important;background-image:radial-gradient(circle at 50% 95%,#991B1B55,transparent 55%),linear-gradient(180deg,#040201,#140804,#040201)!important}\n'
+                            'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,#FBBF24ee 0 3px,transparent 14px),radial-gradient(circle,#F97316dd 0 4.5px,transparent 20px);background-size:115px 175px,185px 265px;animation:lexEmberUp 4.8s linear infinite}\n'
+                            'html body .lex-card h1,html body .lex-card h2,html body .lex-card h3,html body h1,html body h2,html body h3{font-family:"Palatino Linotype",Georgia,serif!important;color:#FEF3C7!important;text-shadow:0 0 14px #F59E0Bee!important}\n'
+                            'html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important}\n'
+                            'html body .lex-banner{background:linear-gradient(115deg,#090402,#7F1D1D,#D97706,#FBBF24,#090402)!important;background-size:300% 300%!important;border:2px solid #FDE68A!important;animation:lexLavaFlow 6s ease-in-out infinite,lexGoldPulse 4s ease-in-out infinite!important}\n'
+                            'html body .lex-banner::before{content:"✦ MOLTEN GOLD EDITION ✦"!important;display:inline-block!important;margin-bottom:6px!important;padding:3px 12px!important;border-radius:999px!important;background:rgba(120,53,15,.55)!important;border:1px solid #FDE68A!important;color:#FEF3C7!important;font-size:11px!important;font-weight:800!important}\n'
+                            'html body .lex-card,html body .lex-friend-card{background:linear-gradient(125deg,#080402,#451A03,#B45309,#080402)!important;background-size:300% 300%!important;border:2px solid #F59E0B!important;animation:lexLavaFlow 6.5s ease-in-out infinite,lexGoldPulse 3.5s ease-in-out infinite!important}'
+                        ),
+                        "3. Bioluminescent Abyss & Neon Teal Tide (Rising Bubbles + Teal Wave)": (
+                            '@keyframes lexBubbleRise{0%{background-position:0 0,45px 0}100%{background-position:0 -360px,45px -540px}}\n'
+                            '@keyframes lexTideWave{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}\n'
+                            '@keyframes lexTealPulse{0%,100%{border-color:#14B8A6;box-shadow:0 0 18px #14B8A688}50%{border-color:#99F6E4;box-shadow:0 0 34px #2DD4BFee,0 0 55px #0284C777}}\n'
+                            'html body [data-testid="stAppViewContainer"]{background-color:#020608!important;background-image:radial-gradient(circle at 25% 20%,#0F766E44,transparent 48%),linear-gradient(180deg,#010406,#041318,#010406)!important}\n'
+                            'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,#2DD4BFee 0 3px,transparent 14px),radial-gradient(circle,#38BDF8dd 0 4.5px,transparent 20px);background-size:120px 180px,190px 270px;animation:lexBubbleRise 5.5s linear infinite}\n'
+                            'html body .lex-card h1,html body .lex-card h2,html body .lex-card h3,html body h1,html body h2,html body h3{font-family:"Snell Roundhand","Palatino Linotype",Georgia,serif!important;color:#CCFBF1!important;text-shadow:0 0 14px #2DD4BFee!important}\n'
+                            'html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important}\n'
+                            'html body .lex-banner{background:linear-gradient(115deg,#02080A,#115E59,#0D9488,#2DD4BF,#02080A)!important;background-size:300% 300%!important;border:2px solid #99F6E4!important;animation:lexTideWave 6s ease-in-out infinite,lexTealPulse 4s ease-in-out infinite!important}\n'
+                            'html body .lex-banner::before{content:"✦ BIOLUMINESCENT TIDE ✦"!important;display:inline-block!important;margin-bottom:6px!important;padding:3px 12px!important;border-radius:999px!important;background:rgba(13,148,136,.35)!important;border:1px solid #99F6E4!important;color:#CCFBF1!important;font-size:11px!important;font-weight:800!important}\n'
+                            'html body .lex-card,html body .lex-friend-card{background:linear-gradient(125deg,#020709,#062B2E,#0F766E,#020709)!important;background-size:300% 300%!important;border:2px solid #14B8A6!important;animation:lexTideWave 6s ease-in-out infinite,lexTealPulse 3.5s ease-in-out infinite!important}'
+                        ),
+                        "4. Electric Cyan Cyber Grid & Floating Orbs (Grid + Neon Cards)": (
+                            '@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.08)}}\n'
+                            'html body [data-testid="stAppViewContainer"]{background-color:#020617!important;background-image:linear-gradient(#00F0FF22 1px,transparent 1px),linear-gradient(90deg,#00F0FF22 1px,transparent 1px),radial-gradient(circle at 20% 20%,#00F0FF33,transparent 45%),linear-gradient(135deg,#020617,#0F172A,#042F2E)!important;background-size:42px 42px,42px 42px,100% 100%,100% 100%!important}\n'
+                            'html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 18% 25%,#00F0FFcc 0 6px,transparent 28px),radial-gradient(circle at 82% 20%,#3B82F6cc 0 7px,transparent 32px),radial-gradient(circle at 75% 75%,#38BDF8cc 0 6px,transparent 28px);animation:orbFloat 5s ease-in-out infinite}\n'
+                            'html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important}\n'
+                            'html body .lex-banner{background:linear-gradient(90deg,#020617,#0369A1,#00F0FF,#020617)!important;border:2px solid #7DD3FC!important}\n'
 
                 if st.form_submit_button("Save All Visual Customizations ✦", use_container_width=True):
                     ok_w, msg_w = scan_image_safely(wall_up, "wallpaper")
