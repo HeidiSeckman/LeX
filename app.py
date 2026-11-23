@@ -1461,6 +1461,30 @@ with hub_col:
                 mq_txt = st.text_input("Marquee Ticker Text", value=th.get("marquee_text", ""))
                 pin_txt = st.text_input("Pinned Bulletin Note", value=th.get("pinned_note", ""))
                 x_css_in = st.text_area("Custom Profile CSS", value=th.get("custom_css", ""), height=68)
+                with st.expander("🎨 Custom CSS Starter Codes & Color Cheat Sheet"):
+                    st.caption("Copy a layout code below, paste it into Custom Profile CSS above, and tweak the #HEX colors to make it yours:")
+                    st.markdown("**1. Cyberpunk Floating Orbs & Grid** *(Change `#EC4899` & `#38BDF8` to swap glow colors)*")
+                    st.code(
+                        '@keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}\n'
+                        'html body .stApp{background:radial-gradient(circle at 20% 20%,#EC489955,transparent 45%),linear-gradient(125deg,#05050B,#1B092B,#07192E)!important}\n'
+                        'html body .stApp::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle at 20% 25%,#EC4899aa 0 6px,transparent 28px),radial-gradient(circle at 80% 70%,#38BDF8aa 0 7px,transparent 30px);animation:orbFloat 5s ease-in-out infinite}\n'
+                        'html body .lex-card{background:rgba(12,12,22,.85)!important;backdrop-filter:blur(14px)!important;border:1.5px solid #EC4899!important}',
+                        language="css",
+                    )
+                    st.markdown("**2. Y2K Chrome & Iridescent Glass** *(Change `#A855F7` & `#F472B6` for custom tint)*")
+                    st.code(
+                        'html body .stApp{background:linear-gradient(135deg,#09090F,#2E1065,#4C0519)!important}\n'
+                        'html body .lex-banner{background:linear-gradient(90deg,#18181B,#A855F7,#F472B6,#18181B)!important;border:2px solid #F9A8D4!important}\n'
+                        'html body .lex-card{background:rgba(24,24,36,.78)!important;backdrop-filter:blur(16px)!important;border:1.5px solid #F472B6!important;box-shadow:0 0 22px #A855F766!important}',
+                        language="css",
+                    )
+                    st.markdown("**3. Toxic Matrix & Arcade Neon** *(Change `#22C55E` to `#F59E0B` for Gold)*")
+                    st.code(
+                        'html body .stApp{background-color:#030805!important;background-image:linear-gradient(#22C55E22 1px,transparent 1px),linear-gradient(90deg,#22C55E22 1px,transparent 1px)!important;background-size:36px 36px!important}\n'
+                        'html body .lex-card,html body .lex-friend-card{background:rgba(4,14,8,.9)!important;border:1.5px solid #22C55E!important;box-shadow:0 0 18px #22C55E44!important}',
+                        language="css",
+                    )
+
                 if st.form_submit_button("Save All Visual Customizations ✦", use_container_width=True):
                     ok_w, msg_w = scan_image_safely(wall_up, "wallpaper")
                     ok_bn, msg_bn = scan_image_safely(ban_up, "banner")
