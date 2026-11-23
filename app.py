@@ -1875,9 +1875,16 @@ with hub_col:
                         st.toast("Added track to playlist ✦")
                         st.rerun()
     with t_radar:
-        all_mem = sb.table("lex_profiles").select("handle, display_name, mood, anthem, theme_json").limit(100).execute().data or [] if sb else []
-        q_search = st.text_input("Search by @handle or Display Name...", placeholder="Type @handle or name...", key="radar_search_q")
-        all_mem = sb.table("lex_profiles").select("handle, display_name, mood, anthem").limit(100).execute().data or [] if sb else []
+        q_search = st.text_input("Search by @handle or Display Name...", placeholder="Type @handle or name...", key="radar_search")
+        all_mem = []
+        if sb:
+            try:
+                all_mem = sb.table("lex_profiles").select("handle, display_name, mood, theme_json").limit(60).execute().data or []
+            except Exception:
+                try:
+                    all_mem = sb.table("lex_profiles").select("handle, display_name, mood").limit(80).execute().data or []
+                except Exception:
+                    all_mem = []
         blocked_set = get_blocked_handles()
         filtered = []
         for m in all_mem:
