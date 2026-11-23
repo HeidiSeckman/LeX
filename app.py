@@ -802,14 +802,25 @@ def friend_card_html(fr, badge: str = "", card_theme: dict = None) -> str:
         fr = {"handle": fr, "name": fr.lstrip("@") or "Member"}
     elif not isinstance(fr, dict):
         fr = {"handle": "@Member", "name": "Member"}
-    ct = card_theme or th
+       ct = card_theme or th
     ini = (str(fr.get("name") or fr.get("handle") or "L").lstrip("@")[:1] or "L").upper()
     is_owner = (str(fr.get("handle", "")).strip().lower() in {"@heidi", "@heidiseckman"})
     pill_lbl = "👑 FOUNDER" if is_owner else badge
-    top_tag = f'<span style="background:{ct["accent"]};color:#000;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:900;">{pill_lbl}</span>' if pill_lbl else ""
+    top_tag = f'<span style="background:{ct["accent"]};color:#000;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:900;">{pill_lbl}</span>' if pill_lbl else '<span></span>'
     is_on = is_member_online(fr) if ("last_seen" in fr) else False
     on_tag = '<span style="color:#34D399;font-size:11px;font-weight:700;">&#9679; ONLINE</span>' if is_on else '<span style="color:#94A3B8;font-size:11px;font-weight:700;">&#9679; OFFLINE</span>'
-    return f'<div class="lex-friend-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">{top_tag}{on_tag}</div><div style="display:flex;align-items:center;gap:10px;"><div style="width:42px;height:42px;border-radius:50%;background:radial-gradient(circle,{ct["accent"]},#111);border:2px solid {ct["accent"]};display:flex;align-items:center;justify-content:center;font-weight:900;color:#FFF;box-shadow:0 0 10px {ct["accent"]};">{ini}</div><div><div style="font-weight:800;font-size:14px;color:{ct["text"]};">{fr.get("name", fr.get("handle", "Member"))}</div><div style="color:{ct["accent"]};font-size:12px;font-weight:700;">{fr.get("handle", "@Member")}</div></div></div><div style="font-size:11px;color:#D4D4D8;margin-top:8px;">{fr.get("mood", "Vibing ⚡")}</div><div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.05);font-size:10px;color:{ct["accent"]};">🎵 {fr.get("anthem", "Y2K Cobalt Synth")}</div></div>'
+    _av_cache = st.session_state.setdefault("_lex_av_cache", {})
+    _fh_key = "@" + clean_handle_str(fr.get("handle", "")).lower()
+    _av_src = fr.get("avatar") or _av_cache.get(_fh_key, "")
+    if not _av_src and _fh_key not in _av_cache and len(_fh_key) > 1 and sb:
+        try:
+            _r_av = sb.table("lex_profiles").select("theme_json").ilike("handle", _fh_key).limit(1).execute().data or []
+            _av_src = (_r_av[0].get("theme_json") or {}).get("avatar", "") if _r_av else ""
+        except Exception:
+            _av_src = ""
+        _av_cache[_fh_key] = _av_src
+    _av_box = f'<img src="{_av_src}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid {ct["accent"]};box-shadow:0 0 10px {ct["accent"]};" />' if _av_src else f'<div style="width:42px;height:42px;border-radius:50%;background:radial-gradient(circle,{ct["accent"]},#111);border:2px solid {ct["accent"]};display:flex;align-items:center;justify-content:center;font-weight:900;color:#FFF;box-shadow:0 0 10px {ct["accent"]};">{ini}</div>'
+    return f'<div class="lex-friend-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">{top_tag}{on_tag}</div><div style="display:flex;align-items:center;gap:10px;">{_av_box}<div><div style="font-weight:800;font-size:14px;color:{ct["text"]};">{fr.get("name", fr.get("handle", "Member"))}</div><div style="color:{ct["accent"]};font-size:12px;font-weight:700;">{fr.get("handle", "@Member")}</div></div></div><div style="font-size:11px;color:#D4D4D8;margin-top:8px;">{fr.get("mood", "Vibing ⚡")}</div><div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.05);font-size:10px;color:{ct["accent"]};">🎵 {fr.get("anthem", "Y2K Cobalt Synth")}</div></div>'
 
 def render_member_action_buttons(target_handle: str, key_prefix: str = "m"):
     tgt = "@" + clean_handle_str(target_handle)
