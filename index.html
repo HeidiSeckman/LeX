@@ -24,12 +24,34 @@
   <meta name="twitter:image" content="https://lexsocial.spacepreview.png" />
 
   <link rel="icon" type="image/png" href="https://lexsocial.spaceicon.png" />
-  <meta http-equiv="refresh" content="0; url=https://streamlit.app" />
+  <style>
+    body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 20%,#7E22CE44,transparent 50%),#05020A;color:#F3E8FF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+    .card{max-width:400px;width:100%;background:rgba(15,8,28,.92);border:1.5px solid #A855F7;border-radius:22px;padding:28px 22px;text-align:center;box-shadow:0 0 32px #A855F755}
+    .badge{display:inline-block;padding:4px 12px;border-radius:999px;background:#A855F733;border:1px solid #D8B4FE;color:#E9D5FF;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:12px}
+    h1{margin:0 0 8px;font-size:24px;color:#FFF}
+    p{margin:0 0 18px;font-size:14px;line-height:1.5;color:#D8B4FE}
+    .btn{display:block;width:100%;box-sizing:border-box;padding:13px 18px;border-radius:999px;background:linear-gradient(90deg,#7E22CE,#A855F7);color:#FFF;font-weight:800;font-size:15px;text-decoration:none;box-shadow:0 0 20px #A855F788}
+    .tip{margin-top:16px;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);font-size:12.5px;color:#E2E8F0;line-height:1.45}
+  </style>
   <script>
-    window.location.replace("https://streamlit.app");
+    var ua = navigator.userAgent || "";
+    var isInApp = /FBAN|FBAV|Instagram|Messenger|TikTok/i.test(ua);
+    var target = ["https://", "lexsocial", ".streamlit.app"].join("");
+    if (!isInApp) {
+      window.location.replace(target);
+    }
   </script>
 </head>
-<body style="background:#0B0F1A;color:#F4F4F5;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
-  <p>Opening LeX Social... <a href="https://streamlit.app" style="color:#A855F7;">Tap here if not redirected</a>.</p>
+<body>
+  <div class="card">
+    <div class="badge">LEX // SOCIAL</div>
+    <h1>Welcome to LeX Social</h1>
+    <p>Your page. Your profile. Top 8s, profile anthems, and chronological feeds with zero algorithms.</p>
+    <a class="btn" id="launchBtn" href="https://lexsocial.streamlit.app" target="_blank" rel="noopener">Launch LeX Social →</a>
+    <div class="tip">
+      <strong>On Facebook or Instagram?</strong><br/>
+      Tap <strong>•••</strong> in the top-right corner and select <strong>Open in Browser / Safari</strong> so your login session stays active!
+    </div>
+  </div>
 </body>
 </html>
