@@ -205,6 +205,31 @@ def earned_badges_html(t_cfg: dict, friends_cnt: int, top8_cnt: int, handle_str:
         return ""
     pills = "".join([f'<span style="display:inline-block;margin:4px 6px 0 0;padding:2px 9px;border-radius:99px;background:linear-gradient(90deg,{grad});color:#05050A;font-size:10px;font-weight:900;letter-spacing:0.5px;box-shadow:0 0 10px rgba(255,255,255,0.35);">{lbl}</span>' for lbl, grad in badges])
     return f'<div style="margin-top:6px;">{pills}</div>'
+    def build_profile_link_html(raw_url: str, raw_label: str, accent: str) -> str:
+    clean = normalize_url(raw_url)
+    if not clean:
+        return ""
+    lbl = (raw_label or "").strip() or "My Website ↗"
+    safe_u = clean.replace('"', "&quot;").replace("<", "").replace(">", "")
+    safe_l = lbl.replace("<", "&lt;").replace(">", "&gt;")
+    return f'<div style="margin-top:6px;"><a href="{safe_u}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:3px 11px;border-radius:99px;background:{accent}22;border:1px solid {accent};color:{accent};font-size:11px;font-weight:800;text-decoration:none;">🔗 {safe_l} ↗</a></div>'
+
+def earned_badges_html(t_cfg: dict, friends_cnt: int, top8_cnt: int, handle_str: str) -> str:
+    badges = []
+    h_low = (handle_str or "").strip().lower()
+    if h_low in {"@heidi", "@heidiseckman"} or int(t_cfg.get("is_og", 0)) == 1 or len(t_cfg.get("followers") or []) >= 1:
+        badges.append(("✨ OG EARLY ADOPTER", "#38BDF8,#818CF8"))
+    if len((t_cfg.get("custom_css") or "").strip()) >= 25:
+        badges.append(("🎨 CSS ARCHITECT", "#EC4899,#A855F7"))
+    if friends_cnt >= 8 or top8_cnt >= 8:
+        badges.append(("👑 TOP 8 ROYALTY", "#F59E0B,#FDE047"))
+    last_ts = int(float(t_cfg.get("last_seen") or 0))
+    if last_ts > 0 and ((last_ts // 3600) % 24) in {0, 1, 2, 3, 4, 5, 6, 7}:
+        badges.append(("🦉 NIGHT OWL", "#6366F1,#14B8A6"))
+    if not badges:
+        return ""
+    pills = "".join([f'<span style="display:inline-block;margin:4px 6px 0 0;padding:2px 9px;border-radius:99px;background:linear-gradient(90deg,{grad});color:#05050A;font-size:10px;font-weight:900;letter-spacing:0.5px;box-shadow:0 0 10px rgba(255,255,255,0.35);">{lbl}</span>' for lbl, grad in badges])
+    return f'<div style="margin-top:6px;">{pills}</div>'
 def build_backdrop_url(style_name: str, accent: str, spray_word: str = "LeX!") -> str:
     w = (spray_word or "LeX!").replace("<", "").replace(">", "")[:14]
     if style_name == "Architectural Grid":
