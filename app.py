@@ -802,7 +802,7 @@ def friend_card_html(fr, badge: str = "", card_theme: dict = None) -> str:
         fr = {"handle": fr, "name": fr.lstrip("@") or "Member"}
     elif not isinstance(fr, dict):
         fr = {"handle": "@Member", "name": "Member"}
-       ct = card_theme or th
+    ct = card_theme or th
     ini = (str(fr.get("name") or fr.get("handle") or "L").lstrip("@")[:1] or "L").upper()
     is_owner = (str(fr.get("handle", "")).strip().lower() in {"@heidi", "@heidiseckman"})
     pill_lbl = "👑 FOUNDER" if is_owner else badge
