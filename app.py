@@ -409,7 +409,7 @@ def save_profile_to_cloud():
     u = st.session_state.get("lex_user")
     if not sb or not u or not u.get("user_id"):
         return
-        try:
+    try:
         theme_payload = dict(st.session_state.get("lex_theme") or {})
         if u.get("avatar"):
             theme_payload["avatar"] = u["avatar"]
