@@ -943,6 +943,7 @@ if st.session_state.viewing_handle and sb:
     if v_th.get("pinned_note"):
         st.markdown(f'<div class="lex-card" style="border-width:2.5px;"><span style="color:{v_th["accent"]};font-weight:900;font-size:11px;">📌 PINNED BULLETIN</span><div style="margin-top:4px;">{v_th["pinned_note"]}</div></div>', unsafe_allow_html=True)
     v_fol, v_fr = list(vtj.get("followers") or []), list(vtj.get("all_friends") or [])
+    v_av = render_avatar_html(vtj.get("avatar", ""), vp.get("display_name", "M"), v_th, 84)
     v_is_founder = vp.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"}
     v_site = founder_studio_link_html(vp.get("handle", ""), v_th["accent"]) if v_is_founder else build_profile_link_html(vtj.get("website", ""), vtj.get("website_label", ""), v_th["accent"])
     v_badges = earned_badges_html(v_th, len(v_fr), len(vp.get("top8_json") or []), vp.get("handle", ""))
