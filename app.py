@@ -1230,7 +1230,7 @@ for _qi, (_qlbl, _qbg, _qacc, _qcard, _qrad, _qcss) in enumerate(_qt_presets):
 b_html = build_live_banner_html(th.get("banner_live", "None"), th.get("banner_img", ""), th["accent"], rad_px, th)
 if b_html:
     st.markdown(b_html, unsafe_allow_html=True)
-    if sb:
+if sb:
     from datetime import datetime, timezone, timedelta
     _st_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
     _my_stories = sb.table("lex_posts").select("*").ilike("handle", f"@{clean_handle_str(user['handle'])}").or_("body.ilike.%[STORY_FRIENDS]%,body.ilike.%[STORY_PUBLIC]%").gte("created_at", _st_cutoff).order("created_at", desc=True).limit(8).execute().data or []
