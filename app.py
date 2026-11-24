@@ -1348,7 +1348,7 @@ if st.session_state.get("show_flashpic_panel"):
 
 b_html = build_live_banner_html(th.get("banner_live", "None"), th.get("banner_img", ""), th["accent"], rad_px, th)
 if b_html:
-st.markdown(b_html, unsafe_allow_html=True
+    st.markdown(b_html, unsafe_allow_html=True)
 if th.get("marquee_on") and th.get("marquee_text"):
     st.markdown(f'<div class="lex-card" style="padding:6px 12px;"><marquee style="color:{th["accent"]};font-weight:800;letter-spacing:0.06em;">{th["marquee_text"]}</marquee></div>', unsafe_allow_html=True)
 
