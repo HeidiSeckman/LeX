@@ -1674,7 +1674,16 @@ with hub_col:
         my_h_low = "@" + clean_handle_str(user["handle"]).lower()
         friend_handles = set()
         for _fr in (st.session_state.lex_friends or []) + (st.session_state.lex_top8 or []):
-            _fh = _fr if isinstance(_fr, str) else (_fr.get("handle") or _fr.get("friend_handle") or "" if isinstance(_fr, dict) else "")
+                   blocked_set = get_blocked_handles()
+        @st.cache_data(ttl=25, show_spinner=False)
+        def _cached_feed_posts():
+            return sb.table("lex_posts").select("id, author, handle, body").order("id", desc=True).limit(45).execute().data or []
+        posts = _cached_feed_posts() if sb else []
+
+        my_h_low = "@" + clean_handle_str(user["handle"]).lower()
+        friend_handles = set()
+        for _fr in (st.session_state.lex_friends or []) + (st.session_state.lex_top8 or []):
+            _fh = _fr if isinstance(_fr, str) else (_fr.get("handle") or _fr.get("friend_handle") or "")
             if _fh.strip():
                 friend_handles.add("@" + clean_handle_str(_fh).lower())
         friend_handles.discard(my_h_low)
@@ -1690,13 +1699,14 @@ with hub_col:
             except Exception:
                 pass
 
-    my_posts = [p for p in posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) == ("@" + clean_handle_str(user.get("handle") or "").lower())]
-    if not my_posts:
-        st.caption("No status updates from you yet — post your first one above!")
-    for p in my_posts:
-        render_feed_post(p, "my")
+        my_posts = [p for p in posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) == my_h_low]
+        if not my_posts:
+            st.caption("No status updates from you yet — post your first one above!")
+        for p in my_posts:
+            render_feed_post(p, "my")
 
     with t_ffeed:
+
         _ff_blocked = get_blocked_handles()
         _ff_my_h = "@" + clean_handle_str(user.get("handle") or "").lower()
         _ff_handles = set()
