@@ -1348,72 +1348,7 @@ if st.session_state.get("show_flashpic_panel"):
 
 b_html = build_live_banner_html(th.get("banner_live", "None"), th.get("banner_img", ""), th["accent"], rad_px, th)
 if b_html:
-    st.markdown(b_html, unsafe_allow_html=True)
-if sb:
-    import json
-    from datetime import datetime, timezone, timedelta
-    def _parse_story_meta(raw_txt):
-        s_img = raw_txt.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in raw_txt else ""
-        s_meta = {}
-        if "||SMETA:" in raw_txt:
-            try:
-                s_meta = json.loads(raw_txt.partition("||SMETA:")[2].partition("||")[0])
-            except Exception:
-                s_meta = {}
-        clean_cap = raw_txt.replace("[STORY_PUBLIC]", "").replace("[STORY_FRIENDS]", "").partition("||IMG:")[0].partition("||SMETA:")[0].strip()
-        return s_img, clean_cap, s_meta
-
-    def _save_story_meta(row_obj, new_meta):
-        rb_old = row_obj.get("body") or ""
-        base_part = rb_old.partition("||SMETA:")[0].rstrip()
-        sb.table("lex_posts").update({"body": f"{base_part} ||SMETA:{json.dumps(new_meta)}||"}).eq("id", row_obj["id"]).execute()
-
-    _st_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
-    _my_stories = sb.table("lex_posts").select("*").ilike("handle", f"@{clean_handle_str(user['handle'])}").or_("body.ilike.%[STORY_FRIENDS]%,body.ilike.%[STORY_PUBLIC]%").gte("created_at", _st_cutoff).order("created_at", desc=True).limit(8).execute().data or []
-    st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">📸 My 24-Hour Story Box</strong> <span style="font-size:11px;opacity:0.75;">({len(_my_stories)} active)</span></div>', unsafe_allow_html=True)
-    _open_sid = st.session_state.get("viewing_story_id")
-    if _open_sid:
-        _active_s = next((x for x in _my_stories if x["id"] == _open_sid), None)
-        if _active_s:
-            _aimg, _acap, _ameta = _parse_story_meta(_active_s.get("body") or "")
-            _abadge = "🌐 Public" if "[STORY_PUBLIC]" in (_active_s.get("body") or "") else "🔒 Friends Only"
-            _v_cnt = len(set(_ameta.get("views", [])))
-            _rx_map = _ameta.get("rx", {})
-            _rx_summary = " • ".join([f"{emo} {cnt}" for emo, cnt in _rx_map.items() if cnt > 0])
-            st.markdown(f'<div class="lex-card" style="text-align:center;border:2px solid {th["accent"]};padding:14px;"><div style="font-size:12px;font-weight:900;color:{th["accent"]};margin-bottom:8px;">📸 Story Viewer • {_abadge} • 👁️ {_v_cnt} {"view" if _v_cnt == 1 else "views"}</div><img src="{_aimg}" style="max-width:100%;max-height:460px;border-radius:14px;" /><div style="font-size:14px;margin-top:8px;">{_acap}</div><div style="font-size:13px;margin-top:6px;color:{th["accent"]};">{_rx_summary}</div></div>', unsafe_allow_html=True)
-            rcols = st.columns(5)
-            for ri, emo in enumerate(["❤️", "🔥", "😂", "😍"]):
-                cur_c = int(_rx_map.get(emo, 0))
-                if rcols[ri].button(f"{emo} {cur_c}", key=f"my_srx_{_active_s['id']}_{ri}", use_container_width=True):
-                    _rx_map[emo] = cur_c + 1
-                    _ameta["rx"] = _rx_map
-                    _save_story_meta(_active_s, _ameta)
-                    st.rerun()
-            if rcols[4].button("✖ Close", key="close_my_story_btn", use_container_width=True):
-                st.session_state.viewing_story_id = None
-                st.rerun()
-    if _my_stories:
-        _scols = st.columns(min(len(_my_stories), 4))
-        for _si, _sr in enumerate(_my_stories[:4]):
-            _simg, _scap, _smeta = _parse_story_meta(_sr.get("body") or "")
-            _sbadge = "🌐 Public" if "[STORY_PUBLIC]" in (_sr.get("body") or "") else "🔒 Friends Only"
-            _vc = len(set(_smeta.get("views", [])))
-            _rc_total = sum(int(v) for v in _smeta.get("rx", {}).values())
-            with _scols[_si]:
-                st.markdown(f'<div class="lex-card" style="padding:8px;text-align:center;"><div style="font-size:10px;font-weight:800;color:{th["accent"]};margin-bottom:4px;">{_sbadge} • 👁️ {_vc} • ❤️ {_rc_total}</div><img src="{_simg}" style="width:100%;height:150px;object-fit:cover;border-radius:10px;" /><div style="font-size:11px;margin-top:4px;">{_scap}</div></div>', unsafe_allow_html=True)
-                sb1, sb2 = st.columns(2)
-                if sb1.button("👁️ View", key=f"view_my_story_{_sr['id']}", use_container_width=True):
-                    st.session_state.viewing_story_id = _sr["id"]
-                    st.rerun()
-                if sb2.button("🗑️ Delete", key=f"del_my_story_{_sr['id']}", use_container_width=True):
-                    if st.session_state.get("viewing_story_id") == _sr["id"]:
-                        st.session_state.viewing_story_id = None
-                    sb.table("lex_posts").delete().eq("id", _sr["id"]).execute()
-                    st.toast("🗑️ Story deleted!")
-                    st.rerun()
-    else:
-        st.caption("No active 24h stories on your profile — tap 📸 + Add 24h Story at the top to post one!")
-
+    st.markdown(b_html, unsafe_allow_html=True
 if th.get("marquee_on") and th.get("marquee_text"):
     st.markdown(f'<div class="lex-card" style="padding:6px 12px;"><marquee style="color:{th["accent"]};font-weight:800;letter-spacing:0.06em;">{th["marquee_text"]}</marquee></div>', unsafe_allow_html=True)
 
@@ -1428,12 +1363,22 @@ def render_profile_module(mod_name: str):
         home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{th.get("hometown")}</strong></div>' if th.get("hometown") else ""
         bio_h = f'{home_h}<div style="margin-top:10px;font-size:13px;">{user.get("bio")}</div>' if user.get("bio") else home_h
 
-
-        st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><div style="font-size:20px;font-weight:900;">{user.get("name","Member")}</div><div style="color:{th["accent"]};font-weight:700;">{user.get("handle","@Member")}</div>{founder_badge_html(user.get("handle",""))}{my_site}<div style="font-size:12px;opacity:0.75;margin-top:4px;">{user.get("mood","Online Now")} • {len(my_fol)} Followers</div></div></div>{bio_h}{my_int_html}</div>', unsafe_allow_html=True)
+        _st_ring_html = ""
+        if sb:
+            from datetime import datetime, timezone, timedelta
+            _sc24 = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+            _srows = sb.table("lex_posts").select("*").ilike("handle", f"@{clean_handle_str(user['handle'])}").ilike("body", "%[STORY_%").gte("created_at", _sc24).order("created_at", desc=True).limit(1).execute().data or []
+            if _srows:
+                _sb0 = _srows[0].get("body") or ""
+                _simg0 = _sb0.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _sb0 else ""
+                if _simg0:
+                    _st_ring_html = f'<div style="margin-left:auto;text-align:center;flex-shrink:0;"><img src="{_simg0}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid {th["accent"]};box-shadow:0 0 16px {th["accent"]}88;" /><div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-top:4px;">STORY</div></div>'
+        st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><div style="font-size:20px;font-weight:900;">{user["name"]}</div><div style="color:{th["accent"]};font-weight:800;">{user["handle"]}</div></div>{_st_ring_html}</div>{bio_h}{my_int_html}</div>', unsafe_allow_html=True)
 
         vis_list = th.get("visitors", [])
-        vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);font-size:12px;">{v}</span>' for v in vis_list[-12:]]) or '<span style="opacity:0.6;font-size:12px;">No recent profile visitors yet.</span>'
+        vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);font-size:12px;">{v.get("name", v.get("handle", ""))} ({v.get("handle", "")})</span>' if isinstance(v, dict) else f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);font-size:12px;">{v}</span>' for v in vis_list])
         st.markdown(f'<div class="lex-card"><strong>👀 Recent Profile Visitors</strong><div style="margin-top:8px;">{vis_html}</div></div>', unsafe_allow_html=True)
+
         c_acc = th.get("accent", "#94A3B8")
         c_bg = th.get("card_bg", "rgba(15,23,42,0.92)")
         av_s = user.get("avatar", "")
