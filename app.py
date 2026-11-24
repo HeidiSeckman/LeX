@@ -1846,9 +1846,9 @@ with hub_col:
                     st.session_state.lex_top8 = cur_list
                     save_profile_to_cloud()
                     st.rerun()
-    with t_studio:
-        with st.expander("👤 Bio, Personal Info, Avatar Shape & Vibe Sticker / GIF", expanded=True):
-            with st.form("studio_bio_form"):
+with t_studio:
+    with st.expander("👤 Bio, Personal Info, Avatar Shape & Vibe Sticker / GIF", expanded=True):
+        with st.form("studio_bio_form"):
             b_name = st.text_input("Display Name", value=user.get("name", ""))
             b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now ⚡"))
             b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Portsmouth, OH")
