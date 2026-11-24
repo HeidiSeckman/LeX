@@ -1681,6 +1681,16 @@ with hub_col:
                 save_profile_to_cloud()
                 st.toast(f"Applied {picked_preset}!")
                 st.rerun()
+            if th.get("banner_img"):
+                bf1, bf2, bf3, bf4 = st.columns(4)
+                ban_fit_in = bf1.selectbox("Banner Image Fit", ["cover", "contain", "fill"], index=["cover", "contain", "fill"].index(th.get("ban_fit", "cover")) if th.get("ban_fit", "cover") in ["cover", "contain", "fill"] else 0, key="live_ban_fit")
+                ban_zoom_in = bf2.slider("Banner Zoom (%)", 50, 200, int(th.get("ban_zoom", 100)), key="live_ban_zoom")
+                ban_x_in = bf3.slider("Move Left / Right (%)", 0, 100, int(th.get("ban_x", 50)), key="live_ban_x")
+                ban_y_in = bf4.slider("Move Up / Down (%)", 0, 100, int(th.get("ban_y", 50)), key="live_ban_y")
+                st.caption("👁️ Real-Time Banner Framing Preview (drag sliders above, then hit Save All Visual Customizations below):")
+                st.markdown(build_live_banner_html("None", th.get("banner_img", ""), th["accent"], rad_px, {"ban_fit": ban_fit_in, "ban_zoom": ban_zoom_in, "ban_x": ban_x_in, "ban_y": ban_y_in}), unsafe_allow_html=True)
+            else:
+                ban_fit_in, ban_zoom_in, ban_x_in, ban_y_in = th.get("ban_fit", "cover"), int(th.get("ban_zoom", 100)), int(th.get("ban_x", 50)), int(th.get("ban_y", 50))
 
             with st.form("studio_full_theme_form"):
                 tc1, tc2, tc3, tc4 = st.columns(4)
