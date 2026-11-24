@@ -1640,26 +1640,26 @@ def render_feed_post(p: dict, k_pfx: str):
     _rx_me = "@" + clean_handle_str(user.get("handle") or "").lower()
     for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
         emo_users = dict(rx_map.get(emo) or {})
-                cnt_e = sum(int(v) if isinstance(v, int) else 1 for v in emo_users.values())
-                i_reacted = _rx_me in {"@" + clean_handle_str(k).lower() for k in emo_users.keys()}
-                lbl_e = f"{emo} {cnt_e} ✓" if i_reacted else f"{emo} {cnt_e}"
-                if rcols[idx_e].button(lbl_e, key=f"{k_pfx}_b_{p['id']}_{emo}") and sb:
-                    try:
-                        existing_k = next((k for k in emo_users.keys() if ("@" + clean_handle_str(k).lower()) == _rx_me), None)
-                        if existing_k:
-                            emo_users.pop(existing_k, None)
-                        else:
-                            emo_users[_rx_me] = 1
-                            push_activity_notif(p_author_h, user["handle"], "react", emo, p["id"])
-                        rx_map[emo] = emo_users
-                        p_meta["rx"] = rx_map
-                        res_rx = sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta)}).eq("id", p["id"]).execute()
-                        if not getattr(res_rx, "data", None):
-                            st.warning("Run `ALTER TABLE public.lex_posts DISABLE ROW LEVEL SECURITY;` in Supabase SQL Editor.")
-                        else:
-                            st.rerun()
-                    except Exception as rx_err:
-                        st.error(f"Reaction error: {rx_err}")
+        cnt_e = sum(int(v) if isinstance(v, int) else 1 for v in emo_users.values())
+        i_reacted = _rx_me in {"@" + clean_handle_str(k).lower() for k in emo_users.keys()}
+        lbl_e = f"{emo} {cnt_e} ✓" if i_reacted else f"{emo} {cnt_e}"
+        if rcols[idx_e].button(lbl_e, key=f"{k_pfx}_b_{p['id']}_{emo}") and sb:
+            try:
+                existing_k = next((k for k in emo_users.keys() if ("@" + clean_handle_str(k).lower()) == _rx_me), None)
+                if existing_k:
+                    emo_users.pop(existing_k, None)
+                else:
+                    emo_users[_rx_me] = 1
+                    push_activity_notif(p_author_h, user["handle"], "react", emo, p["id"])
+                rx_map[emo] = emo_users
+                p_meta["rx"] = rx_map
+                res_rx = sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta)}).eq("id", p["id"]).execute()
+                if not getattr(res_rx, "data", None):
+                    st.warning("Run `ALTER TABLE public.lex_posts DISABLE ROW LEVEL SECURITY;` in Supabase SQL Editor.")
+                else:
+                    st.rerun()
+            except Exception as rx_err:
+                st.error(f"Reaction error: {rx_err}")
 
             c_open_key = f"{k_pfx}_open_cm_{p['id']}"
             if rcols[4].button(f"💬 {len(cm_list)}", key=f"{k_pfx}_cbtn_{p['id']}"):
