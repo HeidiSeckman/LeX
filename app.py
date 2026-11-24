@@ -297,7 +297,7 @@ def calc_age(dob: date) -> int:
     today = date.today()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
     def sanitize_custom_css(css_text: str) -> str:
-    if not css_text:
+if not css_text:
         return ""
     cleaned = re.sub(r"@import\s+[^;]+;?", "", css_text, flags=re.IGNORECASE)
     def _filter_url(m):
