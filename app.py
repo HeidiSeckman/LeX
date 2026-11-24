@@ -382,13 +382,12 @@ def render_avatar_html(avatar_url: str, display_name: str, t_cfg: dict, size_px:
     if avatar_url:
         return f'<div style="{wrap_st}"><img src="{avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:{rad};{clip_css}" /></div>'
     ini = ((display_name or "L")[:1] or "L").upper()
-    return f'<div style="{wrap_st}"><div style="width:100%;height:100%;background:#09090d;color:{acc};font-weight:900;font-size:{int(size_px*0.38)}px;border-radius:{rad};{clip_css}display:flex;align-items:center;justify-content:center;">{ini}</div></div>'
-def is_member_online(theme_data: dict) -> bool:
+    def is_member_online(tj: dict) -> bool:
+    if not isinstance(tj, dict):
+        return False
     try:
-        last_ts = int(float((theme_data or {}).get("last_seen") or 0))
+        last_ts = int(tj.get("last_seen") or 0)
     except Exception:
-        last_ts = 0
-    if last_ts <= 0:
         return False
     return 0 <= (int(time.time()) - last_ts) < 600
 
@@ -397,16 +396,18 @@ def ping_member_heartbeat():
     if not u or not u.get("handle"):
         return
     now_ts = int(time.time())
-    if now_ts - int(st.session_state.get("_lex_hb_ts", 0)) < 60:
+    if now_ts - int(st.session_state.get("_lex_hb_ts", 0)) < 45:
         return
     st.session_state["_lex_hb_ts"] = now_ts
     st.session_state.lex_theme["last_seen"] = now_ts
     sb_hb = get_sb()
     if sb_hb:
         try:
-            th_copy = dict(st.session_state.lex_theme or {})
-            th_copy["last_seen"] = now_ts
-            sb_hb.table("lex_profiles").update({"theme_json": th_copy}).ilike("handle", u["handle"].strip()).execute()
+            h_clean = clean_handle_str(u["handle"])
+            res = sb_hb.table("lex_profiles").select("theme_json").ilike("handle", f"%{h_clean}").limit(1).execute().data or []
+            db_tj = dict(res[0].get("theme_json") or {}) if res else dict(st.session_state.lex_theme or {})
+            db_tj["last_seen"] = now_ts
+            sb_hb.table("lex_profiles").update({"theme_json": db_tj}).ilike("handle", f"%{h_clean}").execute()
         except Exception:
             pass
 
@@ -1573,7 +1574,7 @@ def render_feed_post(p: dict, k_pfx: str):
     clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body"))
     img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin-top:8px;" />' if img_src else ""
     lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="color:{th["accent"]};font-weight:700;">🔗 {lnk_src}</a></div>' if lnk_src else ""
-    f_bdg = ' <span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:2px 7px;border-radius:99px;">CREATOR & FOUNDER</span>' if p_author_h.lower() in {"@heidi", "@heidiseckman"} else ""
+    f_bdg = ' <span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:2px 7px;border-radius:99px;">CREATOR & FOUNDER</span>' if clean_handle_str(p_author_h).lower() in {"heidi", "heidiseckman"} else ""
     st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};">{p_author_h}</span>{f_bdg}<div style="margin-top:6px;">{clean_txt}</div>{img_tag}{lnk_tag}</div>', unsafe_allow_html=True)
     rx_map = p_meta["rx"]
     cm_list = p_meta["comments"]
@@ -1602,17 +1603,18 @@ def render_feed_post(p: dict, k_pfx: str):
             except Exception as rx_err:
                 st.error(f"Reaction error: {rx_err}")
 
-        c_open_key = f"{k_pfx}_open_cm_{p['id']}"
+    c_open_key = f"{k_pfx}_open_cm_{p['id']}"
     if rcols[4].button(f"💬 {len(cm_list)}", key=f"{k_pfx}_cbtn_{p['id']}"):
         st.session_state[c_open_key] = not st.session_state.get(c_open_key, False)
         st.rerun()
-    if p_author_h.lower() == ("@" + clean_handle_str(user.get("handle") or "").lower()):
+    if clean_handle_str(p_author_h).lower() == clean_handle_str(user.get("handle") or "").lower():
         if rcols[5].button("✏️", key=f"{k_pfx}_ed_p_{p['id']}"):
             st.session_state[f"{k_pfx}_edit_p_{p['id']}"] = not st.session_state.get(f"{k_pfx}_edit_p_{p['id']}", False)
             st.rerun()
         if rcols[6].button("🗑️", key=f"{k_pfx}_del_p_{p['id']}") and sb:
             sb.table("lex_posts").delete().eq("id", p["id"]).execute()
             st.rerun()
+
 
     if st.session_state.get(c_open_key, False) or cm_list:
         with st.expander(f"💬 Comments ({len(cm_list)})", expanded=st.session_state.get(c_open_key, False)):
