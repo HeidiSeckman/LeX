@@ -1182,6 +1182,27 @@ if st.session_state.viewing_handle and sb:
     for vw in (vp.get("wall_json") or [])[:8]:
         st.markdown(f'<div class="lex-card"><strong>{vw["sender"]}:</strong> {vw["msg"]}</div>', unsafe_allow_html=True)
     st.stop()
+st.markdown("""<style>
+div[data-testid="stHorizontalBlock"] button {
+    background: rgba(14, 10, 26, 0.78) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-radius: 999px !important;
+    padding: 4px 12px !important;
+    min-height: 34px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+    transition: all 0.2s ease !important;
+}
+div[data-testid="stHorizontalBlock"] button:hover {
+    border-color: #FF2E93 !important;
+    box-shadow: 0 0 14px rgba(255, 46, 147, 0.55) !important;
+    transform: translateY(-1px) !important;
+}
+</style>""", unsafe_allow_html=True)
+
 sp_c1, sp_c2 = st.columns(2)
 if sp_c1.button("📸 + Add 24h Story", key="prof_stories_btn", use_container_width=True):
     st.session_state.show_stories_panel = not st.session_state.get("show_stories_panel", False)
