@@ -781,7 +781,7 @@ if st.session_state.lex_user is None:
                         st.rerun()
                     except Exception as e:
                         err_s = str(e)
-                        if "already registered" in err_s.lower() or "already exists" in err_s.lower():
+                    if "already registered" in err_s.lower() or "already exists" in err_s.lower():
                         st.error("An account with that email already exists. Please log in instead.")
                     else:
                         st.error(f"Signup error: {err_s}")
