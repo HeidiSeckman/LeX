@@ -1602,11 +1602,32 @@ with hub_col:
                                 friend_handles.add(_cand)
             except Exception:
                 pass
-                
-        def render_feed_post(p: dict, k_pfx: str):
-            raw_b_chk = (p.get("body") or "").strip()
-            if raw_b_chk.startswith("[FLASHPIC_TO:") or raw_b_chk.startswith("[REPORT_ALERT]") or raw_b_chk.startswith("[STORY_"):
-                return
+st.markdown("""<style>
+@media (max-width: 768px) {
+    div[data-testid="stHorizontalBlock"]:has(button) {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(button) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(button) > div[data-testid="stColumn"] {
+        width: auto !important;
+        flex: 1 1 auto !important;
+        min-width: 42px !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(button) button {
+        padding: 4px 8px !important;
+        font-size: 12px !important;
+        min-height: 32px !important;
+    }
+}
+</style>""", unsafe_allow_html=True)
+
+def render_feed_post(p: dict, k_pfx: str):
+    raw_b_chk = (p.get("body") or "").strip()
+    if raw_b_chk.startswith("[FLASHPIC_TO:") or raw_b_chk.startswith("[REPORT_ALERT]") or raw_b_chk.startswith("[LEX_NOTIF]") or raw_b_chk.startswith("[STORY_"):
+        return
+
             p_author_h = (p.get("handle") or "").strip()
             clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body"))
             img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:8px;" />' if img_src else ""
