@@ -1262,7 +1262,7 @@ if sp_c1.button("📸 + Add 24h Story", key="prof_stories_btn", use_container_wi
     st.session_state.show_stories_panel = not st.session_state.get("show_stories_panel", False)
     st.session_state.show_flashpic_panel = False
     st.rerun()
-if sp_c2.button("⚡ FlashPic Chat", key="prof_flashpic_btn", use_container_width=True):
+if sp_c2.button("⚡ FlashPic", key="prof_flashpic_btn", use_container_width=True):
     st.session_state.show_flashpic_panel = not st.session_state.get("show_flashpic_panel", False)
     st.session_state.show_stories_panel = False
     st.rerun()
