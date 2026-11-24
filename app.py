@@ -1681,17 +1681,17 @@ with hub_col:
                 save_profile_to_cloud()
                 st.toast(f"Applied {picked_preset}!")
                 st.rerun()
-            if th.get("banner_img"):
-                bf1, bf2, bf3, bf4 = st.columns(4)
-                ban_fit_in = bf1.selectbox("Banner Image Fit", ["cover", "contain", "fill"], index=["cover", "contain", "fill"].index(th.get("ban_fit", "cover")) if th.get("ban_fit", "cover") in ["cover", "contain", "fill"] else 0, key="live_ban_fit")
-                ban_zoom_in = bf2.slider("Banner Zoom (%)", 50, 200, int(th.get("ban_zoom", 100)), key="live_ban_zoom")
-                ban_x_in = bf3.slider("Move Left / Right (%)", 0, 100, int(th.get("ban_x", 50)), key="live_ban_x")
-                ban_y_in = bf4.slider("Move Up / Down (%)", 0, 100, int(th.get("ban_y", 50)), key="live_ban_y")
+            bf1, bf2, bf3, bf4 = st.columns(4)
+            ban_fit_in = bf1.selectbox("Banner Image Fit", ["cover", "contain", "fill"], index=["cover", "contain", "fill"].index(th.get("ban_fit", "cover")) if th.get("ban_fit", "cover") in ["cover", "contain", "fill"] else 0, key="live_ban_fit")
+            ban_zoom_in = bf2.slider("Banner Zoom (%)", 50, 200, int(th.get("ban_zoom", 100)), key="live_ban_zoom")
+            ban_x_in = bf3.slider("Move Left / Right (%)", 0, 100, int(th.get("ban_x", 50)), key="live_ban_x")
+            ban_y_in = bf4.slider("Move Up / Down (%)", 0, 100, int(th.get("ban_y", 50)), key="live_ban_y")
+            _staged_ban = encode_image_data_url(st.session_state.get("th_ban_up")) if st.session_state.get("th_ban_up") is not None else th.get("banner_img", "")
+            if _staged_ban:
                 st.caption("👁️ Real-Time Banner Framing Preview (drag sliders above, then hit Save All Visual Customizations below):")
-                st.markdown(build_live_banner_html("None", th.get("banner_img", ""), th["accent"], rad_px, {"ban_fit": ban_fit_in, "ban_zoom": ban_zoom_in, "ban_x": ban_x_in, "ban_y": ban_y_in}), unsafe_allow_html=True)
+                st.markdown(build_live_banner_html("None", _staged_ban, th["accent"], rad_px, {"ban_fit": ban_fit_in, "ban_zoom": ban_zoom_in, "ban_x": ban_x_in, "ban_y": ban_y_in}), unsafe_allow_html=True)
             else:
-                ban_fit_in, ban_zoom_in, ban_x_in, ban_y_in = th.get("ban_fit", "cover"), int(th.get("ban_zoom", 100)), int(th.get("ban_x", 50)), int(th.get("ban_y", 50))
-
+                st.caption("🖼️ Upload a banner image or paste a GIF link below, then use the 4 sliders above to frame it live!")
             with st.form("studio_full_theme_form"):
                 tc1, tc2, tc3, tc4 = st.columns(4)
                 c_bg = tc1.color_picker("Background", th.get("bg", "#06060A"))
