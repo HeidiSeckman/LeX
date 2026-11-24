@@ -914,10 +914,17 @@ if unread_dms:
         save_profile_to_cloud()
         st.rerun()
 
-top_c1, top_c2, top_c3 = st.columns([0.62, 0.23, 0.15])
+top_c1, top_th, top_c2, top_c3 = st.columns([0.52, 0.16, 0.16, 0.16])
 if st.session_state.viewing_handle and top_c1.button(f"← Back to My Profile ({user['handle']})"):
     st.session_state.viewing_handle = None
     st.rerun()
+with top_th.popover("🎨 Themes", use_container_width=True):
+    for q_tname in ["Neon Prism", "Carbon Tactical", "Midnight Emerald", "Sunset Vaporwave"]:
+        match_k = next((k for k in THEME_PRESETS if q_tname.lower() in k.lower()), None)
+        if match_k and st.button(q_tname, key=f"top_qt_{q_tname}", use_container_width=True):
+            st.session_state.lex_theme.update(THEME_PRESETS[match_k])
+            save_profile_to_cloud()
+            st.rerun()
 if top_c2.button(n_lbl, use_container_width=True, key="top_notif_btn"):
     st.session_state.show_notifs = not st.session_state.show_notifs
     st.rerun()
@@ -925,6 +932,7 @@ if top_c3.button("Sign Out", use_container_width=True):
     st.session_state.lex_user = None
     st.session_state.viewing_handle = None
     st.rerun()
+
 
 if st.session_state.show_notifs:
     nh1, nh2 = st.columns([0.75, 0.25])
