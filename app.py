@@ -1204,7 +1204,8 @@ if st.session_state.get("show_flashpic_panel"):
         for r in all_fp:
             rb = r.get("body") or ""
             sender_h = "@" + clean_handle_str(r.get("handle") or "").lower()
-            to_h = rb.partition("[FLASHPIC_TO:")[2].partition("]")[0].strip().lower()
+            raw_to = rb.partition("[FLASHPIC_TO:")[2].partition("]")[0].strip()
+            to_h = "@" + clean_handle_str(raw_to).lower()
             if my_h_low not in (sender_h, to_h):
                 continue
             other_h = to_h if sender_h == my_h_low else sender_h
@@ -1213,6 +1214,7 @@ if st.session_state.get("show_flashpic_panel"):
         st.markdown(f'<div style="font-size:12px;font-weight:900;color:{th["accent"]};margin:8px 0 4px 2px;">📥 FlashPic Inbox & History ({len(threads)})</div>', unsafe_allow_html=True)
         if not threads:
             st.caption("No FlashPics yet — send your first disappearing pic above!")
+        selected_to_delete = []
         for other_h, rows in threads.items():
             days_active = sorted({(x.get("created_at") or "")[:10] for x in rows if x.get("created_at")}, reverse=True)
             streak = 0
@@ -1236,9 +1238,13 @@ if st.session_state.get("show_flashpic_panel"):
             is_viewed = "[VIEWED]" in l_body
             status_txt = ("⚡ New FlashPic Received!" if not is_viewed else "👁️ Opened Received Pic") if is_incoming else ("📤 Sent • Unopened" if not is_viewed else "👀 Sent • Opened")
 
-            st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><div><strong>{other_h}</strong><span style="color:{th["accent"]};font-weight:900;">{streak_badge}</span><div style="font-size:11px;opacity:0.8;">{status_txt} • {len(rows)} total</div></div></div>', unsafe_allow_html=True)
+            chk_c, card_c = st.columns([0.08, 0.92])
+            if chk_c.checkbox("Select", key=f"fp_chk_{other_h}", label_visibility="collapsed"):
+                selected_to_delete.append(other_h)
+            card_c.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><div><strong>{other_h}</strong><span style="color:{th["accent"]};font-weight:900;">{streak_badge}</span><div style="font-size:11px;opacity:0.8;">{status_txt} • {len(rows)} total</div></div></div>', unsafe_allow_html=True)
+
             unopened_in = [x for x in rows if ("@" + clean_handle_str(x.get("handle") or "").lower()) != my_h_low and "[VIEWED]" not in (x.get("body") or "")]
-            b1, b2, b3 = st.columns([0.38, 0.38, 0.24])
+            b1, b2 = st.columns(2)
             if unopened_in:
                 target_snap = unopened_in[0]
                 open_k = f"fp_open_{target_snap['id']}"
@@ -1263,10 +1269,12 @@ if st.session_state.get("show_flashpic_panel"):
                     st.session_state.fp_reply_target = matched_opt
                 st.rerun()
 
-            if b3.button("🗑️ Delete", key=f"fp_del_thread_{other_h}", use_container_width=True):
-                for del_r in rows:
-                    sb.table("lex_posts").delete().eq("id", del_r["id"]).execute()
-                st.toast(f"🗑️ Permanently deleted FlashPic history with {other_h}!")
+        if selected_to_delete:
+            if st.button(f"🗑️ Permanently Delete Selected History ({len(selected_to_delete)})", key="fp_del_selected_btn", use_container_width=True):
+                for target_h in selected_to_delete:
+                    for del_r in threads.get(target_h, []):
+                        sb.table("lex_posts").delete().eq("id", del_r["id"]).execute()
+                st.toast(f"🗑️ Permanently deleted FlashPic history for {', '.join(selected_to_delete)}!")
                 st.rerun()
 
 qt_cols = st.columns(4)
