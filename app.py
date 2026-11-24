@@ -1374,6 +1374,28 @@ def render_profile_module(mod_name: str):
                 if _simg0:
                     _st_ring_html = f'<div style="margin-left:auto;text-align:center;flex-shrink:0;"><img src="{_simg0}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid {th["accent"]};box-shadow:0 0 16px {th["accent"]}88;" /><div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-top:4px;">STORY</div></div>'
         st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><div style="font-size:20px;font-weight:900;">{user["name"]}</div><div style="color:{th["accent"]};font-weight:800;">{user["handle"]}</div></div>{_st_ring_html}</div>{bio_h}{my_int_html}</div>', unsafe_allow_html=True)
+        if _srows:
+            if st.button(f"👁️ View / Manage Story ({len(_srows)})", key="open_my_story_ring", use_container_width=True):
+                st.session_state["show_my_story_drawer"] = not st.session_state.get("show_my_story_drawer", False)
+                st.rerun()
+            if st.session_state.get("show_my_story_drawer"):
+                _ms_i = st.session_state.get("my_story_idx", 0) % len(_srows)
+                _cur_s = _srows[_ms_i]
+                _cb = _cur_s.get("body") or ""
+                _ci = _cb.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _cb else ""
+                _ct = _cb.replace("[STORY_PUBLIC]", "").replace("[STORY_FRIENDS]", "").partition("||IMG:")[0].strip()
+                st.markdown(f'<div class="lex-card" style="border:2px solid {th["accent"]};text-align:center;"><img src="{_ci}" style="max-width:100%;max-height:360px;border-radius:12px;" /><div style="margin-top:8px;font-size:13px;">{_ct}</div></div>', unsafe_allow_html=True)
+                sc1, sc2, sc3 = st.columns(3)
+                if sc1.button("⏭️ Next", key="ms_next_btn", use_container_width=True):
+                    st.session_state["my_story_idx"] = (_ms_i + 1) % len(_srows)
+                    st.rerun()
+                if sc2.button("🗑️ Delete", key=f"ms_del_{_cur_s['id']}", use_container_width=True):
+                    sb.table("lex_posts").delete().eq("id", _cur_s["id"]).execute()
+                    st.toast("🗑️ Story deleted!")
+                    st.rerun()
+                if sc3.button("✕ Close", key="ms_cls_btn", use_container_width=True):
+                    st.session_state["show_my_story_drawer"] = False
+                    st.rerun()
 
         vis_list = th.get("visitors", [])
         vis_html = "".join([f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);font-size:12px;">{v.get("name", v.get("handle", ""))} ({v.get("handle", "")})</span>' if isinstance(v, dict) else f'<span style="display:inline-block;padding:4px 10px;margin:3px;border-radius:99px;background:rgba(255,255,255,0.08);font-size:12px;">{v}</span>' for v in vis_list])
