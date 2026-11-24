@@ -1137,7 +1137,7 @@ if st.session_state.viewing_handle and sb:
     if ac5.button("🚩 Report", key=f"pub_rep_{vp['handle']}", use_container_width=True):
         block_or_report_member(vp["handle"], "report", "Reported from Public Profile")
         st.toast(f"Reported {vp['handle']}")
-        if sb:
+    if sb:
         from datetime import datetime, timezone, timedelta
         _v_cut = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
         _vh_bare = clean_handle_str(vp.get("handle", "")).lower()
