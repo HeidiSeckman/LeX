@@ -382,7 +382,7 @@ def render_avatar_html(avatar_url: str, display_name: str, t_cfg: dict, size_px:
     if avatar_url:
         return f'<div style="{wrap_st}"><img src="{avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:{rad};{clip_css}" /></div>'
     ini = ((display_name or "L")[:1] or "L").upper()
-    def is_member_online(tj: dict) -> bool:
+def is_member_online(tj: dict) -> bool:
     if not isinstance(tj, dict):
         return False
     try:
