@@ -1407,7 +1407,8 @@ def render_profile_module(mod_name: str):
                 _simg0 = _sb0.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _sb0 else ""
                 if _simg0:
                     _st_ring_html = f'<div style="margin-left:auto;text-align:center;flex-shrink:0;"><img src="{_simg0}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid {th["accent"]};box-shadow:0 0 16px {th["accent"]}88;" /><div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-top:4px;">STORY</div></div>'
-        st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><div style="font-size:20px;font-weight:900;">{user["name"]}</div><div style="color:{th["accent"]};font-weight:800;">{user["handle"]}</div></div>{_st_ring_html}</div>{bio_h}{my_int_html}</div>', unsafe_allow_html=True)
+        _fnd_p = ' <span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin-right:4px;">👑 CREATOR & FOUNDER</span>' if is_owner else ""
+        st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{my_av}<div><div style="font-size:20px;font-weight:900;">{user.get("name", "")} {_fnd_p}</div><div style="color:{th["accent"]};font-weight:800;">{user.get("handle", "")} • <span style="color:#34D399;">🟢 ONLINE</span></div>{my_site}</div>{_st_ring_html}</div>{bio_h}{my_int_html}</div>', unsafe_allow_html=True)
         if _srows:
             if st.button(f"👁️ View / Manage Story ({len(_srows)})", key="open_my_story_ring", use_container_width=True):
                 st.session_state["show_my_story_drawer"] = not st.session_state.get("show_my_story_drawer", False)
@@ -1667,17 +1668,8 @@ with hub_col:
                     packed = pack_post_blob(new_post, normalize_url(post_link) if post_link.strip() else "", encode_image_data_url(post_img) if post_img is not None else "", init_meta)
                     sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": packed, "likes": 0}).execute()
                     st.rerun()
-        blocked_set = get_blocked_handles()
-        @st.cache_data(ttl=25, show_spinner=False)
-        def _cached_feed_posts():
-            return sb.table("lex_posts").select("id, author, handle, body").order("id", desc=True).limit(45).execute().data or [] if sb else []
-        posts = _cached_feed_posts()
-
-
-        my_h_low = "@" + clean_handle_str(user["handle"]).lower()
-        friend_handles = set()
-        for _fr in (st.session_state.lex_friends or []) + (st.session_state.lex_top8 or []):
-                   blocked_set = get_blocked_handles()
+    
+                    blocked_set = get_blocked_handles()
         @st.cache_data(ttl=25, show_spinner=False)
         def _cached_feed_posts():
             return sb.table("lex_posts").select("id, author, handle, body").order("id", desc=True).limit(45).execute().data or []
