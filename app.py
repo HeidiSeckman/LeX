@@ -1628,7 +1628,7 @@ def render_feed_post(p: dict, k_pfx: str):
     if raw_b_chk.startswith("[FLASHPIC_TO:") or raw_b_chk.startswith("[REPORT_ALERT]") or raw_b_chk.startswith("[LEX_NOTIF]") or raw_b_chk.startswith("[STORY_"):
         return
 
-            p_author_h = (p.get("handle") or "").strip()
+    p_author_h = (p.get("handle") or "").strip()
             clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body"))
             img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:8px;" />' if img_src else ""
             lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="color:{th["accent"]};font-weight:800;">🔗 {lnk_src}</a></div>' if lnk_src else ""
