@@ -1231,20 +1231,64 @@ b_html = build_live_banner_html(th.get("banner_live", "None"), th.get("banner_im
 if b_html:
     st.markdown(b_html, unsafe_allow_html=True)
 if sb:
+    import json
     from datetime import datetime, timezone, timedelta
+    def _parse_story_meta(raw_txt):
+        s_img = raw_txt.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in raw_txt else ""
+        s_meta = {}
+        if "||SMETA:" in raw_txt:
+            try:
+                s_meta = json.loads(raw_txt.partition("||SMETA:")[2].partition("||")[0])
+            except Exception:
+                s_meta = {}
+        clean_cap = raw_txt.replace("[STORY_PUBLIC]", "").replace("[STORY_FRIENDS]", "").partition("||IMG:")[0].partition("||SMETA:")[0].strip()
+        return s_img, clean_cap, s_meta
+
+    def _save_story_meta(row_obj, new_meta):
+        rb_old = row_obj.get("body") or ""
+        base_part = rb_old.partition("||SMETA:")[0].rstrip()
+        sb.table("lex_posts").update({"body": f"{base_part} ||SMETA:{json.dumps(new_meta)}||"}).eq("id", row_obj["id"]).execute()
+
     _st_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
     _my_stories = sb.table("lex_posts").select("*").ilike("handle", f"@{clean_handle_str(user['handle'])}").or_("body.ilike.%[STORY_FRIENDS]%,body.ilike.%[STORY_PUBLIC]%").gte("created_at", _st_cutoff).order("created_at", desc=True).limit(8).execute().data or []
     st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">📸 My 24-Hour Story Box</strong> <span style="font-size:11px;opacity:0.75;">({len(_my_stories)} active)</span></div>', unsafe_allow_html=True)
+    _open_sid = st.session_state.get("viewing_story_id")
+    if _open_sid:
+        _active_s = next((x for x in _my_stories if x["id"] == _open_sid), None)
+        if _active_s:
+            _aimg, _acap, _ameta = _parse_story_meta(_active_s.get("body") or "")
+            _abadge = "🌐 Public" if "[STORY_PUBLIC]" in (_active_s.get("body") or "") else "🔒 Friends Only"
+            _v_cnt = len(set(_ameta.get("views", [])))
+            _rx_map = _ameta.get("rx", {})
+            _rx_summary = " • ".join([f"{emo} {cnt}" for emo, cnt in _rx_map.items() if cnt > 0])
+            st.markdown(f'<div class="lex-card" style="text-align:center;border:2px solid {th["accent"]};padding:14px;"><div style="font-size:12px;font-weight:900;color:{th["accent"]};margin-bottom:8px;">📸 Story Viewer • {_abadge} • 👁️ {_v_cnt} {"view" if _v_cnt == 1 else "views"}</div><img src="{_aimg}" style="max-width:100%;max-height:460px;border-radius:14px;" /><div style="font-size:14px;margin-top:8px;">{_acap}</div><div style="font-size:13px;margin-top:6px;color:{th["accent"]};">{_rx_summary}</div></div>', unsafe_allow_html=True)
+            rcols = st.columns(5)
+            for ri, emo in enumerate(["❤️", "🔥", "😂", "😍"]):
+                cur_c = int(_rx_map.get(emo, 0))
+                if rcols[ri].button(f"{emo} {cur_c}", key=f"my_srx_{_active_s['id']}_{ri}", use_container_width=True):
+                    _rx_map[emo] = cur_c + 1
+                    _ameta["rx"] = _rx_map
+                    _save_story_meta(_active_s, _ameta)
+                    st.rerun()
+            if rcols[4].button("✖ Close", key="close_my_story_btn", use_container_width=True):
+                st.session_state.viewing_story_id = None
+                st.rerun()
     if _my_stories:
         _scols = st.columns(min(len(_my_stories), 4))
         for _si, _sr in enumerate(_my_stories[:4]):
-            _rb = _sr.get("body") or ""
-            _simg = _rb.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _rb else ""
-            _scap = _rb.replace("[STORY_PUBLIC]", "").replace("[STORY_FRIENDS]", "").partition("||IMG:")[0].strip()
-            _sbadge = "🌐 Public" if "[STORY_PUBLIC]" in _rb else "🔒 Friends Only"
+            _simg, _scap, _smeta = _parse_story_meta(_sr.get("body") or "")
+            _sbadge = "🌐 Public" if "[STORY_PUBLIC]" in (_sr.get("body") or "") else "🔒 Friends Only"
+            _vc = len(set(_smeta.get("views", [])))
+            _rc_total = sum(int(v) for v in _smeta.get("rx", {}).values())
             with _scols[_si]:
-                st.markdown(f'<div class="lex-card" style="padding:8px;text-align:center;"><div style="font-size:10px;font-weight:800;color:{th["accent"]};margin-bottom:4px;">{_sbadge}</div><img src="{_simg}" style="width:100%;height:150px;object-fit:cover;border-radius:10px;" /><div style="font-size:11px;margin-top:4px;">{_scap}</div></div>', unsafe_allow_html=True)
-                if st.button("🗑️ Delete", key=f"del_my_story_{_sr['id']}", use_container_width=True):
+                st.markdown(f'<div class="lex-card" style="padding:8px;text-align:center;"><div style="font-size:10px;font-weight:800;color:{th["accent"]};margin-bottom:4px;">{_sbadge} • 👁️ {_vc} • ❤️ {_rc_total}</div><img src="{_simg}" style="width:100%;height:150px;object-fit:cover;border-radius:10px;" /><div style="font-size:11px;margin-top:4px;">{_scap}</div></div>', unsafe_allow_html=True)
+                sb1, sb2 = st.columns(2)
+                if sb1.button("👁️ View", key=f"view_my_story_{_sr['id']}", use_container_width=True):
+                    st.session_state.viewing_story_id = _sr["id"]
+                    st.rerun()
+                if sb2.button("🗑️ Delete", key=f"del_my_story_{_sr['id']}", use_container_width=True):
+                    if st.session_state.get("viewing_story_id") == _sr["id"]:
+                        st.session_state.viewing_story_id = None
                     sb.table("lex_posts").delete().eq("id", _sr["id"]).execute()
                     st.toast("🗑️ Story deleted!")
                     st.rerun()
