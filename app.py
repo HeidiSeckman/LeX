@@ -1805,10 +1805,11 @@ with hub_col:
                     ]
                     av_u = im_avs.get(im_act, "")
                     av_h = f'<img src="{av_u}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1.5px solid {th["accent"]};">' if av_u else f'<div style="width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:900;">{im_act.lstrip("@")[:1].upper()}</div>'
-                    rows_h = "".join([
-                        f'<div style="margin-bottom:4px;font-size:12px;line-height:1.35;"><strong style="color:{th["accent"] if str(m.get("sender_handle","")).lower()==my_l else "#34D399"};">{user["handle"] if str(m.get("sender_handle","")).lower()==my_l else im_act}:</strong> <span>{m.get("body","")}</span></div>'
-                        for m in im_thread[-30:]
-                win_html = (
+                rows_h = "".join([
+                    f'<div style="margin-bottom:4px;font-size:12px;line-height:1.35;"><strong>{m.get("sender_handle", "")}:</strong> {m.get("body", "")}</div>'
+                    for m in im_thread[-30:]
+                ]) or '<div style="opacity:0.55;font-size:12px;padding:38px 8px;text-align:center;">No messages yet — say hi!</div>'
+
                     f'<div id="lex-im-win" style="position:fixed;bottom:16px;right:16px;width:360px;max-width:92vw;height:430px;z-index:99999;background:{th["card_bg"]};border:2px solid {th["accent"]};border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.65);display:flex;flex-direction:column;overflow:hidden;color:{th["text"]};font-family:inherit;">'
                     f'<div id="lex-im-bar" style="cursor:move;padding:10px 14px;background:{th["accent"]};color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:space-between;">'
                     f'<span>⚡ {im_act} — LeX Instant</span>'
