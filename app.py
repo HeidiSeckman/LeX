@@ -1154,7 +1154,7 @@ if st.session_state.viewing_handle and sb:
     for vw in (vp.get("wall_json") or [])[:8]:
         st.markdown(f'<div class="lex-card"><strong>{vw["sender"]}:</strong> {vw["msg"]}</div>', unsafe_allow_html=True)
     st.stop()
-    sp_c1, sp_c2 = st.columns(2)
+sp_c1, sp_c2 = st.columns(2)
 if sp_c1.button("📸 + Add 24h Story", key="prof_stories_btn", use_container_width=True):
     st.session_state.show_stories_panel = not st.session_state.get("show_stories_panel", False)
     st.session_state.show_flashpic_panel = False
