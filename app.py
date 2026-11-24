@@ -1615,11 +1615,7 @@ with hub_col:
             st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};font-size:12px;">{p_author_h}</span><div style="margin-top:6px;">{clean_txt}</div>{img_tag}{lnk_tag}</div>', unsafe_allow_html=True)
             rx_map = p_meta["rx"]
             cm_list = p_meta["comments"]
-            rcols = st.columns(7)
-            if rcols[6].button("🚩", key=f"{k_pfx}_rep_{p['id']}", help="Report post"):
-                 if sb:
-                     sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": f"[REPORT_ALERT] Post {p['id']} by {p_author_h} flagged by {user['handle']}"}).execute()
-                 st.toast("🚩 Post reported to LeX Safety.")            
+            rcols = st.columns(7)           
             _rx_me = "@" + clean_handle_str(user.get("handle") or "").lower()
             for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
                 emo_users = dict(rx_map.get(emo) or {})
