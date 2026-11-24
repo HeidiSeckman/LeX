@@ -1847,6 +1847,16 @@ with hub_col:
                     display: none !important;
                 }
                 </style>""", unsafe_allow_html=True)
+                                pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="lex_im_sw_pk")
+                if pk != im_act:
+                    st.session_state["lex_im_peer"] = pk
+                    st.rerun()
+                st.markdown("""<style>
+                div.stElementContainer:has(input[aria-label="LEX_IM_BRIDGE"]),
+                div.stElementContainer:has(input[aria-label="LEX_IM_BRIDGE"]) + div.stElementContainer {
+                    display: none !important;
+                }
+                </style>""", unsafe_allow_html=True)
                 if pk != im_act:
                     st.session_state["lex_im_peer"] = pk
                     st.rerun()
