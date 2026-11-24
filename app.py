@@ -263,9 +263,15 @@ def build_backdrop_url(style_name: str, accent: str, spray_word: str = "LeX!") -
     body = art_map.get(style_name, art_map["Y2K Stars & Sparkles"])
     raw_svg = f'{SV_OPEN}xmlns="{SVG_NS}" width="260" height="220">{body}{SV_CLOSE}'
     return f'url("data:image/svg+xml,{urllib.parse.quote(raw_svg)}")'
-def build_live_banner_html(mode: str, custom_img: str, accent: str, rad_px: int) -> str:
+def build_live_banner_html(mode: str, custom_img: str, accent: str, rad_px: int, t_cfg: dict = None) -> str:
     if custom_img:
-        return f'<div style="width:100%;border-radius:{rad_px}px;overflow:hidden;margin-bottom:12px;border:1.5px solid {accent};box-shadow:0 0 18px {accent}44;background:rgba(10,6,24,0.55);"><img src="{custom_img}" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block;" /></div>'
+        cfg = t_cfg or {}
+        bfit = cfg.get("ban_fit", "cover")
+        bzoom = max(50, min(200, int(cfg.get("ban_zoom", 100)))) / 100.0
+        bx = max(0, min(100, int(cfg.get("ban_x", 50))))
+        by = max(0, min(100, int(cfg.get("ban_y", 50))))
+        return f'<div style="width:100%;height:165px;border-radius:{rad_px}px;overflow:hidden;margin-bottom:12px;border:1.5px solid {accent};box-shadow:0 0 18px {accent}44;background:#070212;"><img src="{custom_img}" style="width:100%;height:100%;object-fit:{bfit};object-position:{bx}% {by}%;transform:scale({bzoom});transform-origin:{bx}% {by}%;display:block;" /></div>'
+
     if not mode or mode == "None":
         return ""
     kf = "@keyframes lexFall{0%{transform:translate(0,-30px);opacity:1}100%{transform:translate(-140px,170px);opacity:0}}@keyframes lexRise{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-14px) scaleY(1.18)}}@keyframes lexOrbit{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes lexRain{0%{transform:translateY(-140px)}100%{transform:translateY(160px)}}@keyframes lexPulse{0%,100%{opacity:.25}50%{opacity:1}}"
@@ -961,7 +967,7 @@ if st.session_state.viewing_handle and sb:
     v_h_str = (vp.get("handle") or "").strip()
     v_rad = int(v_th.get("card_radius", 12))
     st.markdown(build_theme_css(v_th), unsafe_allow_html=True)
-    vb_html = build_live_banner_html(v_th.get("banner_live", "None"), v_th.get("banner_img", ""), v_th["accent"], v_rad)
+    vb_html = build_live_banner_html(v_th.get("banner_live", "None"), v_th.get("banner_img", ""), v_th["accent"], v_rad, v_th)
     if vb_html:
         st.markdown(vb_html, unsafe_allow_html=True)
     if v_th.get("marquee_on") and v_th.get("marquee_text"):
@@ -1132,7 +1138,7 @@ if st.session_state.viewing_handle and sb:
     for vw in (vp.get("wall_json") or [])[:8]:
         st.markdown(f'<div class="lex-card"><strong>{vw["sender"]}:</strong> {vw["msg"]}</div>', unsafe_allow_html=True)
     st.stop()
-b_html = build_live_banner_html(th.get("banner_live", "None"), th.get("banner_img", ""), th["accent"], rad_px)
+b_html = build_live_banner_html(th.get("banner_live", "None"), th.get("banner_img", ""), th["accent"], rad_px, th)
 if b_html:
     st.markdown(b_html, unsafe_allow_html=True)
 if th.get("marquee_on") and th.get("marquee_text"):
@@ -1707,6 +1713,12 @@ with hub_col:
                 g_c1, g_c2 = st.columns(2)
                 wall_gif_in = g_c1.text_input("Or Paste Moving GIF URL / Embed Code (Wallpaper)", value=th.get("custom_wall", "") if str(th.get("custom_wall", "")).startswith("http") else "", placeholder="Paste Giphy/Tenor link, .gif URL, or <iframe>/<img> embed code...")
                 ban_gif_in = g_c2.text_input("Or Paste Moving GIF URL / Embed Code (Banner)", value=th.get("banner_img", "") if str(th.get("banner_img", "")).startswith("http") else "", placeholder="Paste Giphy/Tenor link, .gif URL, or <iframe>/<img> embed code...")
+                bf1, bf2, bf3, bf4 = st.columns(4)
+                ban_fit_in = bf1.selectbox("Banner Image Fit", ["cover", "contain", "fill"], index=["cover", "contain", "fill"].index(th.get("ban_fit", "cover")) if th.get("ban_fit", "cover") in ["cover", "contain", "fill"] else 0)
+                ban_zoom_in = bf2.slider("Banner Zoom (%)", 50, 200, int(th.get("ban_zoom", 100)))
+                ban_x_in = bf3.slider("Move Left / Right (%)", 0, 100, int(th.get("ban_x", 50)))
+                ban_y_in = bf4.slider("Move Up / Down (%)", 0, 100, int(th.get("ban_y", 50)))
+
                 mq_on = st.checkbox("Enable Scrolling Marquee Ticker", value=bool(th.get("marquee_on", False)))
                 mq_txt = st.text_input("Marquee Ticker Text", value=th.get("marquee_text", ""))
                 pin_txt = st.text_input("Pinned Bulletin Note", value=th.get("pinned_note", ""))
@@ -1919,6 +1931,7 @@ with hub_col:
                         st.error(msg_tx)
                     else:
                         th.update({"bg": c_bg, "card": c_cd, "accent": c_ac, "text": c_tx, "font": sel_font, "backdrop": sel_bd, "spray_word": spray_in.strip() or "LeX!", "border_style": sel_bst, "card_radius": rad_val, "card_opacity": op_val, "cursor_style": sel_cur, "card_anim": sel_anim, "glow_borders": glow_b, "text_glow": glow_t, "banner_live": sel_bn, "marquee_on": mq_on, "marquee_text": mq_txt.strip(), "pinned_note": pin_txt.strip(), "allow_css_remix": allow_rmx, "scrapbook_require_approval": scrap_app, "custom_css": x_css_in})
+                        th.update({"ban_fit": ban_fit_in, "ban_zoom": ban_zoom_in, "ban_x": ban_x_in, "ban_y": ban_y_in})
                     def _extract_gif_src(raw_val: str) -> str:
                         s = (raw_val or "").strip()
                         if not s:
