@@ -1154,6 +1154,65 @@ if st.session_state.viewing_handle and sb:
     for vw in (vp.get("wall_json") or [])[:8]:
         st.markdown(f'<div class="lex-card"><strong>{vw["sender"]}:</strong> {vw["msg"]}</div>', unsafe_allow_html=True)
     st.stop()
+    sp_c1, sp_c2 = st.columns(2)
+if sp_c1.button("📸 + Add 24h Story", key="prof_stories_btn", use_container_width=True):
+    st.session_state.show_stories_panel = not st.session_state.get("show_stories_panel", False)
+    st.session_state.show_flashpic_panel = False
+    st.rerun()
+if sp_c2.button("⚡ FlashPic Chat", key="prof_flashpic_btn", use_container_width=True):
+    st.session_state.show_flashpic_panel = not st.session_state.get("show_flashpic_panel", False)
+    st.session_state.show_stories_panel = False
+    st.rerun()
+
+if st.session_state.get("show_stories_panel"):
+    st.markdown(f'<div class="lex-card" style="padding:12px 16px;margin-bottom:8px;"><strong style="color:{th["accent"]};">📸 Post a 24-Hour Story (Shows in Your Profile Story Box)</strong></div>', unsafe_allow_html=True)
+    st1, st2, st3 = st.columns([0.42, 0.34, 0.24])
+    st_file = st1.file_uploader("Story Photo", type=["png", "jpg", "jpeg", "webp", "gif"], key="story_file_up", label_visibility="collapsed")
+    st_cap = st2.text_input("Story caption...", placeholder="Add a 24h story caption...", key="story_cap_in", label_visibility="collapsed")
+    st_vis = st3.selectbox("Visibility", ["Friends Only 🔒", "Public 🌐"], key="story_vis_sel", label_visibility="collapsed")
+    if st.button("➕ Publish 24h Story", key="story_post_btn", use_container_width=True) and st_file is not None and sb:
+        st_url = encode_image_data_url(st_file)
+        vis_tag = "[STORY_PUBLIC]" if "Public" in st_vis else "[STORY_FRIENDS]"
+        sb.table("lex_posts").insert({"user_id": user["user_id"], "handle": user["handle"], "author": user["name"], "body": f"{vis_tag} {st_cap.strip()} ||IMG:{st_url}||"}).execute()
+        st.session_state.show_stories_panel = False
+        st.toast(f"📸 Story added to your profile ({st_vis})!")
+        st.rerun()
+if st.session_state.get("show_flashpic_panel"):
+    st.markdown(f'<div class="lex-card" style="padding:12px 16px;margin-bottom:8px;"><strong style="color:{th["accent"]};">⚡ FlashPic — Disappearing Photo Chat (View Once & Lock)</strong></div>', unsafe_allow_html=True)
+    fp_friends = [("@" + clean_handle_str(f["handle"])) for f in (st.session_state.lex_friends or []) if isinstance(f, dict) and f.get("handle")]
+    if fp_friends and sb:
+        fp1, fp2, fp3 = st.columns([0.28, 0.44, 0.28])
+        fp_to = fp1.selectbox("Send FlashPic To", fp_friends, key="fp_to_sel", label_visibility="collapsed")
+        fp_file = fp2.file_uploader("Snap Photo", type=["png", "jpg", "jpeg", "webp"], key="fp_file_up", label_visibility="collapsed")
+        fp_cap = fp3.text_input("Quick Caption", placeholder="Disappearing caption...", key="fp_cap_in", label_visibility="collapsed")
+        if st.button("⚡ Send FlashPic", key="fp_send_btn", use_container_width=True) and fp_file is not None:
+            fp_url = encode_image_data_url(fp_file)
+            sb.table("lex_posts").insert({"user_id": user["user_id"], "handle": user["handle"], "author": user["name"], "body": f"[FLASHPIC_TO:{fp_to.lower()}] {fp_cap.strip()} ||IMG:{fp_url}||"}).execute()
+            st.toast(f"⚡ FlashPic sent to {fp_to}!")
+            st.rerun()
+    elif not fp_friends:
+        st.caption("Add friends first to send disappearing FlashPics!")
+    if sb:
+        my_fp_tag = f"[FLASHPIC_TO:@{clean_handle_str(user['handle']).lower()}]"
+        fp_rows = sb.table("lex_posts").select("*").ilike("body", f"{my_fp_tag}%").order("created_at", desc=True).limit(10).execute().data or []
+        for fpr in fp_rows:
+            raw_b = fpr.get("body") or ""
+            if "[VIEWED]" in raw_b:
+                continue
+            img_u = raw_b.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in raw_b else ""
+            cap_t = raw_b.partition("]")[2].partition("||IMG:")[0].strip() if "]" in raw_b else ""
+            open_k = f"fp_open_{fpr['id']}"
+            if st.session_state.get(open_k):
+                st.markdown(f'<div class="lex-card" style="text-align:center;border:2px solid {th["accent"]};"><div style="font-size:12px;font-weight:800;color:{th["accent"]};margin-bottom:6px;">⚡ FlashPic from {fpr.get("author")} ({fpr.get("handle")}) — Tap Close to Lock Forever</div><img src="{img_u}" style="max-width:100%;max-height:360px;border-radius:12px;" /><div style="margin-top:6px;">{cap_t}</div></div>', unsafe_allow_html=True)
+                if st.button("🔒 Close & Expire FlashPic", key=f"fp_burn_{fpr['id']}", use_container_width=True):
+                    sb.table("lex_posts").update({"body": f"{my_fp_tag} [VIEWED]"}).eq("id", fpr["id"]).execute()
+                    st.session_state[open_k] = False
+                    st.rerun()
+            else:
+                if st.button(f"⚡ Tap to Open FlashPic from {fpr.get('author')} ({fpr.get('handle')})", key=f"fp_tap_{fpr['id']}", use_container_width=True):
+                    st.session_state[open_k] = True
+                    st.rerun()
+                    
 qt_cols = st.columns(4)
 _qt_presets = [
     ("🌈 Neon Prism", "#05030A", "#FF007F", "rgba(10,5,20,0.92)", "Pill (28px)", '@keyframes lexRainbowDrift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes lexBoxFloat{0%{background-position:0 0,60px 40px,120px 80px,20px 100px}100%{background-position:0 -420px,60px -580px,120px -300px,20px -480px}}@keyframes lexPrismPulse{0%{border-color:#FF007F;box-shadow:0 0 22px #FF007F99,inset 0 0 14px #FF007F44}25%{border-color:#00F0FF;box-shadow:0 0 26px #00F0FF99,inset 0 0 16px #00F0FF44}50%{border-color:#39FF14;box-shadow:0 0 26px #39FF1499,inset 0 0 16px #39FF1444}75%{border-color:#FFE600;box-shadow:0 0 26px #FFE60099,inset 0 0 16px #FFE60044}100%{border-color:#FF007F;box-shadow:0 0 22px #FF007F99,inset 0 0 14px #FF007F44}}html body [data-testid="stAppViewContainer"]{background-color:#05030A!important;background-image:radial-gradient(circle at 12% 18%,#FF007F44 0 28px,transparent 65px),radial-gradient(circle at 86% 16%,#00F0FF44 0 36px,transparent 80px),radial-gradient(circle at 78% 78%,#39FF1438 0 32px,transparent 75px),radial-gradient(circle at 18% 82%,#FFE60038 0 30px,transparent 70px),radial-gradient(circle at 52% 48%,#A855F744 0 42px,transparent 95px),linear-gradient(125deg,#07030F 0%,#1A062E 25%,#042433 50%,#1F1B04 75%,#07030F 100%)!important;background-size:100% 100%,100% 100%,100% 100%,100% 100%,100% 100%,300% 300%!important;animation:lexRainbowDrift 10s ease infinite!important}html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(135deg,#FF007Fbb 0 10px,transparent 10px),linear-gradient(135deg,#00F0FFbb 0 12px,transparent 12px),radial-gradient(circle,#39FF14dd 0 5px,transparent 18px),radial-gradient(circle,#FFE600dd 0 6px,transparent 22px);background-size:150px 220px,230px 310px,130px 190px,190px 260px;animation:lexBoxFloat 6.5s linear infinite}html body .lex-card h1,html body .lex-card h2,html body .lex-card h3,html body h1,html body h2,html body h3,html body .lex-wordmark{font-family:"Snell Roundhand","Brush Script MT","Trebuchet MS",cursive,sans-serif!important;color:#FFFFFF!important;text-shadow:0 0 10px #FF007Fee,0 0 20px #00F0FFcc,0 0 30px #A855F7bb!important}html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important}html body .lex-banner{position:relative!important;overflow:hidden!important;background:linear-gradient(115deg,#12041C,#FF007F,#FF8C00,#FFE600,#39FF14,#00F0FF,#8B5CF6,#12041C)!important;background-size:350% 350%!important;border:2.5px solid #FFFFFF!important;animation:lexRainbowDrift 6s ease-in-out infinite,lexPrismPulse 5s linear infinite!important}html body .lex-banner::before{content:"✦ NEON PRISM // SPLATTER EDITION ✦"!important;display:inline-block!important;margin-bottom:6px!important;padding:4px 14px!important;border-radius:999px!important;background:rgba(5,3,10,.78)!important;border:1.5px solid #FFFFFF!important;color:#FFFFFF!important;font-size:11px!important;font-weight:900!important;letter-spacing:1.5px!important;text-shadow:0 0 10px #00F0FF!important}html body .lex-card{background:radial-gradient(circle at 88% 15%,#FF007F33 0 18px,transparent 42px),radial-gradient(circle at 12% 85%,#00F0FF33 0 22px,transparent 48px),linear-gradient(130deg,rgba(10,5,20,.90) 0%,rgba(42,10,66,.86) 35%,rgba(6,44,58,.86) 68%,rgba(10,5,20,.92) 100%)!important;background-size:100% 100%,100% 100%,300% 300%!important;backdrop-filter:blur(14px)!important;border:2px solid #FF007F!important;animation:lexRainbowDrift 7s ease-in-out infinite,lexPrismPulse 5s linear infinite!important}html body .lex-friend-card{background:linear-gradient(135deg,rgba(10,5,20,.92) 0%,rgba(46,12,72,.88) 50%,rgba(6,38,52,.90) 100%)!important;background-size:260% 260%!important;border:1.5px solid #00F0FF!important;animation:lexRainbowDrift 6s ease-in-out infinite,lexPrismPulse 5s linear infinite!important}html body .stButton button{background:linear-gradient(90deg,#FF007F,#FF8C00,#39FF14,#00F0FF,#A855F7)!important;background-size:250% auto!important;color:#05030A!important;font-weight:900!important;border:1.5px solid #FFFFFF!important;border-radius:999px!important;box-shadow:0 0 18px #00F0FFaa!important;animation:lexRainbowDrift 4s linear infinite!important}'),
@@ -1171,6 +1230,27 @@ for _qi, (_qlbl, _qbg, _qacc, _qcard, _qrad, _qcss) in enumerate(_qt_presets):
 b_html = build_live_banner_html(th.get("banner_live", "None"), th.get("banner_img", ""), th["accent"], rad_px, th)
 if b_html:
     st.markdown(b_html, unsafe_allow_html=True)
+    if sb:
+    from datetime import datetime, timezone, timedelta
+    _st_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    _my_stories = sb.table("lex_posts").select("*").ilike("handle", f"@{clean_handle_str(user['handle'])}").or_("body.ilike.%[STORY_FRIENDS]%,body.ilike.%[STORY_PUBLIC]%").gte("created_at", _st_cutoff).order("created_at", desc=True).limit(8).execute().data or []
+    st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">📸 My 24-Hour Story Box</strong> <span style="font-size:11px;opacity:0.75;">({len(_my_stories)} active)</span></div>', unsafe_allow_html=True)
+    if _my_stories:
+        _scols = st.columns(min(len(_my_stories), 4))
+        for _si, _sr in enumerate(_my_stories[:4]):
+            _rb = _sr.get("body") or ""
+            _simg = _rb.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _rb else ""
+            _scap = _rb.replace("[STORY_PUBLIC]", "").replace("[STORY_FRIENDS]", "").partition("||IMG:")[0].strip()
+            _sbadge = "🌐 Public" if "[STORY_PUBLIC]" in _rb else "🔒 Friends Only"
+            with _scols[_si]:
+                st.markdown(f'<div class="lex-card" style="padding:8px;text-align:center;"><div style="font-size:10px;font-weight:800;color:{th["accent"]};margin-bottom:4px;">{_sbadge}</div><img src="{_simg}" style="width:100%;height:150px;object-fit:cover;border-radius:10px;" /><div style="font-size:11px;margin-top:4px;">{_scap}</div></div>', unsafe_allow_html=True)
+                if st.button("🗑️ Delete", key=f"del_my_story_{_sr['id']}", use_container_width=True):
+                    sb.table("lex_posts").delete().eq("id", _sr["id"]).execute()
+                    st.toast("🗑️ Story deleted!")
+                    st.rerun()
+    else:
+        st.caption("No active 24h stories on your profile — tap 📸 + Add 24h Story at the top to post one!")
+
 if th.get("marquee_on") and th.get("marquee_text"):
     st.markdown(f'<div class="lex-card" style="padding:6px 12px;"><marquee style="color:{th["accent"]};font-weight:800;letter-spacing:0.06em;">{th["marquee_text"]}</marquee></div>', unsafe_allow_html=True)
 
