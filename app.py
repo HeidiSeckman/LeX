@@ -1137,27 +1137,27 @@ if st.session_state.viewing_handle and sb:
     if ac5.button("🚩 Report", key=f"pub_rep_{vp['handle']}", use_container_width=True):
         block_or_report_member(vp["handle"], "report", "Reported from Public Profile")
         st.toast(f"Reported {vp['handle']}")
-        if sb:
-            from datetime import datetime, timezone, timedelta
-            _v_cut = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
-            _vh_bare = clean_handle_str(vp.get("handle", "")).lower()
-            _p_rows = sb.table("lex_posts").select("*").ilike("body", "%STORY%").gte("created_at", _v_cut).order("created_at", desc=False).execute().data or []
-            _m_rows = sb.table("lex_messages").select("*").ilike("body", "%STORY%").gte("created_at", _v_cut).order("created_at", desc=False).execute().data or []
-            _all_st = [r for r in (_p_rows + _m_rows) if clean_handle_str(r.get("handle") or r.get("sender_handle") or "").lower() == _vh_bare]
-            _is_ok_viewer = is_fr or v_is_founder or (user.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"})
-            _v_stories = [s for s in _all_st if ("[STORY_FRIENDS]" not in (s.get("body") or "")) or _is_ok_viewer]
-            if _v_stories:
-                _vs_open_k = f"open_v_story_{_vh_bare}"
-                if st.button(f"👁️ View {vp.get('display_name', vp['handle'])}'s Story ({len(_v_stories)})", key=f"btn_{_vs_open_k}", use_container_width=True):
-                    st.session_state[_vs_open_k] = not st.session_state.get(_vs_open_k, False)
-                    st.rerun()
-                if st.session_state.get(_vs_open_k):
-                    _v_key = f"v_story_idx_{_vh_bare}"
-                    _v_idx = st.session_state.get(_v_key, 0) % len(_v_stories)
-                    _cur_vs = _v_stories[_v_idx]
-                    _vs_body = _cur_vs.get("body") or ""
-                    _vs_img = _vs_body.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _vs_body else ""
-                    _vs_txt = _vs_body.split("]", 1)[-1].partition("||IMG:")[0].strip() if "]" in _vs_body else _vs_body
+    if sb:
+        from datetime import datetime, timezone, timedelta
+        _v_cut = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+        _vh_bare = clean_handle_str(vp.get("handle", "")).lower()
+        _p_rows = sb.table("lex_posts").select("*").ilike("body", "%STORY%").gte("created_at", _v_cut).order("created_at", desc=False).execute().data or []
+        _m_rows = sb.table("lex_messages").select("*").ilike("body", "%STORY%").gte("created_at", _v_cut).order("created_at", desc=False).execute().data or []
+        _all_st = [r for r in (_p_rows + _m_rows) if clean_handle_str(r.get("handle") or r.get("sender_handle") or "").lower() == _vh_bare]
+        _is_ok_viewer = is_fr or v_is_founder or (user.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"})
+        _v_stories = [s for s in _all_st if ("[STORY_FRIENDS]" not in (s.get("body") or "")) or _is_ok_viewer]
+        if _v_stories:
+            _vs_open_k = f"open_v_story_{_vh_bare}"
+            if st.button(f"👁️ View {vp.get('display_name', vp['handle'])}'s Story ({len(_v_stories)})", key=f"btn_{_vs_open_k}", use_container_width=True):
+                st.session_state[_vs_open_k] = not st.session_state.get(_vs_open_k, False)
+                st.rerun()
+            if st.session_state.get(_vs_open_k):
+                _v_key = f"v_story_idx_{_vh_bare}"
+                _v_idx = st.session_state.get(_v_key, 0) % len(_v_stories)
+                _cur_vs = _v_stories[_v_idx]
+                _vs_body = _cur_vs.get("body") or ""
+                _vs_img = _vs_body.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _vs_body else ""
+                _vs_txt = _vs_body.split("]", 1)[-1].partition("||IMG:")[0].strip() if "]" in _vs_body else _vs_body
                     st.markdown(f'<div class="lex-card" style="border:2px solid {v_th.get("accent","#FF2E93")};text-align:center;"><img src="{_vs_img}" style="max-width:100%;max-height:360px;border-radius:12px;" /><div style="margin-top:8px;font-size:13px;">{_vs_txt}</div></div>', unsafe_allow_html=True)
                     vs_c1, vs_c2, vs_c3, vs_c4, vs_c5 = st.columns([0.24, 0.19, 0.19, 0.19, 0.19])
                     if vs_c1.button("⏭️ Next", key=f"vs_next_{_vh_bare}", use_container_width=True):
