@@ -1061,8 +1061,23 @@ if st.session_state.viewing_handle and sb:
             st.session_state[visit_key] = True
         except Exception:
             pass
-
-        st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:16px;">{v_av}<div><h2 style="margin:0;">{vp.get("display_name", "")} {founder_badge_html(vp.get("handle", ""))}</h2><div style="color:{v_th["accent"]};font-weight:700;">{vp.get("handle", "")} <span style="font-size:11px;margin-left:6px;">{online_badge}</span></div><div style="color:#34D399;font-size:13px;">● {vp.get("mood", "Online ⚡")}</div>{v_badges}{v_site}</div></div><div style="display:flex;gap:18px;margin-top:12px;font-weight:800;font-size:13px;"><span>⚡ {len(v_fol)} Followers (Unlimited)</span><span>👥 {len(v_fr)} / {MAX_FRIENDS} Friends</span></div><p style="margin-top:12px;"><strong>About Me:</strong> {vp.get("bio", "")}</p><p><strong>Who I\'d Like to Meet:</strong> {vp.get("who_to_meet", "")}</p>{v_int_html}</div>', unsafe_allow_html=True)
+   
+    _vst_ring_html = ""
+    _v_stories = []
+    if sb:
+        from datetime import datetime, timezone, timedelta
+        _v_cut = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+        _v_raw = sb.table("lex_posts").select("*").ilike("handle", f"@{clean_handle_str(vp.get('handle', ''))}").ilike("body", "%[STORY_%").gte("created_at", _v_cut).order("created_at", desc=False).execute().data or []
+        _is_fr_chk = any(f["handle"].lower() == vp.get("handle", "").lower() for f in st.session_state.lex_friends)
+        _is_fnd_chk = user.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"}
+        _v_stories = [s for s in _v_raw if "[STORY_PUBLIC]" in (s.get("body") or "") or (("[STORY_FRIENDS]" in (s.get("body") or "")) and (_is_fr_chk or _is_fnd_chk))]
+        if _v_stories:
+            _vsb0 = _v_stories[0].get("body") or ""
+            _vsimg0 = _vsb0.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _vsb0 else ""
+            if _vsimg0:
+                _vst_ring_html = f'<div style="margin-left:auto;text-align:center;flex-shrink:0;"><img src="{_vsimg0}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid {v_th.get("accent","#FF2E93")};box-shadow:0 0 16px {v_th.get("accent","#FF2E93")}88;" /><div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:{v_th.get("accent","#FF2E93")};margin-top:4px;">STORY</div></div>'
+    _v_bio_h = f'<div style="margin-top:10px;font-size:13px;">{vp.get("bio")}</div>' if vp.get("bio") else ""
+    st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{v_av}<div><div style="font-size:20px;font-weight:900;">{vp.get("display_name", vp.get("handle", ""))} {v_badges}</div><div style="color:{v_th.get("accent","#FF2E93")};font-weight:800;">{vp.get("handle", "")} • {online_badge}</div>{v_site}</div>{_vst_ring_html}</div>{_v_bio_h}{v_int_html}</div>', unsafe_allow_html=True)
     if v_th.get("allow_css_remix", True):
         if st.button(f"✨ Steal This Look (Remix {vp.get('handle', '')}'s Theme)", key="steal_look_btn"):
             credit_tag = f'html body .lex-banner::after{{content:"Theme inspired by {vp.get("handle", "@Member")}";position:absolute;bottom:6px;right:12px;font-size:10px;opacity:0.85;font-weight:800;}}'
