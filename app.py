@@ -1178,41 +1178,97 @@ if st.session_state.get("show_stories_panel"):
         st.toast(f"📸 Story added to your profile ({st_vis})!")
         st.rerun()
 if st.session_state.get("show_flashpic_panel"):
-    st.markdown(f'<div class="lex-card" style="padding:12px 16px;margin-bottom:8px;"><strong style="color:{th["accent"]};">⚡ FlashPic — Disappearing Photo Chat (View Once & Lock)</strong></div>', unsafe_allow_html=True)
+    from datetime import datetime, timezone
+    st.markdown(f'<div class="lex-card" style="padding:12px 16px;margin-bottom:8px;"><strong style="color:{th["accent"]};">⚡ FlashPic — Picture-Only Disappearing Snaps & Streaks</strong></div>', unsafe_allow_html=True)
     fp_friends = [("@" + clean_handle_str(f["handle"])) for f in (st.session_state.lex_friends or []) if isinstance(f, dict) and f.get("handle")]
+    my_h_low = "@" + clean_handle_str(user["handle"]).lower()
     if fp_friends and sb:
+        pre_target = st.session_state.get("fp_reply_target")
+        def_idx = fp_friends.index(pre_target) if pre_target in fp_friends else 0
         fp1, fp2, fp3 = st.columns([0.28, 0.44, 0.28])
-        fp_to = fp1.selectbox("Send FlashPic To", fp_friends, key="fp_to_sel", label_visibility="collapsed")
+        fp_to = fp1.selectbox("Send FlashPic To", fp_friends, index=def_idx, key="fp_to_sel", label_visibility="collapsed")
         fp_file = fp2.file_uploader("Snap Photo", type=["png", "jpg", "jpeg", "webp"], key="fp_file_up", label_visibility="collapsed")
-        fp_cap = fp3.text_input("Quick Caption", placeholder="Disappearing caption...", key="fp_cap_in", label_visibility="collapsed")
+        fp_cap = fp3.text_input("Disappearing Caption", placeholder="Optional caption...", key="fp_cap_in", label_visibility="collapsed")
         if st.button("⚡ Send FlashPic", key="fp_send_btn", use_container_width=True) and fp_file is not None:
             fp_url = encode_image_data_url(fp_file)
             sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": f"[FLASHPIC_TO:{fp_to.lower()}] {fp_cap.strip()} ||IMG:{fp_url}||"}).execute()
+            st.session_state.fp_reply_target = None
             st.toast(f"⚡ FlashPic sent to {fp_to}!")
             st.rerun()
     elif not fp_friends:
-        st.caption("Add friends first to send disappearing FlashPics!")
+        st.caption("Add friends first to send FlashPics!")
+
     if sb:
-        my_fp_tag = f"[FLASHPIC_TO:@{clean_handle_str(user['handle']).lower()}]"
-        fp_rows = sb.table("lex_posts").select("*").ilike("body", f"{my_fp_tag}%").order("created_at", desc=True).limit(10).execute().data or []
-        for fpr in fp_rows:
-            raw_b = fpr.get("body") or ""
-            if "[VIEWED]" in raw_b:
+        all_fp = sb.table("lex_posts").select("*").ilike("body", "%[FLASHPIC_TO:%").order("created_at", desc=True).limit(150).execute().data or []
+        threads = {}
+        for r in all_fp:
+            rb = r.get("body") or ""
+            sender_h = "@" + clean_handle_str(r.get("handle") or "").lower()
+            to_h = rb.partition("[FLASHPIC_TO:")[2].partition("]")[0].strip().lower()
+            if my_h_low not in (sender_h, to_h):
                 continue
-            img_u = raw_b.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in raw_b else ""
-            cap_t = raw_b.partition("]")[2].partition("||IMG:")[0].strip() if "]" in raw_b else ""
-            open_k = f"fp_open_{fpr['id']}"
-            if st.session_state.get(open_k):
-                st.markdown(f'<div class="lex-card" style="text-align:center;border:2px solid {th["accent"]};"><div style="font-size:12px;font-weight:800;color:{th["accent"]};margin-bottom:6px;">⚡ FlashPic from {fpr.get("author")} ({fpr.get("handle")}) — Tap Close to Lock Forever</div><img src="{img_u}" style="max-width:100%;max-height:360px;border-radius:12px;" /><div style="margin-top:6px;">{cap_t}</div></div>', unsafe_allow_html=True)
-                if st.button("🔒 Close & Expire FlashPic", key=f"fp_burn_{fpr['id']}", use_container_width=True):
-                    sb.table("lex_posts").update({"body": f"{my_fp_tag} [VIEWED]"}).eq("id", fpr["id"]).execute()
-                    st.session_state[open_k] = False
-                    st.rerun()
-            else:
-                if st.button(f"⚡ Tap to Open FlashPic from {fpr.get('author')} ({fpr.get('handle')})", key=f"fp_tap_{fpr['id']}", use_container_width=True):
+            other_h = to_h if sender_h == my_h_low else sender_h
+            threads.setdefault(other_h, []).append(r)
+
+        st.markdown(f'<div style="font-size:12px;font-weight:900;color:{th["accent"]};margin:8px 0 4px 2px;">📥 FlashPic Inbox & History ({len(threads)})</div>', unsafe_allow_html=True)
+        if not threads:
+            st.caption("No FlashPics yet — send your first disappearing pic above!")
+        for other_h, rows in threads.items():
+            days_active = sorted({(x.get("created_at") or "")[:10] for x in rows if x.get("created_at")}, reverse=True)
+            streak = 0
+            if days_active:
+                cur_d = datetime.now(timezone.utc).date()
+                for ds in days_active:
+                    try:
+                        d_obj = datetime.strptime(ds, "%Y-%m-%d").date()
+                        if (cur_d - d_obj).days <= streak + 1:
+                            streak += 1
+                            cur_d = d_obj
+                        else:
+                            break
+                    except Exception:
+                        break
+            streak_badge = f" 🔥 {streak}d" if streak >= 1 else ""
+            latest = rows[0]
+            l_body = latest.get("body") or ""
+            l_sender = "@" + clean_handle_str(latest.get("handle") or "").lower()
+            is_incoming = (l_sender != my_h_low)
+            is_viewed = "[VIEWED]" in l_body
+            status_txt = ("⚡ New FlashPic Received!" if not is_viewed else "👁️ Opened Received Pic") if is_incoming else ("📤 Sent • Unopened" if not is_viewed else "👀 Sent • Opened")
+
+            st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><div><strong>{other_h}</strong><span style="color:{th["accent"]};font-weight:900;">{streak_badge}</span><div style="font-size:11px;opacity:0.8;">{status_txt} • {len(rows)} total</div></div></div>', unsafe_allow_html=True)
+            unopened_in = [x for x in rows if ("@" + clean_handle_str(x.get("handle") or "").lower()) != my_h_low and "[VIEWED]" not in (x.get("body") or "")]
+            b1, b2, b3 = st.columns([0.38, 0.38, 0.24])
+            if unopened_in:
+                target_snap = unopened_in[0]
+                open_k = f"fp_open_{target_snap['id']}"
+                if b1.button(f"⚡ Open ({len(unopened_in)})", key=f"fp_open_btn_{other_h}", use_container_width=True):
                     st.session_state[open_k] = True
                     st.rerun()
-                    
+                if st.session_state.get(open_k):
+                    rb_open = target_snap.get("body") or ""
+                    img_u = rb_open.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in rb_open else ""
+                    cap_t = rb_open.partition("]")[2].partition("||IMG:")[0].strip() if "]" in rb_open else ""
+                    st.markdown(f'<div class="lex-card" style="text-align:center;border:2px solid {th["accent"]};padding:12px;"><div style="font-size:12px;font-weight:900;color:{th["accent"]};margin-bottom:6px;">⚡ From {other_h} — Tap Close to Lock Forever</div><img src="{img_u}" style="max-width:100%;max-height:380px;border-radius:12px;" /><div style="margin-top:6px;font-size:13px;">{cap_t}</div></div>', unsafe_allow_html=True)
+                    if st.button("🔒 Close & Expire Pic", key=f"fp_burn_{target_snap['id']}", use_container_width=True):
+                        sb.table("lex_posts").update({"body": f"[FLASHPIC_TO:{my_h_low}] [VIEWED]"}).eq("id", target_snap["id"]).execute()
+                        st.session_state[open_k] = False
+                        st.rerun()
+            else:
+                b1.button("✓ Caught Up", key=f"fp_done_{other_h}", disabled=True, use_container_width=True)
+
+            if b2.button("⚡ Reply w/ FlashPic", key=f"fp_rep_{other_h}", use_container_width=True):
+                matched_opt = next((opt for opt in fp_friends if opt.lower() == other_h), None)
+                if matched_opt:
+                    st.session_state.fp_reply_target = matched_opt
+                st.rerun()
+
+            if b3.button("🗑️ Delete", key=f"fp_del_thread_{other_h}", use_container_width=True):
+                for del_r in rows:
+                    sb.table("lex_posts").delete().eq("id", del_r["id"]).execute()
+                st.toast(f"🗑️ Permanently deleted FlashPic history with {other_h}!")
+                st.rerun()
+
 qt_cols = st.columns(4)
 _qt_presets = [
     ("🌈 Neon Prism", "#05030A", "#FF007F", "rgba(10,5,20,0.92)", "Pill (28px)", '@keyframes lexRainbowDrift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes lexBoxFloat{0%{background-position:0 0,60px 40px,120px 80px,20px 100px}100%{background-position:0 -420px,60px -580px,120px -300px,20px -480px}}@keyframes lexPrismPulse{0%{border-color:#FF007F;box-shadow:0 0 22px #FF007F99,inset 0 0 14px #FF007F44}25%{border-color:#00F0FF;box-shadow:0 0 26px #00F0FF99,inset 0 0 16px #00F0FF44}50%{border-color:#39FF14;box-shadow:0 0 26px #39FF1499,inset 0 0 16px #39FF1444}75%{border-color:#FFE600;box-shadow:0 0 26px #FFE60099,inset 0 0 16px #FFE60044}100%{border-color:#FF007F;box-shadow:0 0 22px #FF007F99,inset 0 0 14px #FF007F44}}html body [data-testid="stAppViewContainer"]{background-color:#05030A!important;background-image:radial-gradient(circle at 12% 18%,#FF007F44 0 28px,transparent 65px),radial-gradient(circle at 86% 16%,#00F0FF44 0 36px,transparent 80px),radial-gradient(circle at 78% 78%,#39FF1438 0 32px,transparent 75px),radial-gradient(circle at 18% 82%,#FFE60038 0 30px,transparent 70px),radial-gradient(circle at 52% 48%,#A855F744 0 42px,transparent 95px),linear-gradient(125deg,#07030F 0%,#1A062E 25%,#042433 50%,#1F1B04 75%,#07030F 100%)!important;background-size:100% 100%,100% 100%,100% 100%,100% 100%,100% 100%,300% 300%!important;animation:lexRainbowDrift 10s ease infinite!important}html body [data-testid="stAppViewContainer"]::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(135deg,#FF007Fbb 0 10px,transparent 10px),linear-gradient(135deg,#00F0FFbb 0 12px,transparent 12px),radial-gradient(circle,#39FF14dd 0 5px,transparent 18px),radial-gradient(circle,#FFE600dd 0 6px,transparent 22px);background-size:150px 220px,230px 310px,130px 190px,190px 260px;animation:lexBoxFloat 6.5s linear infinite}html body .lex-card h1,html body .lex-card h2,html body .lex-card h3,html body h1,html body h2,html body h3,html body .lex-wordmark{font-family:"Snell Roundhand","Brush Script MT","Trebuchet MS",cursive,sans-serif!important;color:#FFFFFF!important;text-shadow:0 0 10px #FF007Fee,0 0 20px #00F0FFcc,0 0 30px #A855F7bb!important}html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important}html body .lex-banner{position:relative!important;overflow:hidden!important;background:linear-gradient(115deg,#12041C,#FF007F,#FF8C00,#FFE600,#39FF14,#00F0FF,#8B5CF6,#12041C)!important;background-size:350% 350%!important;border:2.5px solid #FFFFFF!important;animation:lexRainbowDrift 6s ease-in-out infinite,lexPrismPulse 5s linear infinite!important}html body .lex-banner::before{content:"✦ NEON PRISM // SPLATTER EDITION ✦"!important;display:inline-block!important;margin-bottom:6px!important;padding:4px 14px!important;border-radius:999px!important;background:rgba(5,3,10,.78)!important;border:1.5px solid #FFFFFF!important;color:#FFFFFF!important;font-size:11px!important;font-weight:900!important;letter-spacing:1.5px!important;text-shadow:0 0 10px #00F0FF!important}html body .lex-card{background:radial-gradient(circle at 88% 15%,#FF007F33 0 18px,transparent 42px),radial-gradient(circle at 12% 85%,#00F0FF33 0 22px,transparent 48px),linear-gradient(130deg,rgba(10,5,20,.90) 0%,rgba(42,10,66,.86) 35%,rgba(6,44,58,.86) 68%,rgba(10,5,20,.92) 100%)!important;background-size:100% 100%,100% 100%,300% 300%!important;backdrop-filter:blur(14px)!important;border:2px solid #FF007F!important;animation:lexRainbowDrift 7s ease-in-out infinite,lexPrismPulse 5s linear infinite!important}html body .lex-friend-card{background:linear-gradient(135deg,rgba(10,5,20,.92) 0%,rgba(46,12,72,.88) 50%,rgba(6,38,52,.90) 100%)!important;background-size:260% 260%!important;border:1.5px solid #00F0FF!important;animation:lexRainbowDrift 6s ease-in-out infinite,lexPrismPulse 5s linear infinite!important}html body .stButton button{background:linear-gradient(90deg,#FF007F,#FF8C00,#39FF14,#00F0FF,#A855F7)!important;background-size:250% auto!important;color:#05030A!important;font-weight:900!important;border:1.5px solid #FFFFFF!important;border-radius:999px!important;box-shadow:0 0 18px #00F0FFaa!important;animation:lexRainbowDrift 4s linear infinite!important}'),
