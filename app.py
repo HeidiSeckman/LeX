@@ -758,7 +758,7 @@ if st.session_state.lex_user is None:
                 4. **Privacy & Data:** We store your email, handle, profile settings, posts, and uploaded images on Supabase to operate your account. You can delete your posts, stories, and FlashPics anytime.
                 5. **DMCA / Abuse Contact:** To report copyright infringement or abuse, use the in-app **🚩 Report** button or email **legal@lexitechstudio.com**.
                 """)
-            agree_terms = st.checkbox("I confirm I am 13+ and agree to the Terms of Service, Privacy Policy & Community Rules.")
+                agree_terms = st.checkbox("I confirm I am 13+ and agree to the Terms of Service, Privacy Policy & Community Rules.")
         if st.form_submit_button("Create Permanent LeX Account ✦", use_container_width=True) and sb:
                 ch = clean_handle_str(r_handle)
                 ok_s, msg_s = check_safety_and_dress_code(f"{d_name} {ch} {site_in}")
