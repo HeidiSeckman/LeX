@@ -394,19 +394,19 @@ def is_member_online(theme_data: dict) -> bool:
 
 def ping_member_heartbeat():
     u = st.session_state.get("lex_user")
-    if not u or not u.get("user_id"):
+    if not u or not u.get("handle"):
         return
     now_ts = int(time.time())
-    if now_ts - int(st.session_state.get("_lex_hb_ts", 0)) < 90:
+    if now_ts - int(st.session_state.get("_lex_hb_ts", 0)) < 60:
         return
     st.session_state["_lex_hb_ts"] = now_ts
     st.session_state.lex_theme["last_seen"] = now_ts
-    sb = get_sb()
-    if sb:
+    sb_hb = get_sb()
+    if sb_hb:
         try:
-            th_copy = st.session_state.lex_theme.copy()
+            th_copy = dict(st.session_state.lex_theme or {})
             th_copy["last_seen"] = now_ts
-            sb.table("lex_profiles").update({"theme_json": th_copy}).eq("user_id", u["user_id"]).execute()
+            sb_hb.table("lex_profiles").update({"theme_json": th_copy}).ilike("handle", u["handle"].strip()).execute()
         except Exception:
             pass
 
