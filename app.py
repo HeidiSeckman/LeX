@@ -390,7 +390,7 @@ def is_member_online(theme_data: dict) -> bool:
         last_ts = 0
     if last_ts <= 0:
         return False
-    return 0 <= (int(time.time()) - last_ts) < 180
+    return 0 <= (int(time.time()) - last_ts) < 600
 
 def ping_member_heartbeat():
     u = st.session_state.get("lex_user")
@@ -1701,11 +1701,11 @@ def render_feed_post(p: dict, k_pfx: str):
                                 st.session_state[c_open_key] = True
                                 st.rerun()
 
-        my_posts = [p for p in posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) == my_h_low]
-        if not my_posts:
-            st.caption("No status updates from you yet — post your first one above!")
-        for p in my_posts:
-            render_feed_post(p, "my")
+    my_posts = [p for p in posts if ("@" + clean_handle_str(p.get("handle") or "").lower()) == my_h_low]
+    if not my_posts:
+        st.caption("No status updates from you yet — post your first one above!")
+    for p in my_posts:
+        render_feed_post(p, "my")
 
     with t_ffeed:
         _ff_blocked = get_blocked_handles()
