@@ -1137,14 +1137,14 @@ if st.session_state.viewing_handle and sb:
     if ac5.button("🚩 Report", key=f"pub_rep_{vp['handle']}", use_container_width=True):
         block_or_report_member(vp["handle"], "report", "Reported from Public Profile")
         st.toast(f"Reported {vp['handle']}")
-    if sb:
+        if sb:
         from datetime import datetime, timezone, timedelta
         _v_cut = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
         _vh_bare = clean_handle_str(vp.get("handle", "")).lower()
-            _v_raw = sb.table("lex_posts").select("*").ilike("handle", f"%{clean_handle_str(vp.get('handle', ''))}").ilike("body", "%[STORY_%").gte("created_at", _v_cut).order("created_at", desc=False).execute().data or []
-            _is_fr_chk = any(f["handle"].lower() == vp.get("handle", "").lower() for f in st.session_state.lex_friends)
-            _is_fnd_chk = user.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"}
-            _v_stories = [s for s in _v_raw if "[STORY_PUBLIC]" in (s.get("body") or "") or (("[STORY_FRIENDS]" in (s.get("body") or "")) and (_is_fr_chk or _is_fnd_chk))]
+        _v_raw = sb.table("lex_posts").select("*").ilike("handle", f"%{clean_handle_str(vp.get('handle', ''))}").ilike("body", "%[STORY_%").gte("created_at", _v_cut).order("created_at", desc=False).execute().data or []
+        _is_fr_chk = any(f["handle"].lower() == vp.get("handle", "").lower() for f in st.session_state.lex_friends)
+        _is_fnd_chk = user.get("handle", "").strip().lower() in {"@heidi", "@heidiseckman"}
+        _v_stories = [s for s in _v_raw if "[STORY_PUBLIC]" in (s.get("body") or "") or (("[STORY_FRIENDS]" in (s.get("body") or "")) and (_is_fr_chk or _is_fnd_chk))]
         if _v_stories:
             _vs_open_k = f"open_v_story_{_vh_bare}"
             if st.button(f"👁️ View {vp.get('display_name', vp['handle'])}'s Story ({len(_v_stories)})", key=f"btn_{_vs_open_k}", use_container_width=True):
@@ -1157,18 +1157,18 @@ if st.session_state.viewing_handle and sb:
                 _vs_body = _cur_vs.get("body") or ""
                 _vs_img = _vs_body.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _vs_body else ""
                 _vs_txt = _vs_body.split("]", 1)[-1].partition("||IMG:")[0].strip() if "]" in _vs_body else _vs_body
-                    st.markdown(f'<div class="lex-card" style="border:2px solid {v_th.get("accent","#FF2E93")};text-align:center;"><img src="{_vs_img}" style="max-width:100%;max-height:360px;border-radius:12px;" /><div style="margin-top:8px;font-size:13px;">{_vs_txt}</div></div>', unsafe_allow_html=True)
-                    vs_c1, vs_c2, vs_c3, vs_c4, vs_c5 = st.columns([0.24, 0.19, 0.19, 0.19, 0.19])
-                    if vs_c1.button("⏭️ Next", key=f"vs_next_{_vh_bare}", use_container_width=True):
-                        st.session_state[_v_key] = (_v_idx + 1) % len(_v_stories)
-                        st.rerun()
-                    for _ri, (_emj, _c_obj) in enumerate([("❤️", vs_c2), ("🔥", vs_c3), ("😍", vs_c4)]):
-                        if _c_obj.button(_emj, key=f"vs_rx_{_cur_vs['id']}_{_ri}", use_container_width=True):
-                            sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": f"[LEX_NOTIF] {user['name']} ({user['handle']}) reacted {_emj} to your 24h Story!"}).execute()
-                            st.toast(f"Sent {_emj} to {vp.get('display_name', vp['handle'])}'s story!")
-                    if vs_c5.button("🚩", key=f"vs_rep_{_cur_vs['id']}", help="Report Story", use_container_width=True):
-                        sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": f"[REPORT_ALERT] Story {_cur_vs['id']} by {vp['handle']} flagged by {user['handle']}"}).execute()
-                        st.toast("🚩 Story reported to LeX Safety.")
+                st.markdown(f'<div class="lex-card" style="border:2px solid {v_th.get("accent","#FF2E93")};text-align:center;"><img src="{_vs_img}" style="max-width:100%;max-height:360px;border-radius:12px;" /><div style="margin-top:8px;font-size:13px;">{_vs_txt}</div></div>', unsafe_allow_html=True)
+                vs_c1, vs_c2, vs_c3, vs_c4, vs_c5 = st.columns([0.24, 0.19, 0.19, 0.19, 0.19])
+                if vs_c1.button("⏭️ Next", key=f"vs_next_{_vh_bare}", use_container_width=True):
+                    st.session_state[_v_key] = (_v_idx + 1) % len(_v_stories)
+                    st.rerun()
+                for _ri, (_emj, _c_obj) in enumerate([("❤️", vs_c2), ("🔥", vs_c3), ("😍", vs_c4)]):
+                    if _c_obj.button(_emj, key=f"vs_rx_{_cur_vs['id']}_{_ri}", use_container_width=True):
+                        sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": f"[LEX_NOTIF] {user['name']} ({user['handle']}) reacted {_emj} to your 24h Story!"}).execute()
+                        st.toast(f"Sent {_emj} to {vp.get('display_name', vp['handle'])}'s story!")
+                if vs_c5.button("🚩", key=f"vs_rep_{_cur_vs['id']}", help="Report Story", use_container_width=True):
+                    sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": f"[REPORT_ALERT] Story {_cur_vs['id']} by {vp['handle']} flagged by {user['handle']}"}).execute()
+                    st.toast("🚩 Story reported to LeX Safety.")
 
     if vp.get("custom_song_url"):
         render_popular_song_embed(vp["custom_song_url"])
