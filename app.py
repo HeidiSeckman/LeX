@@ -2289,7 +2289,7 @@ with t_studio:
                         m_gp = re.search(r'giphy\.com/(?:gifs|embed)/(?:[a-zA-Z0-9_-]+-)?([a-zA-Z0-9]+)', s, flags=re.IGNORECASE)
                         if m_gp:
                             return f"https://giphy.com{m_gp.group(1)}/giphy.gif"
-                        return safe_http_url(s)
+                    return normalize_url(s) if "normalize_url" in globals() else (s if s.startswith(("http://", "https://", "data:image/")) else "")
 
                     if clr_wall:
                         th["custom_wall"] = ""
