@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 import io
 import re
 import base64
@@ -301,28 +302,37 @@ def encode_image_data_url(uploaded_file) -> str:
     raw_bytes = uploaded_file.getvalue()
     ftype = (uploaded_file.type or "").lower()
     fname = (getattr(uploaded_file, "name", "") or "").lower()
+    out_bytes, out_mime, out_ext = raw_bytes, (uploaded_file.type or "image/png"), "png"
     if "gif" in ftype or fname.endswith(".gif"):
-        b64 = base64.b64encode(raw_bytes).decode("ascii")
-        return f"data:image/gif;base64,{b64}"
-    try:
-        from PIL import Image
-        im = Image.open(io.BytesIO(raw_bytes))
-        im.thumbnail((1100, 1100))
-        buf = io.BytesIO()
-        if im.mode in ("RGBA", "LA", "P"):
-            im = im.convert("RGBA")
-            im.save(buf, format="WEBP", quality=72)
-            b64 = base64.b64encode(buf.getvalue()).decode("ascii")
-            return f"data:image/webp;base64,{b64}"
-        if im.mode != "RGB":
-            im = im.convert("RGB")
-        im.save(buf, format="JPEG", quality=68, optimize=True)
-        b64 = base64.b64encode(buf.getvalue()).decode("ascii")
-        return f"data:image/jpeg;base64,{b64}"
-
-    except Exception:
-        b64 = base64.b64encode(raw_bytes).decode("ascii")
-        return f"data:{uploaded_file.type or 'image/png'};base64,{b64}"
+        out_bytes, out_mime, out_ext = raw_bytes, "image/gif", "gif"
+    else:
+        try:
+            from PIL import Image
+            im = Image.open(io.BytesIO(raw_bytes))
+            im.thumbnail((1100, 1100))
+            buf = io.BytesIO()
+            if im.mode in ("RGBA", "LA", "P"):
+                im = im.convert("RGBA")
+                im.save(buf, format="WEBP", quality=72)
+                out_bytes, out_mime, out_ext = buf.getvalue(), "image/webp", "webp"
+            else:
+                if im.mode != "RGB":
+                    im = im.convert("RGB")
+                im.save(buf, format="JPEG", quality=68, optimize=True)
+                out_bytes, out_mime, out_ext = buf.getvalue(), "image/jpeg", "jpg"
+        except Exception:
+            pass
+    if sb is not None:
+        try:
+            key = f"{uuid.uuid4().hex}.{out_ext}"
+            sb.storage.from_("lex-media").upload(key, out_bytes, {"content-type": out_mime})
+            pub_url = sb.storage.from_("lex-media").get_public_url(key)
+            if pub_url:
+                return pub_url
+        except Exception:
+            pass
+    b64 = base64.b64encode(out_bytes).decode("ascii")
+    return f"data:{out_mime};base64,{b64}"
 
 def normalize_url(raw_url: str) -> str:
     clean = (raw_url or "").strip()
