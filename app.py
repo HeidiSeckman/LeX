@@ -841,6 +841,7 @@ if st.session_state.lex_user is None:
 
 
 user = st.session_state.lex_user
+ping_member_heartbeat()
 st.session_state.lex_friends = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (st.session_state.lex_friends or [])]
 st.session_state.lex_top8 = [x if isinstance(x, dict) else {"handle": str(x), "name": str(x).lstrip("@")} for x in (st.session_state.lex_top8 or [])]
 
