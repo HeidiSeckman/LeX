@@ -1602,17 +1602,18 @@ def render_feed_post(p: dict, k_pfx: str):
             except Exception as rx_err:
                 st.error(f"Reaction error: {rx_err}")
 
-    c_open_key = f"{k_pfx}_open_cm_{p['id']}"
-    if rcols.button(f"💬 {len(cm_list)}", key=f"{k_pfx}_cbtn_{p['id']}"):
+        c_open_key = f"{k_pfx}_open_cm_{p['id']}"
+    if rcols[4].button(f"💬 {len(cm_list)}", key=f"{k_pfx}_cbtn_{p['id']}"):
         st.session_state[c_open_key] = not st.session_state.get(c_open_key, False)
         st.rerun()
-    if p_author_h.lower() == my_h_low:
-        if rcols.button("✏️", key=f"{k_pfx}_ed_p_{p['id']}"):
+    if p_author_h.lower() == ("@" + clean_handle_str(user.get("handle") or "").lower()):
+        if rcols[5].button("✏️", key=f"{k_pfx}_ed_p_{p['id']}"):
             st.session_state[f"{k_pfx}_edit_p_{p['id']}"] = not st.session_state.get(f"{k_pfx}_edit_p_{p['id']}", False)
             st.rerun()
-        if rcols.button("🗑️", key=f"{k_pfx}_del_p_{p['id']}") and sb:
+        if rcols[6].button("🗑️", key=f"{k_pfx}_del_p_{p['id']}") and sb:
             sb.table("lex_posts").delete().eq("id", p["id"]).execute()
             st.rerun()
+
     if st.session_state.get(c_open_key, False) or cm_list:
         with st.expander(f"💬 Comments ({len(cm_list)})", expanded=st.session_state.get(c_open_key, False)):
             for cm in cm_list[-20:]:
