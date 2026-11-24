@@ -1848,39 +1848,62 @@ with hub_col:
                     st.rerun()
     with t_studio:
         with st.expander("👤 Bio, Personal Info, Avatar Shape & Vibe Sticker / GIF", expanded=True):
-            with st.form("studio_bio_form"):
-                b_name = st.text_input("Display Name", value=user.get("name", ""))
-                b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now • Vibing ⚡"))
-                b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Portsmouth, OH")
+        with st.form("studio_bio_form"):
+            b_name = st.text_input("Display Name", value=user.get("name", ""))
+            b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now ⚡"))
+            b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Portsmouth, OH")
+            _u_dob_s = user.get("dob") or th.get("dob")
+            _is_u16 = False
+            if _u_dob_s:
+                try:
+                    _is_u16 = calc_age(date.fromisoformat(str(_u_dob_s)[:10])) < 16
+                except Exception:
+                    _is_u16 = False
+            if _is_u16:
+                b_priv = True
+                st.info("🔒 Under-16 Safety Lock: Profiles for ages 13–15 remain Private automatically until age 16.")
+            else:
                 b_priv = st.checkbox("🔒 Private Profile (Only approved friends can see your bio, Top 8 & wall)", value=bool(th.get("is_private", False)))
-                ws1, ws2 = st.columns(2)
-                b_site_lbl = ws1.text_input("Link Display Name (Shown on Profile)", value=th.get("website_label", ""), placeholder="e.g., My Portfolio / YouTube")
-                b_site = ws2.text_input("Profile Website / Link URL", value=user.get("website") or th.get("website", ""), placeholder="https://...")
-                b_bio = st.text_area("About Me (Bio)", value=user.get("bio", ""), height=90)
-
-                b_meet = st.text_area("Who I'd Like to Meet", value=user.get("who_to_meet", ""), height=68)
-                ic1, ic2 = st.columns(2)
-                i_gen = ic1.text_input("General Interests", value=th.get("int_general", ""))
-                i_mus = ic2.text_input("Music", value=th.get("int_music", ""))
-                i_mov = ic1.text_input("Movies", value=th.get("int_movies", ""))
-                i_tv = ic2.text_input("Television", value=th.get("int_tv", ""))
-                i_bok = st.text_input("Books & Heroes", value=th.get("int_books", ""))
-                av_c1, av_c2 = st.columns(2)
-                shape_keys = list(AVATAR_SHAPES.keys())
-                cur_shape = th.get("avatar_shape", "Classic Circle")
-                pick_shape = av_c1.selectbox("Profile Picture Border Shape (16 Shapes)", shape_keys, index=shape_keys.index(cur_shape) if cur_shape in shape_keys else 0)
-                upd_av = av_c2.file_uploader("Upload New Profile Photo", type=["png", "jpg", "jpeg", "webp"], key="upd_av_file")
-                st.markdown("**✨ Vibe Box Sticker / Animated GIF (Paste URL OR Upload .gif/.png)**")
-                sk1, sk2 = st.columns(2)
-                cur_stk = th.get("vibe_sticker", "")
-                stk_url_in = sk1.text_input("Sticker / GIF URL (Giphy link or direct .gif)", value="" if cur_stk.startswith("data:") else cur_stk)
-                upd_stk = sk2.file_uploader("Or Upload Sticker / GIF File", type=["gif", "png", "jpg", "jpeg", "webp"], key="upd_stk_file")
-                clr_stk = st.checkbox("Remove current Vibe Sticker / GIF")
-                if st.form_submit_button("Save Profile, Bio & Sticker ✦", use_container_width=True):
-                    blob_chk = f"{b_name} {b_mood} {b_home} {b_site} {b_bio} {b_meet} {i_gen} {i_mus} {i_mov} {i_tv} {i_bok} {stk_url_in}"
-                    ok_b, msg_b = check_safety_and_dress_code(blob_chk)
-                    ok_av, msg_av = scan_image_safely(upd_av, b_name)
-                    ok_sk, msg_sk = scan_image_safely(upd_stk, "sticker")
+            ws1, ws2 = st.columns(2)
+            b_site_lbl = ws1.text_input("Link Display Name (Shown on Profile)", value=th.get("website_label", ""), placeholder="e.g., My Portfolio / YouTube")
+            b_site = ws2.text_input("Profile Website / Link URL", value=user.get("website") or th.get("website", ""), placeholder="https://...")
+            b_bio = st.text_area("About Me (Bio)", value=user.get("bio", ""), height=90)
+            b_meet = st.text_area("Who I'd Like to Meet", value=user.get("who_to_meet", ""), height=68)
+            ic1, ic2 = st.columns(2)
+            i_gen = ic1.text_input("General Interests", value=th.get("int_general", ""))
+            i_mus = ic2.text_input("Music", value=th.get("int_music", ""))
+            i_mov = ic1.text_input("Movies", value=th.get("int_movies", ""))
+            i_tv = ic2.text_input("Television", value=th.get("int_tv", ""))
+            i_bok = st.text_input("Books & Heroes", value=th.get("int_books", ""))
+            av_c1, av_c2 = st.columns(2)
+            shape_keys = list(AVATAR_SHAPES.keys())
+            cur_shape = th.get("avatar_shape", "Classic Circle")
+            pick_shape = av_c1.selectbox("Profile Picture Border Shape (16 Shapes)", shape_keys, index=shape_keys.index(cur_shape) if cur_shape in shape_keys else 0)
+            upd_av = av_c2.file_uploader("Upload New Profile Photo", type=["png", "jpg", "jpeg", "webp"], key="upd_av_file")
+            st.markdown("**✨ Vibe Box Sticker / Animated GIF (Paste URL OR Upload .gif/.png)**")
+            sk1, sk2 = st.columns(2)
+            cur_stk = th.get("vibe_sticker", "")
+            stk_url_in = sk1.text_input("Sticker / GIF URL (Giphy link or .gif URL)", value=cur_stk if cur_stk.startswith("http") else "")
+            upd_stk = sk2.file_uploader("Or Upload Sticker / GIF File", type=["gif", "png", "jpg", "jpeg", "webp"], key="upd_stk_file")
+            clr_stk = st.checkbox("Remove current Vibe Sticker / GIF")
+            if st.form_submit_button("Save Profile, Bio & Sticker +", use_container_width=True):
+                blob_chk = f"{b_name} {b_mood} {b_home} {b_site} {b_bio}"
+                ok_b, msg_b = check_safety_and_dress_code(blob_chk)
+                ok_av, msg_av = scan_image_safely(upd_av, b_name)
+                ok_sk, msg_sk = scan_image_safely(upd_stk, "sticker")
+                if not ok_b:
+                    st.error(msg_b)
+                elif not ok_av:
+                    st.error(msg_av)
+                elif not ok_sk:
+                    st.error(msg_sk)
+                else:
+                    user["name"] = b_name.strip() or user["name"]
+                    user["mood"] = b_mood.strip()
+                    th["hometown"] = b_home.strip()
+                    th["is_private"] = True if _is_u16 else bool(b_priv)
+                    if user.get("dob"):
+                        th["dob"] = str(user["dob"])[:10]
                     if not ok_b:
                         st.error(msg_b)
                     elif not ok_av:
