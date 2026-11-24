@@ -1937,7 +1937,7 @@ with t_studio:
                         save_profile_to_cloud()
                         st.toast("Saved Profile, Bio & Sticker to Cloud ✦")
                         st.rerun()
-            with st.expander("🎨 Premade Themes, Colors, Card FX, Custom Wallpapers & CSS", expanded=True):
+        with st.expander("🎨 Premade Themes, Colors, Card FX, Custom Wallpapers & CSS", expanded=True):
             PRESET_THEMES = {
                 "Custom (Keep Current)": None,
                 "💖 2000s Scene Pink": {"bg": "#06060A", "card": "#0E0E16", "accent": "#EC4899", "text": "#F4F4F5", "font": "Girl Punk / Spray Marker", "backdrop": "Y2K Stars & Sparkles"},
