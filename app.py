@@ -307,6 +307,7 @@ def calc_age(dob: date) -> int:
         return "none"
     cleaned = re.sub(r"url\(\s*([^)]+?)\s*\)", _filter_url, cleaned, flags=re.IGNORECASE)
     return cleaned[:12000]
+
 def encode_image_data_url(uploaded_file) -> str:
     if uploaded_file is None:
         return ""
