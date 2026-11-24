@@ -1847,7 +1847,7 @@ with hub_col:
                     display: none !important;
                 }
                 </style>""", unsafe_allow_html=True)
-                                pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="lex_im_sw_pk")
+                pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="lex_im_sw_pk")
                 if pk != im_act:
                     st.session_state["lex_im_peer"] = pk
                     st.rerun()
