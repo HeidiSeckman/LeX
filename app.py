@@ -920,11 +920,10 @@ if st.session_state.viewing_handle and top_c1.button(f"← Back to My Profile ({
     st.rerun()
 with top_th.popover("🎨 Themes", use_container_width=True):
     for q_tname in ["Neon Prism", "Carbon Tactical", "Midnight Emerald", "Sunset Vaporwave"]:
-        match_k = next((k for k in THEME_PRESETS if q_tname.lower() in k.lower()), None)
-        if match_k and st.button(q_tname, key=f"top_qt_{q_tname}", use_container_width=True):
-            st.session_state.lex_theme.update(THEME_PRESETS[match_k])
-            save_profile_to_cloud()
+        if st.button(q_tname, key=f"top_qt_{q_tname}", use_container_width=True):
+            st.session_state["pending_quick_theme"] = q_tname
             st.rerun()
+
 if top_c2.button(n_lbl, use_container_width=True, key="top_notif_btn"):
     st.session_state.show_notifs = not st.session_state.show_notifs
     st.rerun()
@@ -1959,6 +1958,15 @@ with t_studio:
                 "💎 Crown Diamond Ice": {"bg": "#060B10", "card": "#0E1721", "accent": "#22D3EE", "text": "#ECFEFF", "font": "Futuristic Orbitron", "backdrop": "Crown & Diamond Luxe"},
                 "🌹 Rose Thorn Crimson": {"bg": "#0E0507", "card": "#1A090D", "accent": "#E11D48", "text": "#FFF1F2", "font": "Gothic Editorial", "backdrop": "Rose Thorns & Petals"},
             }
+    if st.session_state.get("pending_quick_theme"):
+        _pqt = st.session_state.pop("pending_quick_theme")
+        _mk = next((k for k in PRESET_THEMES if k != "Custom (Keep Current)" and _pqt.lower() in k.lower()), None)
+        if _mk and PRESET_THEMES.get(_mk):
+            th.update(PRESET_THEMES[_mk])
+            st.session_state.lex_theme = th
+            save_profile_to_cloud()
+            st.rerun()
+
             p_c1, p_c2 = st.columns([0.72, 0.28])
             picked_preset = p_c1.selectbox("⚡ Quick-Apply a Premade Vibe Theme", list(PRESET_THEMES.keys()), key="preset_th_pick")
             if p_c2.button("Apply Preset ✦", use_container_width=True, key="apply_preset_btn") and PRESET_THEMES[picked_preset]:
