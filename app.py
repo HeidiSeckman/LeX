@@ -1687,6 +1687,7 @@ with hub_col:
                 save_profile_to_cloud()
                 st.toast(f"Applied {picked_preset}!")
                 st.rerun()
+                
             ban_up = st.file_uploader("🖼️ Upload Custom Banner Image (Live Preview & Framing)", type=["png", "jpg", "jpeg", "webp", "gif"], key="th_ban_up_live")
             bf1, bf2, bf3, bf4 = st.columns(4)
             ban_fit_in = bf1.selectbox("Banner Image Fit", ["cover", "contain", "fill"], index=["cover", "contain", "fill"].index(th.get("ban_fit", "cover")) if th.get("ban_fit", "cover") in ["cover", "contain", "fill"] else 0, key="live_ban_fit")
@@ -1727,11 +1728,6 @@ with hub_col:
                 g_c1, g_c2 = st.columns(2)
                 wall_gif_in = g_c1.text_input("Or Paste Moving GIF URL / Embed Code (Wallpaper)", value=th.get("custom_wall", "") if str(th.get("custom_wall", "")).startswith("http") else "", placeholder="Paste Giphy/Tenor link, .gif URL, or <iframe>/<img> embed code...")
                 ban_gif_in = g_c2.text_input("Or Paste Moving GIF URL / Embed Code (Banner)", value=th.get("banner_img", "") if str(th.get("banner_img", "")).startswith("http") else "", placeholder="Paste Giphy/Tenor link, .gif URL, or <iframe>/<img> embed code...")
-                bf1, bf2, bf3, bf4 = st.columns(4)
-                if _prev_ban_src:
-                    st.caption("👁️ Live Banner Framing Preview (adjust Fit / Zoom / Position above & hit Save):")
-                    st.markdown(build_live_banner_html("None", _prev_ban_src, th["accent"], rad_px, {"ban_fit": ban_fit_in, "ban_zoom": ban_zoom_in, "ban_x": ban_x_in, "ban_y": ban_y_in}), unsafe_allow_html=True)
-
                 mq_on = st.checkbox("Enable Scrolling Marquee Ticker", value=bool(th.get("marquee_on", False)))
                 mq_txt = st.text_input("Marquee Ticker Text", value=th.get("marquee_text", ""))
                 pin_txt = st.text_input("Pinned Bulletin Note", value=th.get("pinned_note", ""))
