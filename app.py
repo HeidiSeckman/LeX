@@ -296,6 +296,17 @@ def build_live_banner_html(mode: str, custom_img: str, accent: str, rad_px: int,
 def calc_age(dob: date) -> int:
     today = date.today()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+    def sanitize_custom_css(css_text: str) -> str:
+    if not css_text:
+        return ""
+    cleaned = re.sub(r"@import\s+[^;]+;?", "", css_text, flags=re.IGNORECASE)
+    def _filter_url(m):
+        u = m.group(1).strip().strip("\"'")
+        if u.startswith("data:image/") or "supabase.co/storage/v1/object/public/lex-media/" in u:
+            return f'url("{u}")'
+        return "none"
+    cleaned = re.sub(r"url\(\s*([^)]+?)\s*\)", _filter_url, cleaned, flags=re.IGNORECASE)
+    return cleaned[:12000]
 def encode_image_data_url(uploaded_file) -> str:
     if uploaded_file is None:
         return ""
@@ -737,11 +748,23 @@ if st.session_state.lex_user is None:
             d_name, r_handle = st.text_input("Display Name"), st.text_input("@handle (Must be unique)")
             dob = st.date_input("Date of Birth (13+ Only)", value=date(2000, 1, 1), min_value=date(1920, 1, 1), max_value=date.today())
             site_in = st.text_input("Profile Link / Website (Optional)", placeholder="heidiseckman.github.io/lexitech-hub")
-            if st.form_submit_button("Create Permanent LeX Account ✦", use_container_width=True) and sb:
+            with st.expander("📜 Terms of Service, Privacy Policy & DMCA Rules"):
+                st.markdown("""
+                **LeX Social Terms of Service & Privacy Policy (Operated by LexiTech Studio)**
+                1. **13+ Eligibility:** You must be at least 13 years old to create an account. Accounts created by anyone under 13 will be terminated immediately.
+                2. **User Content & Conduct:** You own the photos and posts you upload, and grant LeX Social a license to display them on the platform. Illegal content, CSAM, harassment, threats, nudity/explicit material, and copyright infringement are strictly prohibited.
+                3. **Stories & FlashPics:** While 24-hour Stories and FlashPics expire automatically, screenshots by recipients are possible. Illegal content is preserved and reported to law enforcement / NCMEC as required by law.
+                4. **Privacy & Data:** We store your email, handle, profile settings, posts, and uploaded images on Supabase to operate your account. You can delete your posts, stories, and FlashPics anytime.
+                5. **DMCA / Abuse Contact:** To report copyright infringement or abuse, use the in-app **🚩 Report** button or email **legal@lexitechstudio.com**.
+                """)
+        agree_terms = st.checkbox("I confirm I am 13+ and agree to the Terms of Service, Privacy Policy & Community Rules.")
+        if st.form_submit_button("Create Permanent LeX Account ✦", use_container_width=True) and sb:
                 ch = clean_handle_str(r_handle)
                 ok_s, msg_s = check_safety_and_dress_code(f"{d_name} {ch} {site_in}")
                 if calc_age(dob) < 13:
                     st.error("Must be 13+ to join LeX.")
+                elif not agree_terms:
+                    st.error("Please agree to the Terms of Service & Privacy Policy to create an account.")                
                 elif not ok_s:
                     st.error(msg_s)
                 elif not ch:
@@ -756,7 +779,11 @@ if st.session_state.lex_user is None:
                         st.session_state["show_confirm_email_popup"] = True
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Signup error: {e}")
+                        err_s = str(e)
+                        if "already registered" in err_s.lower() or "already exists" in err_s.lower():
+                        st.error("An account with that email already exists. Please log in instead.")
+                    else:
+                        st.error(f"Signup error: {err_s}")
     st.markdown(
         f"{ST_OPEN}"
         + ".lex-app-dock { margin-top: 18px; padding: 16px 14px; border-radius: 14px; "
@@ -2094,7 +2121,7 @@ with hub_col:
                             'html body .lex-friend-card{background-color:#DCA05A!important;background-image:linear-gradient(rgba(255,240,245,.80),rgba(255,228,238,.82)),radial-gradient(ellipse 12px 9px at 20px 22px,#8C4A19 0 4.5px,#1A0B04 5px 8.5px,transparent 9.5px),radial-gradient(ellipse 9px 11px at 68px 28px,#A35820 0 4px,#1A0B04 4.5px 8px,transparent 9px),radial-gradient(ellipse 13px 10px at 44px 64px,#7D3F12 0 5px,#1A0B04 5.5px 9.5px,transparent 10.5px),linear-gradient(125deg,#E6A85C 0%,#F5C478 50%,#C98236 100%)!important;background-size:100% 100%,94px 94px,94px 94px,94px 94px,100% 100%!important;border:2px solid #FF007F!important;color:#240814!important;animation:lexNeonPinkFloat 3.5s ease-in-out infinite!important}'
                             'html body .stButton button{background:linear-gradient(90deg,#FF007F,#FF69B4,#FFF0F5,#FF69B4,#FF007F)!important;background-size:250% auto!important;color:#1A0B04!important;font-weight:900!important;border:2px solid #FFFFFF!important;border-radius:999px!important;box-shadow:0 0 18px #FF007Fdd!important;animation:lexGlamShimmer 3.5s linear infinite!important}'
                         ),
-                        "13. Overwatch // Ultimate Ready": (
+                        "13. Arena Hero // Ultimate Ready": (
                             '@keyframes lexOwPulse{0%{border-color:#FA9C1E;box-shadow:0 0 18px #FA9C1Ecc,inset 0 0 14px #FA9C1E44}50%{border-color:#00C3FF;box-shadow:0 0 26px #00C3FFdd,inset 0 0 18px #00C3FF55}100%{border-color:#FA9C1E;box-shadow:0 0 18px #FA9C1Ecc,inset 0 0 14px #FA9C1E44}}'
                             '@keyframes lexHudDrift{0%{background-position:0 0,80px 40px,140px 90px,30px 110px}100%{background-position:0 -460px,80px -620px,140px -340px,30px -520px}}'
                             '@keyframes lexEnergySweep{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}'
@@ -2103,12 +2130,12 @@ with hub_col:
                             'html body .lex-card h1,html body .lex-card h2,html body .lex-card h3,html body h1,html body h2,html body h3,html body .lex-wordmark{font-family:"Impact","Arial Black","Trebuchet MS",sans-serif!important;font-style:italic!important;text-transform:uppercase!important;letter-spacing:1.8px!important;color:#FFFFFF!important;text-shadow:0 0 10px #FA9C1Eee,0 0 22px #00C3FFaa,2px 2px 0 #0B0E17!important}'
                             'html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important;font-style:normal!important;text-transform:none!important}'
                             'html body .lex-banner{position:relative!important;overflow:hidden!important;background-color:#111827!important;background-image:radial-gradient(circle at 88% 50%,transparent 0 42px,#FA9C1E 43px 52px,transparent 53px),linear-gradient(125deg,transparent 78%,#00C3FF44 78.5% 81%,transparent 81.5%),linear-gradient(125deg,transparent 83%,#FA9C1E55 83.5% 86%,transparent 86.5%),linear-gradient(110deg,#0A0E1A 0%,#16223B 48%,#1F1610 82%,#0A0E1A 100%)!important;background-size:100% 100%,100% 100%,100% 100%,250% 250%!important;border:2.5px solid #FA9C1E!important;border-left:8px solid #FA9C1E!important;animation:lexEnergySweep 7s ease infinite,lexOwPulse 4s linear infinite!important}'
-                            'html body .lex-banner::before{content:"⚡ OVERWATCH // ULTIMATE READY 100% ⚡"!important;display:inline-block!important;margin-bottom:6px!important;padding:4px 14px!important;border-radius:4px!important;background:rgba(11,14,23,.90)!important;border:1.5px solid #FA9C1E!important;color:#FA9C1E!important;font-family:"Arial Black",sans-serif!important;font-style:italic!important;font-size:11px!important;font-weight:900!important;letter-spacing:1.8px!important;text-shadow:0 0 10px #FA9C1E!important}'
+                            'html body .lex-banner::before{content:"⚡ ARENA HERO // ULTIMATE READY 100% ⚡"!important;display:inline-block!important;margin-bottom:6px!important;padding:4px 14px!important;border-radius:4px!important;background:rgba(11,14,23,.90)!important;border:1.5px solid #FA9C1E!important;color:#FA9C1E!important;font-family:"Arial Black",sans-serif!important;font-style:italic!important;font-size:11px!important;font-weight:900!important;letter-spacing:1.8px!important;text-shadow:0 0 10px #FA9C1E!important}'
                             'html body .lex-card{background:linear-gradient(135deg,rgba(12,17,30,.94) 0%,rgba(22,32,56,.90) 55%,rgba(14,19,34,.95) 100%)!important;border:2px solid #00C3FF!important;border-top:4px solid #FA9C1E!important;color:#E2E8F0!important;animation:lexOwPulse 4.5s linear infinite!important}'
                             'html body .lex-friend-card{background:linear-gradient(135deg,rgba(14,20,36,.95) 0%,rgba(26,38,66,.90) 100%)!important;border:1.5px solid #FA9C1E!important;color:#FFFFFF!important;animation:lexOwPulse 4.5s linear infinite!important}'
                             'html body .stButton button{background:linear-gradient(90deg,#FA9C1E,#FF6B00,#00C3FF,#FA9C1E)!important;background-size:250% auto!important;color:#070A12!important;font-family:"Arial Black",sans-serif!important;font-style:italic!important;text-transform:uppercase!important;font-weight:900!important;letter-spacing:1px!important;border:1.5px solid #FFFFFF!important;border-radius:4px!important;box-shadow:0 0 16px #FA9C1Ecc!important;animation:lexEnergySweep 3.5s linear infinite!important}'
                         ),
-                        "14. Fortnite // Victory Royale": (
+                        "14. Drop Zone // Storm Edition": (
                             '@keyframes lexStormDrift{0%{background-position:0 0,60px 40px,110px 80px}100%{background-position:0 -420px,60px -580px,110px -300px}}'
                             '@keyframes lexBattleWave{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}'
                             '@keyframes lexRarityPulse{0%{border-color:#00E5FF;box-shadow:0 0 20px #00E5FF88,inset 0 0 14px #00E5FF33}33%{border-color:#C026D3;box-shadow:0 0 24px #C026D399,inset 0 0 16px #C026D344}66%{border-color:#FACC15;box-shadow:0 0 26px #FACC15aa,inset 0 0 16px #FACC1544}100%{border-color:#00E5FF;box-shadow:0 0 20px #00E5FF88,inset 0 0 14px #00E5FF33}}'
@@ -2117,7 +2144,7 @@ with hub_col:
                             'html body .lex-card h1,html body .lex-card h2,html body .lex-card h3,html body h1,html body h2,html body h3,html body .lex-wordmark{font-family:"Impact","Arial Black","Trebuchet MS",sans-serif!important;letter-spacing:1.5px!important;text-transform:uppercase!important;color:#FEF08A!important;text-shadow:0 2px 0 #0F172A,0 0 14px #FACC15ee,0 0 28px #00E5FFaa!important}'
                             'html body [data-testid="stIconMaterial"],html body .material-symbols-rounded{font-family:"Material Symbols Rounded",sans-serif!important}'
                             'html body .lex-banner{position:relative!important;overflow:hidden!important;background:linear-gradient(115deg,#060B19,#0284C7,#7E22CE,#FACC15,#0284C7,#060B19)!important;background-size:320% 320%!important;border:2.5px solid #FACC15!important;animation:lexBattleWave 6s ease-in-out infinite,lexRarityPulse 6s linear infinite!important}'
-                            'html body .lex-banner::before{content:"👑 #1 VICTORY ROYALE // STORM EDITION 👑"!important;display:inline-block!important;margin-bottom:6px!important;padding:4px 14px!important;border-radius:999px!important;background:rgba(5,7,20,.82)!important;border:1.5px solid #FACC15!important;color:#FEF08A!important;font-family:"Arial Black",sans-serif!important;font-size:11px!important;font-weight:900!important;letter-spacing:1.4px!important;text-shadow:0 0 10px #FACC15!important}'
+                            'html body .lex-banner::before{content:"👑 #1 DROP ZONE // STORM EDITION 👑"!important;display:inline-block!important;margin-bottom:6px!important;padding:4px 14px!important;border-radius:999px!important;background:rgba(5,7,20,.82)!important;border:1.5px solid #FACC15!important;color:#FEF08A!important;font-family:"Arial Black",sans-serif!important;font-size:11px!important;font-weight:900!important;letter-spacing:1.4px!important;text-shadow:0 0 10px #FACC15!important}'
                             'html body .lex-card{background:linear-gradient(130deg,rgba(7,12,28,.92) 0%,rgba(46,16,101,.86) 45%,rgba(7,89,133,.86) 80%,rgba(7,12,28,.94) 100%)!important;background-size:300% 300%!important;backdrop-filter:blur(14px)!important;border:2px solid #00E5FF!important;animation:lexBattleWave 7s ease-in-out infinite,lexRarityPulse 6s linear infinite!important}'
                             'html body .lex-friend-card{background:linear-gradient(135deg,rgba(7,12,28,.94) 0%,rgba(30,27,75,.90) 50%,rgba(12,74,110,.90) 100%)!important;background-size:260% 260%!important;border:1.5px solid #D946EF!important;animation:lexBattleWave 6s ease-in-out infinite,lexRarityPulse 6s linear infinite!important}'
                             'html body .stButton button{background:linear-gradient(90deg,#FACC15,#F59E0B,#00E5FF)!important;background-size:220% auto!important;color:#050714!important;font-family:"Arial Black",sans-serif!important;font-weight:900!important;text-transform:uppercase!important;border:2px solid #FFFFFF!important;border-radius:10px!important;box-shadow:0 0 18px #FACC15aa!important;animation:lexBattleWave 4.5s linear infinite!important}'
