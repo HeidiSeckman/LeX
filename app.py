@@ -1628,18 +1628,18 @@ def render_feed_post(p: dict, k_pfx: str):
     if raw_b_chk.startswith("[FLASHPIC_TO:") or raw_b_chk.startswith("[REPORT_ALERT]") or raw_b_chk.startswith("[LEX_NOTIF]") or raw_b_chk.startswith("[STORY_"):
         return
 
-p_author_h = (p.get("handle") or "").strip()
-            clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body"))
-            img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:8px;" />' if img_src else ""
-            lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="color:{th["accent"]};font-weight:800;">🔗 {lnk_src}</a></div>' if lnk_src else ""
-            f_bdg = ' <span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:2px 7px;border-radius:999px;margin-left:4px;">👑 FOUNDER</span>' if clean_handle_str(p_author_h).lower() in ("heidi", "heidiseckman") else ""
-            st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};font-size:12px;">{p_author_h}</span><div style="margin-top:6px;">{clean_txt}</div>{img_tag}{lnk_tag}</div>', unsafe_allow_html=True)
-            rx_map = p_meta["rx"]
-            cm_list = p_meta["comments"]
-            rcols = st.columns(7)           
-            _rx_me = "@" + clean_handle_str(user.get("handle") or "").lower()
-            for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
-                emo_users = dict(rx_map.get(emo) or {})
+    p_author_h = (p.get("handle") or "").strip()
+    clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body"))
+    img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-top:8px;" />' if img_src else ""
+    lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="color:{th["accent"]};font-weight:800;">🔗 {lnk_src}</a></div>' if lnk_src else ""
+    f_bdg = ' <span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:2px 7px;border-radius:999px;margin-left:4px;">👑 FOUNDER</span>' if clean_handle_str(p_author_h).lower() in ("heidi", "heidiseckman") else ""
+    st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};font-size:12px;">{p_author_h}</span><div style="margin-top:6px;">{clean_txt}</div>{img_tag}{lnk_tag}</div>', unsafe_allow_html=True)
+    rx_map = p_meta["rx"]
+    cm_list = p_meta["comments"]
+    rcols = st.columns(7)           
+    _rx_me = "@" + clean_handle_str(user.get("handle") or "").lower()
+    for idx_e, emo in enumerate(["🔥", "💖", "🎸", "💀"]):
+        emo_users = dict(rx_map.get(emo) or {})
                 cnt_e = sum(int(v) if isinstance(v, int) else 1 for v in emo_users.values())
                 i_reacted = _rx_me in {"@" + clean_handle_str(k).lower() for k in emo_users.keys()}
                 lbl_e = f"{emo} {cnt_e} ✓" if i_reacted else f"{emo} {cnt_e}"
