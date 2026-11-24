@@ -785,6 +785,16 @@ if st.session_state.lex_user is None:
                         st.error("An account with that email already exists. Please log in instead.")
                     else:
                         st.error(f"Signup error: {err_s}")
+    with st.expander("📜 Terms of Service, Privacy Policy & DMCA Rules"):
+        st.markdown("""
+        **LeX Social Terms of Service & Privacy Policy (Operated by LexiTech Studio)**
+        1. **13+ Eligibility & Youth Safety:** You must be at least 13 years old to create an account. Accounts for users ages 13–15 remain locked to Private mode automatically until age 16.
+        2. **User Content & Conduct:** You own the photos and posts you upload, and grant LeX Social a license to display them on the platform. Illegal content, CSAM, harassment, threats, nudity/explicit material, and copyright infringement are strictly prohibited.
+        3. **Stories & FlashPics:** While 24-hour Stories and FlashPics expire automatically, screenshots by recipients are possible. Illegal content is preserved and reported to law enforcement / NCMEC as required by law.
+        4. **Privacy & Data:** We store your email, handle, profile settings, posts, and uploaded images on Supabase to operate your account. You can delete your posts, stories, and FlashPics anytime.
+        5. **DMCA / Abuse Contact:** To report copyright infringement or abuse, use the in-app **🚩 Report** button or email **legal@lexitechstudio.com**.
+        """)
+
     st.markdown(
         f"{ST_OPEN}"
         + ".lex-app-dock { margin-top: 18px; padding: 16px 14px; border-radius: 14px; "
