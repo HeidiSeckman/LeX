@@ -307,13 +307,19 @@ def encode_image_data_url(uploaded_file) -> str:
     try:
         from PIL import Image
         im = Image.open(io.BytesIO(raw_bytes))
-        if im.mode in ("RGBA", "P"):
-            im = im.convert("RGB")
-        im.thumbnail((520, 520))
+        im.thumbnail((1100, 1100))
         buf = io.BytesIO()
-        im.save(buf, format="JPEG", quality=62, optimize=True)
+        if im.mode in ("RGBA", "LA", "P"):
+            im = im.convert("RGBA")
+            im.save(buf, format="WEBP", quality=72)
+            b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+            return f"data:image/webp;base64,{b64}"
+        if im.mode != "RGB":
+            im = im.convert("RGB")
+        im.save(buf, format="JPEG", quality=68, optimize=True)
         b64 = base64.b64encode(buf.getvalue()).decode("ascii")
         return f"data:image/jpeg;base64,{b64}"
+
     except Exception:
         b64 = base64.b64encode(raw_bytes).decode("ascii")
         return f"data:{uploaded_file.type or 'image/png'};base64,{b64}"
