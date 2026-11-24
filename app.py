@@ -976,8 +976,7 @@ def friend_card_html(fr, badge: str = "", card_theme: dict = None) -> str:
     is_owner = (str(fr.get("handle", "")).strip().lower() in {"@heidi", "@heidiseckman"})
     pill_lbl = "👑 FOUNDER" if is_owner else badge
     top_tag = f'<span style="background:{ct["accent"]};color:#000;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:900;">{pill_lbl}</span>' if pill_lbl else '<span></span>'
-    is_on = is_member_online(fr) if ("last_seen" in fr) else False
-    on_tag = '<span style="color:#34D399;font-size:11px;font-weight:700;">&#9679; ONLINE</span>' if is_on else '<span style="color:#94A3B8;font-size:11px;font-weight:700;">&#9679; OFFLINE</span>'
+    on_tag = ""
     _av_cache = st.session_state.setdefault("_lex_av_cache", {})
     _fh_key = "@" + clean_handle_str(fr.get("handle", "")).lower()
     _av_src = fr.get("avatar") or _av_cache.get(_fh_key, "")
