@@ -1937,7 +1937,7 @@ with t_studio:
                         save_profile_to_cloud()
                         st.toast("Saved Profile, Bio & Sticker to Cloud ✦")
                         st.rerun()
-        with st.expander("🎨 Premade Themes, Colors, Card FX, Custom Wallpapers & CSS", expanded=True):
+            with st.expander("🎨 Premade Themes, Colors, Card FX, Custom Wallpapers & CSS", expanded=True):
             PRESET_THEMES = {
                 "Custom (Keep Current)": None,
                 "💖 2000s Scene Pink": {"bg": "#06060A", "card": "#0E0E16", "accent": "#EC4899", "text": "#F4F4F5", "font": "Girl Punk / Spray Marker", "backdrop": "Y2K Stars & Sparkles"},
@@ -1952,14 +1952,6 @@ with t_studio:
                 "💎 Crown Diamond Ice": {"bg": "#060B10", "card": "#0E1721", "accent": "#22D3EE", "text": "#ECFEFF", "font": "Futuristic Orbitron", "backdrop": "Crown & Diamond Luxe"},
                 "🌹 Rose Thorn Crimson": {"bg": "#0E0507", "card": "#1A090D", "accent": "#E11D48", "text": "#FFF1F2", "font": "Gothic Editorial", "backdrop": "Rose Thorns & Petals"},
             }
-    if st.session_state.get("pending_quick_theme"):
-        _pqt = st.session_state.pop("pending_quick_theme")
-        _mk = next((k for k in PRESET_THEMES if k != "Custom (Keep Current)" and _pqt.lower() in k.lower()), None)
-        if _mk and PRESET_THEMES.get(_mk):
-            th.update(PRESET_THEMES[_mk])
-            st.session_state.lex_theme = th
-            save_profile_to_cloud()
-            st.rerun()
 
             p_c1, p_c2 = st.columns([0.72, 0.28])
             picked_preset = p_c1.selectbox("⚡ Quick-Apply a Premade Vibe Theme", list(PRESET_THEMES.keys()), key="preset_th_pick")
