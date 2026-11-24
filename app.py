@@ -270,7 +270,7 @@ def build_live_banner_html(mode: str, custom_img: str, accent: str, rad_px: int,
         bzoom = max(50, min(200, int(cfg.get("ban_zoom", 100)))) / 100.0
         bx = max(0, min(100, int(cfg.get("ban_x", 50))))
         by = max(0, min(100, int(cfg.get("ban_y", 50))))
-        return f'<div style="width:100%;height:165px;border-radius:{rad_px}px;overflow:hidden;margin-bottom:12px;border:1.5px solid {accent};box-shadow:0 0 18px {accent}44;background:#070212;"><img src="{custom_img}" style="width:100%;height:100%;object-fit:{bfit};object-position:{bx}% {by}%;transform:scale({bzoom});transform-origin:{bx}% {by}%;display:block;" /></div>'
+        return f'<div style="width:100%;height:320px;border-radius:{rad_px}px;overflow:hidden;margin-bottom:12px;border:1.5px solid {accent};box-shadow:0 0 18px {accent}44;background:#070212;"><img src="{custom_img}" style="width:100%;height:100%;object-fit:{bfit};object-position:{bx}% {by}%;transform:scale({bzoom});transform-origin:{bx}% {by}%;display:block;" /></div>'
 
     if not mode or mode == "None":
         return ""
