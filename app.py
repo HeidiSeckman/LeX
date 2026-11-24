@@ -1808,41 +1808,52 @@ with hub_col:
                     rows_h = "".join([
                         f'<div style="margin-bottom:4px;font-size:12px;line-height:1.35;"><strong style="color:{th["accent"] if str(m.get("sender_handle","")).lower()==my_l else "#34D399"};">{user["handle"] if str(m.get("sender_handle","")).lower()==my_l else im_act}:</strong> <span>{m.get("body","")}</span></div>'
                         for m in im_thread[-30:]
-                    ]) or '<div style="opacity:0.55;font-size:12px;padding:38px 8px;text-align:center;">No messages yet — say hey below! ⚡</div>'
-                    win_html = (
-                        f'<div id="lex-im-win" style="position:fixed;bottom:16px;right:16px;width:310px;z-index:99999;border-radius:10px;overflow:hidden;border:1.5px solid {th["accent"]};background:#0B0F1A;color:#F8FAFC;box-shadow:0 12px 32px rgba(0,0,0,0.75);font-family:sans-serif;">'
-                        f'<div id="lex-im-bar" style="cursor:move;padding:6px 10px;background:linear-gradient(90deg,{th["accent"]},#1E293B);color:#06060A;font-weight:900;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none;">'
-                        f'<span>⚡ {im_act} — LeX Instant</span>'
-                        f'<span id="lex-im-min" style="cursor:pointer;padding:0 6px;font-size:14px;font-weight:900;">_</span></div>'
-                        f'<div id="lex-im-body">'
-                        f'<div style="padding:8px 10px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px;">{av_h}<div><div style="font-weight:800;font-size:13px;">{im_peers.get(im_act, im_act)}</div><div style="font-size:10px;color:#34D399;">● Online • LeX Instant</div></div></div>'
-                        f'<div id="lex-im-log" style="height:175px;overflow-y:auto;padding:8px 10px;background:#070A12;">{rows_h}</div>'
-                        f'</div></div>'
-                    )
-                    st.markdown(win_html, unsafe_allow_html=True)
-                    st.components.v1.html(
-                        "<" + "script>"
-                        + "const p=window.parent.document,w=p.getElementById('lex-im-win'),b=p.getElementById('lex-im-bar'),m=p.getElementById('lex-im-min'),bd=p.getElementById('lex-im-body'),lg=p.getElementById('lex-im-log');"
-                        + "if(lg){lg.scrollTop=lg.scrollHeight;}"
-                        + "if(m&&bd){m.onclick=()=>{bd.style.display=bd.style.display==='none'?'block':'none';};}"
-                        + "if(w&&b){let dx=0,dy=0,drag=false;b.onmousedown=(e)=>{drag=true;dx=e.clientX-w.offsetLeft;dy=e.clientY-w.offsetTop;};p.onmousemove=(e)=>{if(!drag)return;w.style.left=(e.clientX-dx)+'px';w.style.top=(e.clientY-dy)+'px';w.style.right='auto';w.style.bottom='auto';};p.onmouseup=()=>{drag=false;};}"
-                        + "</" + "script>",
-                        height=0,
-                    )
-                    with st.expander("⚡ LeX Instant Quick Send / Switch Friend", expanded=True):
-                        c_p, c_m, c_s = st.columns([1.4, 2.4, 0.8])
-                        pk = c_p.selectbox("Friend", im_list, index=im_list.index(im_act), format_func=lambda x: im_peers.get(x, x), label_visibility="collapsed", key="lex_im_sel")
-                        if pk != im_act:
-                            st.session_state["lex_im_peer"] = pk
-                            st.rerun()
-                        im_in = c_m.text_input("IM", placeholder=f"IM {im_act}...", label_visibility="collapsed", key="lex_im_txt")
-                        if c_s.button("SEND", key="lex_im_go", use_container_width=True) and im_in.strip():
-                            ok_i, msg_i = check_safety_and_dress_code(im_in)
-                            if ok_i:
-                                sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": im_act, "body": im_in.strip()}).execute()
-                                st.rerun()
-                            else:
-                                st.error(msg_i)
+                win_html = (
+                    f'<div id="lex-im-win" style="position:fixed;bottom:16px;right:16px;width:360px;max-width:92vw;height:430px;z-index:99999;background:{th["card_bg"]};border:2px solid {th["accent"]};border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.65);display:flex;flex-direction:column;overflow:hidden;color:{th["text"]};font-family:inherit;">'
+                    f'<div id="lex-im-bar" style="cursor:move;padding:10px 14px;background:{th["accent"]};color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:space-between;">'
+                    f'<span>⚡ {im_act} — LeX Instant</span>'
+                    f'<span id="lex-im-min" style="cursor:pointer;padding:0 6px;font-size:16px;">—</span></div>'
+                    f'<div id="lex-im-body" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">'
+                    f'<div style="padding:8px 12px;border-bottom:1px solid {th["accent"]}44;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.2);">{av_h}<div style="font-size:12px;font-weight:800;">Chatting with {im_peers[im_act]}</div></div>'
+                    f'<div id="lex-im-scroll" style="flex:1;overflow-y:auto;padding:10px 12px;">{rows_h}</div>'
+                    f'<div style="padding:8px;border-top:1px solid {th["accent"]}44;display:flex;gap:6px;background:rgba(0,0,0,0.25);">'
+                    f'<input id="lex-im-txt" type="text" placeholder="IM {im_act}..." style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid {th["accent"]};background:rgba(15,23,42,0.9);color:#fff;font-size:12px;outline:none;" />'
+                    f'<button id="lex-im-send" style="padding:8px 14px;border-radius:10px;border:none;background:{th["accent"]};color:#fff;font-weight:900;font-size:12px;cursor:pointer;">SEND</button>'
+                    f'</div></div></div>'
+                )
+                st.components.v1.html(
+                    "<script>"
+                    "const pd=window.parent.document;"
+                    "let old=pd.getElementById('lex-im-win');if(old)old.remove();"
+                    "const wrap=pd.createElement('div');wrap.innerHTML=" + json.dumps(win_html) + ";"
+                    "pd.body.appendChild(wrap.firstChild);"
+                    "const w=pd.getElementById('lex-im-win'),b=pd.getElementById('lex-im-bar'),bd=pd.getElementById('lex-im-body'),mn=pd.getElementById('lex-im-min'),sc=pd.getElementById('lex-im-scroll');"
+                    "if(sc)sc.scrollTop=sc.scrollHeight;"
+                    "let dx=0,dy=0,drag=false;"
+                    "b.onmousedown=e=>{if(e.target===mn)return;drag=true;dx=e.clientX-w.offsetLeft;dy=e.clientY-w.offsetTop;};"
+                    "pd.onmousemove=e=>{if(!drag)return;w.style.left=(e.clientX-dx)+'px';w.style.top=(e.clientY-dy)+'px';w.style.right='auto';w.style.bottom='auto';};"
+                    "pd.onmouseup=()=>{drag=false;};"
+                    "mn.onclick=()=>{const h=bd.style.display==='none';bd.style.display=h?'flex':'none';w.style.height=h?'430px':'auto';mn.textContent=h?'—':'+';};"
+                    "const inp=pd.getElementById('lex-im-txt'),sbtn=pd.getElementById('lex-im-send');"
+                    "function fireSend(){const v=(inp.value||'').trim();if(!v)return;const stIn=pd.querySelector('input[aria-label=\"LEX_IM_BRIDGE\"]');const stBtns=[...pd.querySelectorAll('button')];const stGo=stBtns.find(x=>x.innerText.trim()==='LEX_IM_GO');if(stIn&&stGo){const setter=Object.getOwnPropertyDescriptor(window.parent.HTMLInputElement.prototype,'value').set;setter.call(stIn,v);stIn.dispatchEvent(new Event('input',{bubbles:true}));setTimeout(()=>stGo.click(),60);}}"
+                    "sbtn.onclick=fireSend;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();fireSend();}};"
+                    "</script>",
+                    height=0,
+                )
+                pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="lex_im_sw_pk")
+                if pk != im_act:
+                    st.session_state["lex_im_peer"] = pk
+                    st.rerun()
+                st.markdown("<style>div:has(> div > input[aria-label='LEX_IM_BRIDGE']), div:has(> button > div > p) { } input[aria-label='LEX_IM_BRIDGE']{height:1px!important;opacity:0!important;pointer-events:none!important;position:fixed!important;left:-9999px!important;}</style>", unsafe_allow_html=True)
+                br_val = st.text_input("LEX_IM_BRIDGE", key="lex_im_bridge_in", label_visibility="collapsed")
+                if st.button("LEX_IM_GO", key="lex_im_bridge_go") and br_val.strip():
+                    ok_i, msg_i = check_safety_and_dress_code(br_val)
+                    if ok_i:
+                        sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": im_act, "body": br_val.strip()}).execute()
+                        st.rerun()
+                    else:
+                        st.error(msg_i)
+                        
             except Exception as e:
                 st.warning(f"LeX Instant notice: {e}")
 
