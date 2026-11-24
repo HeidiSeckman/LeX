@@ -1718,6 +1718,10 @@ with hub_col:
                 ban_zoom_in = bf2.slider("Banner Zoom (%)", 50, 200, int(th.get("ban_zoom", 100)))
                 ban_x_in = bf3.slider("Move Left / Right (%)", 0, 100, int(th.get("ban_x", 50)))
                 ban_y_in = bf4.slider("Move Up / Down (%)", 0, 100, int(th.get("ban_y", 50)))
+                _prev_ban_src = encode_image_data_url(ban_up) if ban_up is not None else (_extract_gif_src(ban_gif_in) if "ban_gif_in" in locals() and ban_gif_in.strip() else th.get("banner_img", ""))
+                if _prev_ban_src:
+                    st.caption("👁️ Live Banner Framing Preview (adjust Fit / Zoom / Position above & hit Save):")
+                    st.markdown(build_live_banner_html("None", _prev_ban_src, th["accent"], rad_px, {"ban_fit": ban_fit_in, "ban_zoom": ban_zoom_in, "ban_x": ban_x_in, "ban_y": ban_y_in}), unsafe_allow_html=True)
 
                 mq_on = st.checkbox("Enable Scrolling Marquee Ticker", value=bool(th.get("marquee_on", False)))
                 mq_txt = st.text_input("Marquee Ticker Text", value=th.get("marquee_text", ""))
