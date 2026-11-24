@@ -1173,7 +1173,7 @@ if st.session_state.get("show_stories_panel"):
     if st.button("➕ Publish 24h Story", key="story_post_btn", use_container_width=True) and st_file is not None and sb:
         st_url = encode_image_data_url(st_file)
         vis_tag = "[STORY_PUBLIC]" if "Public" in st_vis else "[STORY_FRIENDS]"
-        sb.table("lex_posts").insert({"handle": user["handle"], "body": f"{vis_tag} {st_cap.strip()} ||IMG:{st_url}||"}).execute()
+        sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": f"{vis_tag} {st_cap.strip()} ||IMG:{st_url}||"}).execute()
         st.session_state.show_stories_panel = False
         st.toast(f"📸 Story added to your profile ({st_vis})!")
         st.rerun()
@@ -1187,7 +1187,7 @@ if st.session_state.get("show_flashpic_panel"):
         fp_cap = fp3.text_input("Quick Caption", placeholder="Disappearing caption...", key="fp_cap_in", label_visibility="collapsed")
         if st.button("⚡ Send FlashPic", key="fp_send_btn", use_container_width=True) and fp_file is not None:
             fp_url = encode_image_data_url(fp_file)
-            sb.table("lex_posts").insert({"handle": user["handle"], "body": f"[FLASHPIC_TO:{fp_to.lower()}] {fp_cap.strip()} ||IMG:{fp_url}||"}).execute()
+            sb.table("lex_posts").insert({"handle": user["handle"], "author": user["name"], "body": f"[FLASHPIC_TO:{fp_to.lower()}] {fp_cap.strip()} ||IMG:{fp_url}||"}).execute()
             st.toast(f"⚡ FlashPic sent to {fp_to}!")
             st.rerun()
     elif not fp_friends:
