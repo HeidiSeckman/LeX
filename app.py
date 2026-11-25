@@ -1852,7 +1852,6 @@ with hub_col:
             render_feed_post(p, "my")
 
     with t_ffeed:
-
         _ff_blocked = get_blocked_handles()
         _ff_my_h = "@" + clean_handle_str(user.get("handle") or "").lower()
         _ff_handles = set()
@@ -1870,17 +1869,17 @@ with hub_col:
             render_feed_post(p, "fr")
 
     with t_friends:
-                _all_f_list = st.session_state.get("lex_friends") or []
-                _my_clean_h = "@" + clean_handle_str(user.get("handle", "")).lower()
-                _follower_cnt = len(_all_f_list)
-                if sb:
-                    try:
-                        _all_u_rows = sb.table("lex_users").select("handle,theme_json").limit(500).execute().data or []
-                        _follower_cnt = sum(
-                            1 for _ur in _all_u_rows
-                            if _my_clean_h in ["@" + clean_handle_str(x).lower() for x in ((_ur.get("theme_json") or {}).get("friends") or [])]
-                        )
-                    except Exception:
+            _all_f_list = st.session_state.get("lex_friends") or []
+            _my_clean_h = "@" + clean_handle_str(user.get("handle", "")).lower()
+            _follower_cnt = len(_all_f_list)
+            if sb:
+                try:
+                    _all_u_rows = sb.table("lex_users").select("handle,theme_json").limit(500).execute().data or []
+                    _follower_cnt = sum(
+                        1 for _ur in _all_u_rows
+                        if _my_clean_h in ["@" + clean_handle_str(x).lower() for x in ((_ur.get("theme_json") or {}).get("friends") or [])]
+                    )
+                except Exception:
                         pass
                 st.markdown(
                     f'<div class="lex-card" style="padding:12px 16px;display:flex;justify-content:space-around;text-align:center;">'
@@ -1889,9 +1888,9 @@ with hub_col:
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-        inc_reqs = list(th.get("incoming_requests") or [])
-        sent_reqs = list(th.get("sent_requests") or [])
-        blk_users = list(th.get("blocked_users") or [])
+    inc_reqs = list(th.get("incoming_requests") or [])
+    sent_reqs = list(th.get("sent_requests") or [])
+    blk_users = list(th.get("blocked_users") or [])
         with st.expander(f"⚙️ Requests & Blocked Manager ({len(inc_reqs)} Incoming • {len(sent_reqs)} Sent • {len(blk_users)} Blocked)", expanded=bool(inc_reqs)):
             mgr_pick = st.selectbox("Select Manager View", ["📩 Pending Friend Requests", "⏳ Sent Friend Requests", "🚫 Blocked Users List"], key="fr_mgr_sel")
             if mgr_pick == "📩 Pending Friend Requests":
