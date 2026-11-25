@@ -1544,10 +1544,12 @@ def render_profile_module(mod_name: str):
                 save_profile_to_cloud()
                 st.rerun()
     elif mod_name == "Badge Trophy Case":
-        if st.session_state.get("_tc_rendered_pass") == st.session_state.get("_tc_pass_token"):
+        import time as _tc_t
+        if _tc_t.time() - float(st.session_state.get("_tc_last_ts", 0)) < 0.8:
             return
-        st.session_state["_tc_rendered_pass"] = st.session_state.get("_tc_pass_token")
+        st.session_state["_tc_last_ts"] = _tc_t.time()
         if th.get("show_badges", True):
+
             my_h_b = "@" + clean_handle_str(user.get("handle", "")).lower()
             b_pills = []
             if clean_handle_str(user.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
