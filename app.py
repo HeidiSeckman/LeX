@@ -1060,15 +1060,15 @@ if st.session_state.viewing_handle and sb:
             _vsb0 = _v_stories[0].get("body") or ""
             _vsimg0 = _vsb0.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _vsb0 else ""
             if _vsimg0:
-                _vst_ring_html = f'<div style="margin-left:auto;text-align:center;flex-shrink:0;"><img src="{_vsimg0}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid {v_th.get("accent","#FF2E93")};box-shadow:0 0 16px {v_th.get("accent","#FF2E93")}88;" /><div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:{v_th.get("accent","#FF2E93")};margin-top:4px;">STORY</div></div>'
-                _v_bio_h = f'<div style="margin-top:10px;font-size:13px;">{vp.get("bio")}</div>' if vp.get("bio") else ""
-                _v_home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{v_th.get("hometown")}</strong></div>' if v_th.get("hometown") else ""
-                _v_work_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128188; <strong>{v_th.get("work_school")}</strong></div>' if v_th.get("work_school") else ""
-                _v_rs_v = v_th.get("relationship_status", "Not Specified")
-                _v_rp_v = (v_th.get("relationship_partner") or "").strip()
-                _v_rp_tag = f' with <span style="display:inline-block;padding:1px 7px;border-radius:99px;background:{v_th.get("accent", "#FF2E93")}28;border:1px solid {v_th.get("accent", "#FF2E93")};color:#FFFFFF;font-weight:800;">{_v_rp_v}</span>' if _v_rp_v else ""
-                _v_rel_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.9;">&#128158; <strong>{_v_rs_v}</strong>{_v_rp_tag}</div>' if (_v_rs_v and _v_rs_v != "Not Specified") else ""
-                _v_bio_h = f"{_v_home_h}{_v_work_h}{_v_rel_h}{_v_bio_h}"
+    _vst_ring_html = f'<div style="margin-left:auto;text-align:center;flex-shrink:0;"><img src="{_vsimg0}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid {v_th.get("accent","#FF2E93")};box-shadow:0 0 16px {v_th.get("accent","#FF2E93")}88;" /><div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:{v_th.get("accent","#FF2E93")};margin-top:4px;">STORY</div></div>'
+    _v_bio_h = f'<div style="margin-top:10px;font-size:13px;">{vp.get("bio")}</div>' if vp.get("bio") else ""
+    _v_home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{v_th.get("hometown")}</strong></div>' if v_th.get("hometown") else ""
+    _v_work_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128188; <strong>{v_th.get("work_school")}</strong></div>' if v_th.get("work_school") else ""
+    _v_rs_v = v_th.get("relationship_status", "Not Specified")
+    _v_rp_v = (v_th.get("relationship_partner") or "").strip()
+    _v_rp_tag = f' with <span style="display:inline-block;padding:1px 7px;border-radius:99px;background:{v_th.get("accent", "#FF2E93")}28;border:1px solid {v_th.get("accent", "#FF2E93")};color:#FFFFFF;font-weight:800;">{_v_rp_v}</span>' if _v_rp_v else ""
+    _v_rel_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.9;">&#128158; <strong>{_v_rs_v}</strong>{_v_rp_tag}</div>' if (_v_rs_v and _v_rs_v != "Not Specified") else ""
+    _v_bio_h = f"{_v_home_h}{_v_work_h}{_v_rel_h}{_v_bio_h}"
     st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{v_av}<div><div style="font-size:20px;font-weight:900;">{vp.get("display_name", vp.get("handle", ""))} {v_badges}</div><div style="color:{v_th.get("accent","#FF2E93")};font-weight:800;">{vp.get("handle", "")} • {online_badge}</div>{v_site}</div>{_vst_ring_html}</div>{_v_bio_h}{v_int_html}</div>', unsafe_allow_html=True)
     if v_th.get("allow_css_remix", True):
         if st.button(f"✨ Steal This Look (Remix {vp.get('handle', '')}'s Theme)", key="steal_look_btn"):
