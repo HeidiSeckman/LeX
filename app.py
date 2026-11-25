@@ -2013,49 +2013,22 @@ with hub_col:
                     f'<div style="margin-bottom:4px;font-size:12px;line-height:1.35;"><strong>{m.get("sender_handle", "")}:</strong> {m.get("body", "")}</div>'
                     for m in im_thread[-30:]
                 ]) or '<div style="opacity:0.55;font-size:12px;padding:38px 8px;text-align:center;">No messages yet — say hi!</div>'
-                win_html = (
-                    f'<div id="lex-im-win" style="position:fixed;bottom:16px;right:16px;width:320px;height:auto;max-height:420px;
-                    f'<div id="lex-im-bar" style="cursor:move;padding:10px 14px;background:{th["accent"]};color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:space-between;">'
-                    f'<span>⚡ {im_act} — LeX Instant</span>'
-                    f'<span id="lex-im-min" style="cursor:pointer;padding:0 6px;font-size:16px;font-weight:bold;">+</span></div>'
-                    f'<div id="lex-im-body" style="display:none;flex-direction:column;flex:1;overflow:hidden;">'
-                    f'<div style="padding:8px 12px;border-bottom:1px solid {th["accent"]}44;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.2);">{av_h}<div style="font-size:12px;font-weight:800;">Chatting with {im_peers[im_act]}</div></div>'
-                    f'<div id="lex-im-scroll" style="flex:1;overflow-y:auto;padding:10px 12px;">{rows_h}</div>'
-                    f'<div style="padding:8px;border-top:1px solid {th["accent"]}44;display:flex;gap:6px;background:rgba(0,0,0,0.25);">'
-                    f'<input id="lex-im-txt" type="text" placeholder="IM {im_act}..." style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid {th["accent"]};background:rgba(15,23,42,0.9);color:#fff;font-size:12px;outline:none;" />'
-                    f'<button id="lex-im-send" style="padding:8px 14px;border-radius:10px;border:none;background:{th["accent"]};color:#fff;font-weight:900;font-size:12px;cursor:pointer;">SEND</button>'
-                    f'</div></div></div>'
-            )
-                st.markdown(win_html.replace("position:fixed;bottom:16px;right:16px;width:320px;", "position:relative;width:100%;max-width:520px;margin:8px 0;").replace("display:none;", "display:flex;"), unsafe_allow_html=True)
-                st.markdown("""<style>
-                div.stElementContainer:has(input[aria-label="LEX_IM_BRIDGE"]),
-                div.stElementContainer:has(input[aria-label="LEX_IM_BRIDGE"]) + div.stElementContainer {
-                    display: none !important;
-                }
-                </style>""", unsafe_allow_html=True)
-                pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="lex_im_sw_pk")
-                if pk != im_act:
-                    st.session_state["lex_im_peer"] = pk
-                    st.rerun()
-                st.markdown("""<style>
-                div.stElementContainer:has(input[aria-label="LEX_IM_BRIDGE"]),
-                div.stElementContainer:has(input[aria-label="LEX_IM_BRIDGE"]) + div.stElementContainer {
-                    display: none !important;
-                }
-                </style>""", unsafe_allow_html=True)
-                if pk != im_act:
-                    st.session_state["lex_im_peer"] = pk
-                    st.rerun()
-                st.markdown("<style>div:has(> div > input[aria-label='LEX_IM_BRIDGE']), div:has(> button > div > p) { } input[aria-label='LEX_IM_BRIDGE']{height:1px!important;opacity:0!important;pointer-events:none!important;position:fixed!important;left:-9999px!important;}</style>", unsafe_allow_html=True)
-                br_val = st.text_input("LEX_IM_BRIDGE", key="lex_im_bridge_in", label_visibility="collapsed")
-                if st.button("LEX_IM_GO", key="lex_im_bridge_go") and br_val.strip():
+            st.markdown(f'<div class="lex-card" style="padding:12px 14px;max-height:360px;overflow-y:auto;">{rows_h}</div>', unsafe_allow_html=True)
+            pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="im_peer_sel")
+            if pk != im_act:
+                st.session_state["lex_im_peer"] = pk
+                st.rerun()
+            with st.form("lex_dm_send_form", clear_on_submit=True):
+                dm_c1, dm_c2 = st.columns([0.78, 0.22])
+                br_val = dm_c1.text_input("Message", placeholder=f"Message {im_act}...", label_visibility="collapsed")
+                if dm_c2.form_submit_button("Send ➤", use_container_width=True) and br_val.strip():
                     ok_i, msg_i = check_safety_and_dress_code(br_val)
                     if ok_i:
                         sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": im_act, "body": br_val.strip()}).execute()
                         st.rerun()
                     else:
                         st.error(msg_i)
-                        
+
             except Exception as e:
                 st.warning(f"LeX Instant notice: {e}")
 
