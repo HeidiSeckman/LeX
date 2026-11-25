@@ -1716,6 +1716,12 @@ def render_feed_post(p: dict, k_pfx: str):
                         st.session_state[c_open_key] = True
                         st.rerun()
 
+active_left = list(dict.fromkeys(th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Anthem", "Photo Albums", "Guestbook Wall"]))
+active_right = list(dict.fromkeys(th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub", "Badge Trophy Case"]))
+if th.get("show_badges", True) and "Badge Trophy Case" not in active_left and "Badge Trophy Case" not in active_right:
+    active_right.insert(max(0, len(active_right) - 1), "Badge Trophy Case")
+if "Social Hub" not in active_left and "Social Hub" not in active_right:
+    active_right.append("Social Hub")
 _dedup_left = list(dict.fromkeys(active_left))
 _dedup_right = [m for m in dict.fromkeys(active_right) if m not in _dedup_left]
 col_left, col_right = st.columns([1.05, 1.95], gap="large")
