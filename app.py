@@ -1628,6 +1628,8 @@ def render_profile_module(mod_name: str):
 
 active_left = list(th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Playlist", "Photo Albums", "Guestbook Wall"])
 active_right = list(th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub"])
+if th.get("show_badges", True) and "Badge Trophy Case" not in active_left and "Badge Trophy Case" not in active_right:
+    active_right.append("Badge Trophy Case")
 if "Social Hub" not in active_left and "Social Hub" not in active_right:
     active_right.append("Social Hub")
 st.markdown("""<style>
