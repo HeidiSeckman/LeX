@@ -2016,21 +2016,21 @@ with hub_col:
                     f'<div style="margin-bottom:4px;font-size:12px;line-height:1.35;"><strong>{m.get("sender_handle", "")}:</strong> {m.get("body", "")}</div>'
                     for m in im_thread[-30:]
                 ]) or '<div style="opacity:0.55;font-size:12px;padding:38px 8px;text-align:center;">No messages yet — say hi!</div>'
-                    st.markdown(f'<div class="lex-card" style="padding:12px 14px;max-height:360px;overflow-y:auto;">{rows_h}</div>', unsafe_allow_html=True)
-        pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="im_peer_sel")
-        if pk != im_act:
-            st.session_state["lex_im_peer"] = pk
-            st.rerun()
-        with st.form("lex_dm_send_form", clear_on_submit=True):
-            dm_c1, dm_c2 = st.columns([0.78, 0.22])
-            br_val = dm_c1.text_input("Message", placeholder=f"Message {im_act}...", label_visibility="collapsed")
-            if dm_c2.form_submit_button("Send ➤", use_container_width=True) and br_val.strip():
-                ok_i, msg_i = check_safety_and_dress_code(br_val)
-                if ok_i:
-                    sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": im_act, "body": br_val.strip()}).execute()
+                st.markdown(f'<div class="lex-card" style="padding:12px 14px;max-height:360px;overflow-y:auto;">{rows_h}</div>', unsafe_allow_html=True)
+                pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="im_peer_sel")
+                if pk != im_act:
+                    st.session_state["lex_im_peer"] = pk
                     st.rerun()
-                else:
-                    st.error(msg_i)
+                with st.form("lex_dm_send_form", clear_on_submit=True):
+                    dm_c1, dm_c2 = st.columns([0.78, 0.22])
+                    br_val = dm_c1.text_input("Message", placeholder=f"Message {im_act}...", label_visibility="collapsed")
+                    if dm_c2.form_submit_button("Send ➤", use_container_width=True) and br_val.strip():
+                        ok_i, msg_i = check_safety_and_dress_code(br_val)
+                        if ok_i:
+                            sb.table("lex_messages").insert({"sender_handle": user["handle"], "recipient_handle": im_act, "body": br_val.strip()}).execute()
+                            st.rerun()
+                        else:
+                            st.error(msg_i)
                     
             except Exception as e:
                 st.warning(f"LeX Instant notice: {e}")
