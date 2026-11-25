@@ -1633,13 +1633,12 @@ def render_profile_module(mod_name: str):
         for i_t8, fr8 in enumerate(st.session_state.lex_top8[:8]):
             t8_top_cols[i_t8 % 4].markdown(friend_card_html(fr8, "👑 #1" if i_t8 == 0 else f"#{i_t8 + 1}", th), unsafe_allow_html=True)
 
-    active_left = list(dict.fromkeys(th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Anthem", "Photo Albums", "Guestbook Wall"]))
-    active_right = list(dict.fromkeys(th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub", "Badge Trophy Case"]))
-    if th.get("show_badges", True) and "Badge Trophy Case" not in active_left and "Badge Trophy Case" not in active_right:
-        active_right.insert(max(0, len(active_right) - 1), "Badge Trophy Case")
-    if "Social Hub" not in active_left and "Social Hub" not in active_right:
-        active_right.append("Social Hub")
-
+active_left = list(dict.fromkeys(th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Anthem", "Photo Albums", "Guestbook Wall"]))
+active_right = list(dict.fromkeys(th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub", "Badge Trophy Case"]))
+if th.get("show_badges", True) and "Badge Trophy Case" not in active_left and "Badge Trophy Case" not in active_right:
+    active_right.insert(max(0, len(active_right) - 1), "Badge Trophy Case")
+if "Social Hub" not in active_left and "Social Hub" not in active_right:
+    active_right.append("Social Hub")
 
 st.markdown("""<style>
 @media (max-width: 768px) {
