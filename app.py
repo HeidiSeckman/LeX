@@ -1742,17 +1742,6 @@ def render_feed_post(p: dict, k_pfx: str):
         if rcols[5].button("🚩", key=f"{k_pfx}_rep_p_{p['id']}", help="Report post"):
             st.session_state[f"{k_pfx}_rep_open_{p['id']}"] = not st.session_state.get(f"{k_pfx}_rep_open_{p['id']}", False)
             st.rerun()
- clean_handle_str(p_author_h).lower() == clean_handle_str(user.get("handle") or "").lower():
-        if rcols[5].button("✏️", key=f"{k_pfx}_ed_p_{p['id']}"):
-            st.session_state[f"{k_pfx}_edit_p_{p['id']}"] = not st.session_state.get(f"{k_pfx}_edit_p_{p['id']}", False)
-            st.rerun()
-        if rcols[6].button("🗑️", key=f"{k_pfx}_del_p_{p['id']}") and sb:
-            sb.table("lex_posts").delete().eq("id", p["id"]).execute()
-            st.rerun()
-    else:
-        if rcols[5].button("🚩", key=f"{k_pfx}_rep_p_{p['id']}", help="Report post to Founder"):
-            st.session_state[f"{k_pfx}_rep_open_{p['id']}"] = not st.session_state.get(f"{k_pfx}_rep_open_{p['id']}", False)
-            st.rerun()
 
     if st.session_state.get(c_open_key, False) or cm_list:
         with st.expander(f"💬 Comments ({len(cm_list)})", expanded=st.session_state.get(c_open_key, False)):
