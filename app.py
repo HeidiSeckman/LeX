@@ -1097,12 +1097,12 @@ if st.session_state.viewing_handle and sb:
         _vb_pills = []
         if clean_handle_str(vp.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
             _vb_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
-        _v_base_bdgs = list(vp.get("badges") or v_th.get("badges") or [])
-        if "OG EARLY ADOPTER" not in _v_base_bdgs:
-            _v_base_bdgs.insert(0, "OG EARLY ADOPTER")
-        for _tb in _v_base_bdgs:
-
-            _vb_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{v_th.get("accent","#FF2E93")}28;border:1px solid {v_th.get("accent","#FF2E93")};">{_tb}</span>')
+        _vb_pills.append('<span style="background:linear-gradient(90deg,#0284C7,#38BDF8);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">✦ OG EARLY ADOPTER</span>')
+        if (v_th.get("custom_css") or "").strip():
+            _vb_pills.append('<span style="background:linear-gradient(90deg,#9333EA,#EC4899);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🎨 CSS ARCHITECT</span>')
+        for _tb in (vp.get("badges") or v_th.get("badges") or []):
+            if _tb not in {"OG EARLY ADOPTER", "CSS ARCHITECT", "CREATOR & FOUNDER"}:
+                _vb_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{v_th.get("accent","#FF2E93")}28;border:1px solid {v_th.get("accent","#FF2E93")};">{_tb}</span>')
         if sb:
             try:
                 _vfp_rows = sb.table("lex_posts").select("handle,body").ilike("body", "%[FLASHPIC_TO:%").limit(500).execute().data or []
