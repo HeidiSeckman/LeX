@@ -2498,7 +2498,7 @@ with t_studio:
                         rb.append(lb.pop(idx_l))
                         th["left_blocks"], th["right_blocks"] = lb, rb
                         save_profile_to_cloud()
-                            st.rerun()
+                        st.rerun()
                 with mc2:
                     st.caption("➡️ Right Column Order")
                     for idx_r, blk in enumerate(rb):
