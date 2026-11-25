@@ -2421,7 +2421,7 @@ with t_studio:
                         m_src = re.search(r'src=["\']([^"\']+)["\']', s, flags=re.IGNORECASE)
                         if m_src:
                             s = m_src.group(1).strip()
-                            m_gp = re.search(r'giphy\.com/(?:gifs|embed)/(?:[a-zA-Z0-9_-]+-)?([a-zA-Z0-9]+)', s, flags=re.IGNORECASE)
+                        m_gp = re.search(r'giphy\.com/(?:gifs|embed)/(?:[a-zA-Z0-9_-]+-)?([a-zA-Z0-9]+)', s, flags=re.IGNORECASE)
                         if m_gp:
                             return f"https://giphy.com{m_gp.group(1)}/giphy.gif"
                         return normalize_url(s) if "normalize_url" in globals() else (s if s.startswith(("http://", "https://", "data:image/")) else "")
