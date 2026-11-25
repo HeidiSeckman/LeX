@@ -1903,6 +1903,31 @@ with hub_col:
         inc_reqs = list(th.get("incoming_requests") or [])
         sent_reqs = list(th.get("sent_requests") or [])
         blk_users = list(th.get("blocked_users") or [])
+            _inc_rel = th.get("incoming_rel_req")
+            if isinstance(_inc_rel, dict) and _inc_rel.get("handle"):
+                st.info(f"💞 **{_inc_rel.get('name', _inc_rel['handle'])}** (`{_inc_rel['handle']}`) wants to list you as their partner (**{_inc_rel.get('status', 'In a Relationship')}**).")
+                _rl1, _rl2 = st.columns(2)
+                if _rl1.button("💞 Approve Partner Tag", key="acc_rel_req", use_container_width=True) and sb:
+                    th["relationship_status"] = _inc_rel.get("status", "In a Relationship")
+                    th["relationship_partner"] = _inc_rel["handle"]
+                    th["incoming_rel_req"] = None
+                    save_profile_to_cloud()
+                    try:
+                        _sr = sb.table("lex_profiles").select("handle,theme_json").ilike("handle", _inc_rel["handle"]).limit(1).execute().data or []
+                        if _sr:
+                            _sth = dict(_sr[0].get("theme_json") or {})
+                            _sth["relationship_status"] = _inc_rel.get("status", "In a Relationship")
+                            _sth["relationship_partner"] = user["handle"]
+                            _sth["relationship_partner_pending"] = ""
+                            sb.table("lex_profiles").update({"theme_json": _sth}).eq("handle", _sr[0]["handle"]).execute()
+                    except Exception:
+                        pass
+                    st.toast("💞 Partner tag approved on both profiles!")
+                    st.rerun()
+                if _rl2.button("✖ Decline", key="dec_rel_req", use_container_width=True):
+                    th["incoming_rel_req"] = None
+                    save_profile_to_cloud()
+                    st.rerun()
         with st.expander(f"⚙️ Requests & Blocked Manager ({len(inc_reqs)} Incoming • {len(sent_reqs)} Sent • {len(blk_users)} Blocked)", expanded=bool(inc_reqs)):
             mgr_pick = st.selectbox("Select Manager View", ["📩 Pending Friend Requests", "⏳ Sent Friend Requests", "🚫 Blocked Users List"], key="fr_mgr_sel")
             if mgr_pick == "📩 Pending Friend Requests":
@@ -2171,7 +2196,23 @@ with t_studio:
                         th["hometown"] = b_home.strip()
                         th["work_school"] = b_work.strip()
                         th["relationship_status"] = b_rel_stat
-                        th["relationship_partner"] = ("@" + clean_handle_str(b_rel_partner)) if b_rel_partner.strip() else ""
+                        _new_rp = ("@" + clean_handle_str(b_rel_partner)) if b_rel_partner.strip() else ""
+                        if not _new_rp or b_rel_stat in ("Not Specified", "Single"):
+                            th["relationship_partner"] = ""
+                            th["relationship_partner_pending"] = ""
+                        elif _new_rp.lower() != (th.get("relationship_partner") or "").lower():
+                            th["relationship_partner"] = ""
+                            th["relationship_partner_pending"] = _new_rp
+                            if sb:
+                                try:
+                                    _pr = sb.table("lex_profiles").select("handle,theme_json").ilike("handle", _new_rp).limit(1).execute().data or []
+                                    if _pr:
+                                        _pth = dict(_pr[0].get("theme_json") or {})
+                                        _pth["incoming_rel_req"] = {"handle": user["handle"], "name": user.get("name", user["handle"]), "status": b_rel_stat}
+                                        sb.table("lex_profiles").update({"theme_json": _pth}).eq("handle", _pr[0]["handle"]).execute()
+                                        push_activity_notif(_pr[0]["handle"], user["handle"], "mention", f"sent a Relationship Tag request ({b_rel_stat})")
+                                except Exception:
+                                    pass
                         th["is_private"] = bool(b_priv)                        
                         user["website"] = normalize_url(b_site)
                         th["website"] = user["website"]
