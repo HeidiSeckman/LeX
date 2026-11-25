@@ -2480,8 +2480,6 @@ with t_studio:
                 unsafe_allow_html=True,
             )
             with st.container(border=True):
-
-            )
             st.markdown("**🔀 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)**")
 
             lb = [m for m in (th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Playlist", "Photo Albums", "Guestbook Wall"]) if m in ALL_PROFILE_MODULES]
