@@ -2463,15 +2463,9 @@ with t_studio:
                 st.session_state.lex_theme = th
                 save_profile_to_cloud()
                 st.rerun()
-            st.html(
-                "".join([
-                    "<st", "yle>",
-                    "div[data-testid='stVerticalBlockBorderWrapper'] { background: #0B0B0F !important; border: 1.5px solid #27272A !important; border-radius: 14px !important; padding: 14px !important; }",
-                    "div[data-testid='stVerticalBlockBorderWrapper'] button { background: #18181B !important; border: 1.5px solid #52525B !important; color: #FFFFFF !important; }",
-                    "</st", "yle>"
-                ])
-            )
+            st.markdown("<st" + "yle>[data-testid='stVerticalBlockBorderWrapper']{background:#0B0B0F!important;border:1.5px solid #27272A!important;border-radius:14px!important;padding:14px!important;}[data-testid='stVerticalBlockBorderWrapper'] button{background:#18181B!important;border:1.5px solid #52525B!important;color:#FFFFFF!important;}</st" + "yle>", unsafe_allow_html=True)
             with st.container(border=True):
+
                 st.markdown("**🔀 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)**")
                 lb = [m for m in (th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Playlist", "Photo Albums", "Guestbook Wall"]) if m in ALL_PROFILE_MODULES]
                 rb = [m for m in (th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub"]) if m in ALL_PROFILE_MODULES and m not in lb]
