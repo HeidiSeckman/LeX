@@ -1644,7 +1644,7 @@ st.markdown("""<style>
 def format_mentions_html(raw_html: str, accent: str = "#FF2E93") -> str:
     return re.sub(
         r'(?<![\w/])@([a-zA-Z0-9_.]{2,30})',
-        rf'<a href="?u=\1" target="_self" style="display:inline-block;padding:1px 7px;border-radius:99px;background:{accent}28;border:1px solid {accent};color:#FFFFFF;font-weight:800;font-size:0.92em;text-decoration:none;">@\1</a>',
+        rf'<span style="display:inline-block;padding:1px 7px;border-radius:99px;background:{accent}28;border:1px solid {accent};color:#FFFFFF;font-weight:800;font-size:0.92em;">@\1</span>',
         raw_html or "",
     )
 def notify_mentioned_handles(raw_txt: str, sender_handle: str, kind: str = "mention"):
