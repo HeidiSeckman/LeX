@@ -1868,7 +1868,7 @@ with hub_col:
         for p in fr_posts:
             render_feed_post(p, "fr")
 
-        with t_friends:      
+    with t_friends:      
         inc_reqs = list(th.get("incoming_requests") or [])
         sent_reqs = list(th.get("sent_requests") or [])
         blk_users = list(th.get("blocked_users") or [])
