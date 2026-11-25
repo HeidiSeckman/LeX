@@ -1769,7 +1769,7 @@ with col_right:
             st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
             with st.expander("🏆 View FlashPic Milestone Rank Guide (10 → 2,000+)"):
                 st.markdown(
-                    '<div style="font-size:12px;line-height:1.8;">'
+                    '<div style="background:#0B0B0F;border:1px solid #27272A;border-radius:12px;padding:12px 14px;color:#F8FAFC;font-size:12px;line-height:1.9;">'
                     'Trade FlashPics with any friend to unlock shared ranks automatically (never resets if you miss a day!):<br/>'
                     '• <strong>10 Flashes:</strong> <span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">⚡ VIBE SPARK</span><br/>'
                     '• <strong>50 Flashes:</strong> <span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🔥 INNER CIRCLE</span><br/>'
