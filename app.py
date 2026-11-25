@@ -2074,7 +2074,13 @@ with t_studio:
         with st.form("studio_bio_form"):
             b_name = st.text_input("Display Name", value=user.get("name", ""))
             b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now ⚡"))
-            b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Portsmouth, OH")
+            b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Hometown, State")
+            b_work = st.text_input("Work / School (Optional)", value=th.get("work_school", ""), placeholder="e.g., Shawnee State University")
+            _rel_opts = ["Not Specified", "Single", "In a Relationship", "Engaged", "Married", "It's Complicated"]
+            _cur_rel = th.get("relationship_status", "Not Specified")
+            rc_rel1, rc_rel2 = st.columns(2)
+            b_rel_stat = rc_rel1.selectbox("Relationship Status (Optional)", _rel_opts, index=_rel_opts.index(_cur_rel) if _cur_rel in _rel_opts else 0)
+            b_rel_partner = rc_rel2.text_input("Partner @handle (Optional)", value=th.get("relationship_partner", ""), placeholder="@partnerhandle")
             _u_dob_s = user.get("dob") or th.get("dob")
             _is_u16 = False
             if _u_dob_s:
