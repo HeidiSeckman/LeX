@@ -2214,6 +2214,7 @@ with t_studio:
                         user["name"] = b_name.strip() or user["name"]
                         user["mood"] = b_mood.strip()
                         th["hometown"] = b_home.strip()
+                        th["school"] = b_school.strip()
                         th["work_school"] = b_work.strip()
                         th["relationship_status"] = b_rel_stat
                         _new_rp = ("@" + clean_handle_str(b_rel_partner)) if b_rel_partner.strip() else ""
