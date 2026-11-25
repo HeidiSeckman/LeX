@@ -1913,8 +1913,8 @@ with hub_col:
                         save_profile_to_cloud()
                         st.rerun()
         flw_rows = (sb.table("lex_users").select("theme_json").limit(500).execute().data or []) if sb else []
-            _flw_total = sum(1 for _u in _flw_rows if clean_handle_str(user.get("handle", "")).lower() in [clean_handle_str(x.get("handle") if isinstance(x, dict) else x).lower() for x in ((_u.get("theme_json") or {}).get("friends") or [])])
-            st.markdown(f"**👥 All Friends ({len(st.session_state.lex_friends)} / 1000) • 🌟 Followers ({_flw_total})**")        fcols = st.columns(3)
+        _flw_total = sum(1 for _u in _flw_rows if clean_handle_str(user.get("handle", "")).lower() in [clean_handle_str(x.get("handle") if isinstance(x, dict) else x).lower() for x in ((_u.get("theme_json") or {}).get("friends") or [])])
+        st.markdown(f"**👥 All Friends ({len(st.session_state.lex_friends)} / 1000) • 🌟 Followers ({_flw_total})**")        fcols = st.columns(3)
         for idx_f, fr in enumerate(st.session_state.lex_friends):
             fh = fr.get("handle", "")
             with fcols[idx_f % 3]:
