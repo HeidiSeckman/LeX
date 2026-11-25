@@ -1092,7 +1092,42 @@ if st.session_state.viewing_handle and sb:
             save_profile_to_cloud()
             st.toast(f"Remixed {vp.get('handle', '')}'s layout with credit badge!")
             st.rerun()
-
+    if v_th.get("show_badges", True):
+        _vh_b = "@" + clean_handle_str(vp.get("handle", "")).lower()
+        _vb_pills = []
+        if clean_handle_str(vp.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
+            _vb_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
+        for _tb in (v_th.get("badges") or []):
+            _vb_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{v_th.get("accent","#FF2E93")}28;border:1px solid {v_th.get("accent","#FF2E93")};">{_tb}</span>')
+        if sb:
+            try:
+                _vfp_rows = sb.table("lex_posts").select("handle,body").ilike("body", "%[FLASHPIC_TO:%").limit(500).execute().data or []
+                _vpair = {}
+                for _r in _vfp_rows:
+                    _rb = _r.get("body") or ""
+                    _sh = "@" + clean_handle_str(_r.get("handle") or "").lower()
+                    _th_to = "@" + clean_handle_str(_rb.partition("[FLASHPIC_TO:")[2].partition("]")[0]).lower()
+                    if _vh_b in (_sh, _th_to):
+                        _peer = _th_to if _sh == _vh_b else _sh
+                        _vpair[_peer] = _vpair.get(_peer, 0) + 1
+                for _peer, _cnt in sorted(_vpair.items(), key=lambda x: x[1], reverse=True):
+                    if _cnt >= 2000:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1.5px solid #FFFFFF;box-shadow:0 0 10px rgba(255,255,255,0.75);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 LeX ICON • {_cnt // 1000}K ({_peer})</span>')
+                    elif _cnt >= 1000:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;box-shadow:0 0 10px rgba(251,191,36,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🌌 SOLAR ECLIPSE ({_peer})</span>')
+                    elif _cnt >= 500:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;box-shadow:0 0 10px rgba(236,72,153,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔮 SUPERNOVA ({_peer})</span>')
+                    elif _cnt >= 100:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">💎 DIAMOND DUO ({_peer})</span>')
+                    elif _cnt >= 50:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔥 INNER CIRCLE ({_peer})</span>')
+                    elif _cnt >= 10:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">⚡ VIBE SPARK ({_peer})</span>')
+            except Exception:
+                pass
+        if _vb_pills:
+            _v_acc = v_th.get("accent", "#FF2E93")
+            st.markdown(f'<div class="lex-card" style="padding:14px 18px;margin-top:8px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{_v_acc};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(_vb_pills)}</div></div>', unsafe_allow_html=True)
     if v_th.get("vibe_sticker"):
         v_stk = v_th["vibe_sticker"] if v_th["vibe_sticker"].startswith("data:") else normalize_gif_url(v_th["vibe_sticker"])
         st.markdown(f'<div class="lex-card" style="text-align:center;"><img src="{v_stk}" style="max-width:100%;max-height:220px;border-radius:10px;" /></div>', unsafe_allow_html=True)
@@ -1313,27 +1348,40 @@ if st.session_state.get("show_flashpic_panel"):
                 continue
             other_h = to_h if sender_h == my_h_low else sender_h
             threads.setdefault(other_h, []).append(r)
-
+        with st.expander("🏆 FlashPic Milestone Badge Guide (10 → 1,000+)"):
+            st.markdown(
+                '<div style="font-size:12px;line-height:1.7;">'
+                'Trade FlashPics with any friend to level up your shared badge automatically (never resets if you miss a day!):<br/>'
+                '• <strong>10 Flashes:</strong> <span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">⚡ VIBE SPARK</span><br/>'
+                '• <strong>50 Flashes:</strong> <span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🔥 INNER CIRCLE</span><br/>'
+                '• <strong>100 Flashes:</strong> <span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">💎 DIAMOND DUO</span><br/>'
+                '• <strong>500 Flashes:</strong> <span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🔮 SUPERNOVA</span><br/>'
+                '• <strong>1,000 Flashes:</strong> <span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🌌 SOLAR ECLIPSE</span><br/>'
+                '• <strong>2,000+ (Every +1K):</strong> <span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1px solid #FFFFFF;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">👑 LeX ICON • 2K+</span>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
         st.markdown(f'<div style="font-size:12px;font-weight:900;color:{th["accent"]};margin:8px 0 4px 2px;">📥 FlashPic Inbox & History ({len(threads)})</div>', unsafe_allow_html=True)
         if not threads:
             st.caption("No FlashPics yet — send your first disappearing pic above!")
         selected_to_delete = []
         for other_h, rows in threads.items():
-            days_active = sorted({(x.get("created_at") or "")[:10] for x in rows if x.get("created_at")}, reverse=True)
-            streak = 0
-            if days_active:
-                cur_d = datetime.now(timezone.utc).date()
-                for ds in days_active:
-                    try:
-                        d_obj = datetime.strptime(ds, "%Y-%m-%d").date()
-                        if (cur_d - d_obj).days <= streak + 1:
-                            streak += 1
-                            cur_d = d_obj
-                        else:
-                            break
-                    except Exception:
-                        break
-            streak_badge = f" 🔥 {streak}d" if streak >= 1 else ""
+            fp_cnt = len(rows)
+            if fp_cnt >= 2000:
+                streak_badge = f' <span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1.5px solid #FFFFFF;box-shadow:0 0 10px rgba(255,255,255,0.75);font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">👑 LeX ICON • {fp_cnt // 1000}K ({fp_cnt})</span>'
+            elif fp_cnt >= 1000:
+                streak_badge = f' <span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;box-shadow:0 0 10px rgba(251,191,36,0.65);font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🌌 SOLAR ECLIPSE ({fp_cnt})</span>'
+            elif fp_cnt >= 500:
+                streak_badge = f' <span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;box-shadow:0 0 10px rgba(236,72,153,0.65);font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🔮 SUPERNOVA ({fp_cnt})</span>'
+            elif fp_cnt >= 100:
+                streak_badge = f' <span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">💎 DIAMOND DUO ({fp_cnt})</span>'
+            elif fp_cnt >= 50:
+                streak_badge = f' <span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🔥 INNER CIRCLE ({fp_cnt})</span>'
+            elif fp_cnt >= 10:
+                streak_badge = f' <span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">⚡ VIBE SPARK ({fp_cnt})</span>'
+            else:
+                streak_badge = f' <span style="opacity:0.7;font-size:11px;font-weight:800;">📸 {fp_cnt}</span>'
+
             latest = rows[0]
             l_body = latest.get("body") or ""
             l_sender = "@" + clean_handle_str(latest.get("handle") or "").lower()
@@ -1529,6 +1577,42 @@ def render_profile_module(mod_name: str):
                     save_profile_to_cloud()
                     st.rerun()
                 if ap_c2.button("✕ Reject", key=f"rej_sp_{idx_pd}"):
+    elif mod_name == "Badge Trophy Case":
+        if th.get("show_badges", True):
+            my_h_b = "@" + clean_handle_str(user.get("handle", "")).lower()
+            b_pills = []
+            if clean_handle_str(user.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
+                b_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
+            for _tb in (th.get("badges") or []):
+                b_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{th["accent"]}28;border:1px solid {th["accent"]};">{_tb}</span>')
+            if sb:
+                try:
+                    _fp_rows = sb.table("lex_posts").select("handle,body").ilike("body", "%[FLASHPIC_TO:%").limit(500).execute().data or []
+                    _pair_cnts = {}
+                    for _r in _fp_rows:
+                        _rb = _r.get("body") or ""
+                        _sh = "@" + clean_handle_str(_r.get("handle") or "").lower()
+                        _th_to = "@" + clean_handle_str(_rb.partition("[FLASHPIC_TO:")[2].partition("]")[0]).lower()
+                        if my_h_b in (_sh, _th_to):
+                            _peer = _th_to if _sh == my_h_b else _sh
+                            _pair_cnts[_peer] = _pair_cnts.get(_peer, 0) + 1
+                    for _peer, _cnt in sorted(_pair_cnts.items(), key=lambda x: x[1], reverse=True):
+                        if _cnt >= 2000:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1.5px solid #FFFFFF;box-shadow:0 0 10px rgba(255,255,255,0.75);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 LeX ICON • {_cnt // 1000}K ({_peer})</span>')
+                        elif _cnt >= 1000:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;box-shadow:0 0 10px rgba(251,191,36,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🌌 SOLAR ECLIPSE ({_peer})</span>')
+                        elif _cnt >= 500:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;box-shadow:0 0 10px rgba(236,72,153,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔮 SUPERNOVA ({_peer})</span>')
+                        elif _cnt >= 100:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">💎 DIAMOND DUO ({_peer})</span>')
+                        elif _cnt >= 50:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔥 INNER CIRCLE ({_peer})</span>')
+                        elif _cnt >= 10:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">⚡ VIBE SPARK ({_peer})</span>')
+                except Exception:
+                    pass
+            if b_pills:
+                st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
                     all_my_sp.remove(psp)
                     th["scrapbook_photos"] = all_my_sp
                     save_profile_to_cloud()
@@ -2291,7 +2375,7 @@ with t_studio:
                         m_src = re.search(r'src=["\']([^"\']+)["\']', s, flags=re.IGNORECASE)
                         if m_src:
                             s = m_src.group(1).strip()
-                        m_gp = re.search(r'giphy\.com/(?:gifs|embed)/(?:[a-zA-Z0-9_-]+-)?([a-zA-Z0-9]+)', s, flags=re.IGNORECASE)
+                            m_gp = re.search(r'giphy\.com/(?:gifs|embed)/(?:[a-zA-Z0-9_-]+-)?([a-zA-Z0-9]+)', s, flags=re.IGNORECASE)
                         if m_gp:
                             return f"https://giphy.com{m_gp.group(1)}/giphy.gif"
                         return normalize_url(s) if "normalize_url" in globals() else (s if s.startswith(("http://", "https://", "data:image/")) else "")
@@ -2326,7 +2410,13 @@ with t_studio:
                     save_profile_to_cloud()
                     st.toast("Saved Profile Song ✦")
                     st.rerun()
-
+                    
+            tog_bdg = st.toggle("Show 🏆 Earned Badges & Milestones box on my profile", value=bool(th.get("show_badges", True)), key="studio_show_bdg_tog")
+            if tog_bdg != bool(th.get("show_badges", True)):
+                th["show_badges"] = tog_bdg
+                st.session_state.lex_theme = th
+                save_profile_to_cloud()
+                st.rerun()
             st.markdown("**🧩 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)**")
             lb = [m for m in (th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Playlist", "Photo Albums", "Guestbook Wall"]) if m in ALL_PROFILE_MODULES]
             rb = [m for m in (th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub"]) if m in ALL_PROFILE_MODULES and m not in lb]
