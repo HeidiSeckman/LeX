@@ -1870,6 +1870,25 @@ with hub_col:
             render_feed_post(p, "fr")
 
     with t_friends:
+            _all_f_list = st.session_state.get("lex_friends") or []
+            _my_clean_h = "@" + clean_handle_str(user.get("handle", "")).lower()
+            _follower_cnt = len(_all_f_list)
+            if sb:
+                try:
+                    _all_u_rows = sb.table("lex_users").select("handle,theme_json").limit(500).execute().data or []
+                    _follower_cnt = sum(
+                        1 for _ur in _all_u_rows
+                        if _my_clean_h in ["@" + clean_handle_str(x).lower() for x in ((_ur.get("theme_json") or {}).get("friends") or [])]
+                    )
+                except Exception:
+                    pass
+            st.markdown(
+                f'<div class="lex-card" style="padding:12px 16px;display:flex;justify-content:space-around;text-align:center;">'
+                f'<div><div style="font-size:20px;font-weight:900;color:{th["accent"]};">{_follower_cnt}</div><div style="font-size:11px;opacity:0.8;letter-spacing:1px;">FOLLOWERS</div></div>'
+                f'<div><div style="font-size:20px;font-weight:900;color:{th["accent"]};">{len(_all_f_list)}</div><div style="font-size:11px;opacity:0.8;letter-spacing:1px;">FOLLOWING</div></div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
         inc_reqs = list(th.get("incoming_requests") or [])
         sent_reqs = list(th.get("sent_requests") or [])
         blk_users = list(th.get("blocked_users") or [])
