@@ -1730,10 +1730,6 @@ with col_left:
     for m_name in _dedup_left:
         if m_name != "Social Hub":
             render_profile_module(m_name)
-with col_right:
-    for m_name in _dedup_right:
-        if m_name != "Social Hub":
-            render_profile_module(m_name)
 
 hub_col = col_left if "Social Hub" in active_left else col_right
 with hub_col:
