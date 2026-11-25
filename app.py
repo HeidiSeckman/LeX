@@ -1767,6 +1767,19 @@ with col_right:
                 pass
         if b_pills:
             st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
+            with st.expander("🏆 View FlashPic Milestone Rank Guide (10 → 2,000+)"):
+                st.markdown(
+                    '<div style="font-size:12px;line-height:1.8;">'
+                    'Trade FlashPics with any friend to unlock shared ranks automatically (never resets if you miss a day!):<br/>'
+                    '• <strong>10 Flashes:</strong> <span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">⚡ VIBE SPARK</span><br/>'
+                    '• <strong>50 Flashes:</strong> <span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🔥 INNER CIRCLE</span><br/>'
+                    '• <strong>100 Flashes:</strong> <span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">💎 DIAMOND DUO</span><br/>'
+                    '• <strong>500 Flashes:</strong> <span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🔮 SUPERNOVA</span><br/>'
+                    '• <strong>1,000 Flashes:</strong> <span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">🌌 SOLAR ECLIPSE</span><br/>'
+                    '• <strong>2,000+ (Every +1K):</strong> <span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1px solid #FFFFFF;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;">👑 LeX ICON • 2K+</span>'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
 hub_col = col_left if "Social Hub" in active_left else col_right
 with hub_col:
     t_feed, t_ffeed, t_friends, t_dm, t_top8, t_studio, t_radar = st.tabs([
