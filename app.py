@@ -2465,19 +2465,22 @@ with t_studio:
                 st.rerun()
             st.markdown(
                 """<style>
-                div[data-testid="stTabs"] div[data-testid="stVerticalBlockBorderWrapper"] {
-                    background: #0B0B0F !important;
+                div[data-testid="stVerticalBlockBorderWrapper"] {
+                    background-color: #0B0B0F !important;
                     border: 1px solid #27272A !important;
                     border-radius: 14px !important;
                     padding: 14px !important;
                 }
-                div[data-testid="stTabs"] button[kind="secondary"] {
-                    background: #18181B !important;
+                div[data-testid="stVerticalBlockBorderWrapper"] button {
+                    background-color: #18181B !important;
                     border: 1.5px solid #52525B !important;
                     color: #FFFFFF !important;
                 }
                 </style>""",
                 unsafe_allow_html=True,
+            )
+            with st.container(border=True):
+
             )
             st.markdown("**🔀 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)**")
 
