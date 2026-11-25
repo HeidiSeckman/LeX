@@ -1724,13 +1724,15 @@ def render_feed_post(p: dict, k_pfx: str):
                         st.session_state[c_open_key] = True
                         st.rerun()
 
+_dedup_left = list(dict.fromkeys(active_left))
+_dedup_right = [m for m in dict.fromkeys(active_right) if m not in _dedup_left]
 col_left, col_right = st.columns([1.05, 1.95], gap="large")
 with col_left:
-    for m_name in active_left:
+    for m_name in _dedup_left:
         if m_name != "Social Hub":
             render_profile_module(m_name)
 with col_right:
-    for m_name in active_right:
+    for m_name in _dedup_right:
         if m_name != "Social Hub":
             render_profile_module(m_name)
 
