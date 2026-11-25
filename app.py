@@ -1545,7 +1545,7 @@ def render_profile_module(mod_name: str):
                 st.rerun()
     elif mod_name == "Badge Trophy Case":
         import time as _tc_t
-        if _tc_t.time() - float(st.session_state.get("_tc_last_ts", 0)) < 0.8:
+        if _tc_t.time() - float(st.session_state.get("_tc_last_ts", 0)) < 2.5:
             return
         st.session_state["_tc_last_ts"] = _tc_t.time()
         if th.get("show_badges", True):
