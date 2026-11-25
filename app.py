@@ -1438,7 +1438,7 @@ def render_profile_module(mod_name: str):
         my_site = founder_studio_link_html(user.get("handle", ""), th["accent"])
         my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("Books", "int_books")] if th.get(k, "")]
         my_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong>{lbl}:</strong> {val}</div>' for lbl, val in my_ints])
-        home_h = f"{home_h}{work_h}{school_h}{rel_h}"
+        home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{th.get("hometown")}</strong></div>' if th.get("hometown") else ""
         work_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128188; <strong>{th.get("work_school")}</strong></div>' if th.get("work_school") else ""
         school_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#127891; <strong>{th.get("school")}</strong></div>' if th.get("school") else ""
         _rs_v = th.get("relationship_status", "Not Specified")
