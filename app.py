@@ -18,7 +18,6 @@ _stc.html("<script>const p=window.parent.document;['lex-im-win','lex-im-wrap'].f
 ST_OPEN = "<" + "style>"
 ST_CLOSE = "<" + "/style>"
 unsafe_allow_html=True,
-)
 st.markdown(f"{ST_OPEN}[id*='im'],[class*='im-win'],[class*='chat-dock']{{display:none!important;visibility:hidden!important;pointer-events:none!important;}}{ST_CLOSE}", unsafe_allow_html=True)    + ".block-container { padding-left: 0.65rem !important; padding-right: 0.65rem !important; padding-top: 1.2rem !important; max-width: 100vw !important; overflow-x: hidden !important; }"
     + ".lex-card { padding: 12px !important; margin-bottom: 10px !important; }"
     + ".lex-card h2 { font-size: 1.25rem !important; }"
