@@ -1129,34 +1129,7 @@ if st.session_state.viewing_handle and sb:
         if _vb_pills:
             _v_acc = v_th.get("accent", "#FF2E93")
             st.markdown(f'<div class="lex-card" style="padding:14px 18px;margin-top:8px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{_v_acc};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(_vb_pills)}</div></div>', unsafe_allow_html=True)
-
-                _vpair = {}
-                for _r in _vfp_rows:
-                    _rb = _r.get("body") or ""
-                    _sh = "@" + clean_handle_str(_r.get("handle") or "").lower()
-                    _th_to = "@" + clean_handle_str(_rb.partition("[FLASHPIC_TO:")[2].partition("]")[0]).lower()
-                    if _vh_b in (_sh, _th_to):
-                        _peer = _th_to if _sh == _vh_b else _sh
-                        _vpair[_peer] = _vpair.get(_peer, 0) + 1
-                for _peer, _cnt in sorted(_vpair.items(), key=lambda x: x[1], reverse=True):
-                    if _cnt >= 2000:
-                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1.5px solid #FFFFFF;box-shadow:0 0 10px rgba(255,255,255,0.75);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 LeX ICON • {_cnt // 1000}K ({_peer})</span>')
-                    elif _cnt >= 1000:
-                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;box-shadow:0 0 10px rgba(251,191,36,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🌌 SOLAR ECLIPSE ({_peer})</span>')
-                    elif _cnt >= 500:
-                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;box-shadow:0 0 10px rgba(236,72,153,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔮 SUPERNOVA ({_peer})</span>')
-                    elif _cnt >= 100:
-                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">💎 DIAMOND DUO ({_peer})</span>')
-                    elif _cnt >= 50:
-                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔥 INNER CIRCLE ({_peer})</span>')
-                    elif _cnt >= 10:
-                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">⚡ VIBE SPARK ({_peer})</span>')
-            except Exception:
-                pass
-        if _vb_pills:
-            _v_acc = v_th.get("accent", "#FF2E93")
-            st.markdown(f'<div class="lex-card" style="padding:14px 18px;margin-top:8px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{_v_acc};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(_vb_pills)}</div></div>', unsafe_allow_html=True)
-    if v_th.get("vibe_sticker"):
+            
         v_stk = v_th["vibe_sticker"] if v_th["vibe_sticker"].startswith("data:") else normalize_gif_url(v_th["vibe_sticker"])
         st.markdown(f'<div class="lex-card" style="text-align:center;"><img src="{v_stk}" style="max-width:100%;max-height:220px;border-radius:10px;" /></div>', unsafe_allow_html=True)
     ac1, ac2, ac3, ac4, ac5 = st.columns([0.22, 0.30, 0.20, 0.14, 0.14])
