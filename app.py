@@ -1718,7 +1718,31 @@ def render_feed_post(p: dict, k_pfx: str):
     if rcols[4].button(f"💬 {len(cm_list)}", key=f"{k_pfx}_cbtn_{p['id']}"):
         st.session_state[c_open_key] = not st.session_state.get(c_open_key, False)
         st.rerun()
-    if clean_handle_str(p_author_h).lower() == clean_handle_str(user.get("handle") or "").lower():
+    if clean_handle_str(p_author_h).lower() == clean_handle_str(user.get("handle", "")).lower():
+        if rcols[5].button("✏️", key=f"{k_pfx}_ed_p_{p['id']}", help="Edit post"):
+            st.session_state[f"{k_pfx}_edit_p_{p['id']}"] = not st.session_state.get(f"{k_pfx}_edit_p_{p['id']}", False)
+            st.rerun()
+        if rcols[6].button("🗑️", key=f"{k_pfx}_del_p_{p['id']}", help="Delete post") and sb:
+            sb.table("lex_posts").delete().eq("id", p["id"]).execute()
+            st.toast("🗑️ Post deleted!")
+            st.rerun()
+        if st.session_state.get(f"{k_pfx}_edit_p_{p['id']}", False):
+            _raw_ed_txt, _ed_lnk, _ed_img, _ed_meta = parse_post_blob(p.get("body"))
+            _new_ed_txt = st.text_area("Edit Post", value=_raw_ed_txt, key=f"{k_pfx}_ed_ta_{p['id']}", height=80)
+            _ec1, _ec2 = st.columns(2)
+            if _ec1.button("💾 Save Edit", key=f"{k_pfx}_ed_sv_{p['id']}", use_container_width=True) and sb:
+                sb.table("lex_posts").update({"body": pack_post_blob(_new_ed_txt.strip(), _ed_lnk, _ed_img, _ed_meta)}).eq("id", p["id"]).execute()
+                st.session_state[f"{k_pfx}_edit_p_{p['id']}"] = False
+                st.toast("✨ Post updated!")
+                st.rerun()
+            if _ec2.button("Cancel", key=f"{k_pfx}_ed_cn_{p['id']}", use_container_width=True):
+                st.session_state[f"{k_pfx}_edit_p_{p['id']}"] = False
+                st.rerun()
+    else:
+        if rcols[5].button("🚩", key=f"{k_pfx}_rep_p_{p['id']}", help="Report post"):
+            st.session_state[f"{k_pfx}_rep_open_{p['id']}"] = not st.session_state.get(f"{k_pfx}_rep_open_{p['id']}", False)
+            st.rerun()
+ clean_handle_str(p_author_h).lower() == clean_handle_str(user.get("handle") or "").lower():
         if rcols[5].button("✏️", key=f"{k_pfx}_ed_p_{p['id']}"):
             st.session_state[f"{k_pfx}_edit_p_{p['id']}"] = not st.session_state.get(f"{k_pfx}_edit_p_{p['id']}", False)
             st.rerun()
@@ -1729,8 +1753,6 @@ def render_feed_post(p: dict, k_pfx: str):
         if rcols[5].button("🚩", key=f"{k_pfx}_rep_p_{p['id']}", help="Report post to Founder"):
             st.session_state[f"{k_pfx}_rep_open_{p['id']}"] = not st.session_state.get(f"{k_pfx}_rep_open_{p['id']}", False)
             st.rerun()
-
-
 
     if st.session_state.get(c_open_key, False) or cm_list:
         with st.expander(f"💬 Comments ({len(cm_list)})", expanded=st.session_state.get(c_open_key, False)):
