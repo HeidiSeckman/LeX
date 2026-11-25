@@ -1920,8 +1920,8 @@ with hub_col:
                         _sth["relationship_partner"] = user["handle"]
                         _sth["relationship_partner_pending"] = ""
                         sb.table("lex_profiles").update({"theme_json": _sth}).eq("handle", _sr[0]["handle"]).execute()
-                    except Exception:
-                        pass
+                except Exception:
+                    pass
                     st.toast("💞 Partner tag approved on both profiles!")
                     st.rerun()
                 if _rl2.button("✖ Decline", key="dec_rel_req", use_container_width=True):
