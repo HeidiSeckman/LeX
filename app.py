@@ -1097,7 +1097,7 @@ if st.session_state.viewing_handle and sb:
         _vb_pills = []
         if clean_handle_str(vp.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
             _vb_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
-        _v_base_bdgs = v_th.get("badges") or ["OG EARLY ADOPTER"]
+        _v_base_bdgs = vp.get("badges") or v_th.get("badges") or ["OG EARLY ADOPTER"]
         for _tb in _v_base_bdgs:
             _vb_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{v_th.get("accent","#FF2E93")}28;border:1px solid {v_th.get("accent","#FF2E93")};">{_tb}</span>')
         if sb:
@@ -1562,7 +1562,7 @@ def render_profile_module(mod_name: str):
             b_pills = []
             if clean_handle_str(user.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
                 b_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
-            _base_bdgs = th.get("badges") or ["OG EARLY ADOPTER", "CSS ARCHITECT"]
+            _base_bdgs = user.get("badges") or th.get("badges") or ["OG EARLY ADOPTER", "CSS ARCHITECT"]
             for _tb in _base_bdgs:
                 b_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{th["accent"]}28;border:1px solid {th["accent"]};">{_tb}</span>')
             if sb:
