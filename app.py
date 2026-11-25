@@ -1667,6 +1667,13 @@ def render_feed_post(p: dict, k_pfx: str):
     lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="color:{th["accent"]};font-weight:700;">🔗 {lnk_src}</a></div>' if lnk_src else ""
     f_bdg = ' <span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:2px 7px;border-radius:99px;">CREATOR & FOUNDER</span>' if clean_handle_str(p_author_h).lower() in {"heidi", "heidiseckman"} else ""
     st.markdown(f'<div class="lex-card"><strong>{p["author"]}</strong> <span style="color:{th["accent"]};">{p_author_h}</span>{f_bdg}<div style="margin-top:6px;">{clean_txt}</div>{img_tag}{lnk_tag}</div>', unsafe_allow_html=True)
+    _tagged_handles = list(dict.fromkeys(re.findall(r'(?<![\w/])@([a-zA-Z0-9_.]{2,30})', re.sub(r'<[^>]+>', '', clean_txt or ""))))
+    if _tagged_handles:
+        _t_cols = st.columns(min(len(_tagged_handles), 4))
+        for _ti, _th_tag in enumerate(_tagged_handles[:4]):
+            if _t_cols[_ti].button(f"👤 @{_th_tag}", key=f"tag_{k_pfx}_{p.get('id', _ti)}_{_th_tag}"):
+                st.session_state.viewing_handle = "@" + _th_tag
+                st.rerun()
     rx_map = p_meta["rx"]
     cm_list = p_meta["comments"]
     rcols = st.columns(7)
