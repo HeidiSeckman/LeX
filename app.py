@@ -2466,53 +2466,53 @@ with t_studio:
             st.markdown("<st" + "yle>[data-testid='stVerticalBlockBorderWrapper']{background:#0B0B0F!important;border:1.5px solid #27272A!important;border-radius:14px!important;padding:14px!important;}[data-testid='stVerticalBlockBorderWrapper'] button{background:#18181B!important;border:1.5px solid #52525B!important;color:#FFFFFF!important;}</st" + "yle>", unsafe_allow_html=True)
             with st.container(border=True):
 
-                st.markdown("**🔀 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)**")
-                lb = [m for m in (th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Playlist", "Photo Albums", "Guestbook Wall"]) if m in ALL_PROFILE_MODULES]
-                rb = [m for m in (th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub"]) if m in ALL_PROFILE_MODULES and m not in lb]
-                for missing_m in ALL_PROFILE_MODULES:
-                    if missing_m not in lb and missing_m not in rb:
-                        rb.append(missing_m)
-                mc1, mc2 = st.columns(2)
-                with mc1:
-                    st.caption("⬅️ Left Column Order")
-                    for idx_l, blk in enumerate(lb):
-                        r1, r2, r3, r4 = st.columns([2.2, 0.6, 0.6, 0.8])
-                        r1.markdown(f"**{idx_l + 1}. {blk}**")
-                        if idx_l > 0 and r2.button("↑", key=f"lu_{idx_l}"):
-                            lb[idx_l], lb[idx_l - 1] = lb[idx_l - 1], lb[idx_l]
+                 with st.expander("🔀 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)", expanded=True):
+                    lb = [m for m in (th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Playlist", "Photo Albums", "Guestbook Wall"]) if m in ALL_PROFILE_MODULES]
+                    rb = [m for m in (th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub"]) if m in ALL_PROFILE_MODULES and m not in lb]
+                    for missing_m in ALL_PROFILE_MODULES:
+                        if missing_m not in lb and missing_m not in rb:
+                            rb.append(missing_m)
+                    mc1, mc2 = st.columns(2)
+                    with mc1:
+                        st.caption("⬅️ Left Column Order")
+                        for idx_l, blk in enumerate(lb):
+                            r1, r2, r3, r4 = st.columns([2.2, 0.6, 0.6, 0.8])
+                            r1.markdown(f"**{idx_l + 1}. {blk}**")
+                            if idx_l > 0 and r2.button("↑", key=f"lu_{idx_l}"):
+                                lb[idx_l], lb[idx_l - 1] = lb[idx_l - 1], lb[idx_l]
+                                th["left_blocks"], th["right_blocks"] = lb, rb
+                                save_profile_to_cloud()
+                                st.rerun()
+                            if idx_l < len(lb) - 1 and r3.button("↓", key=f"ld_{idx_l}"):
+                                lb[idx_l], lb[idx_l + 1] = lb[idx_l + 1], lb[idx_l]
+                                th["left_blocks"], th["right_blocks"] = lb, rb
+                                save_profile_to_cloud()
+                                st.rerun()
+                        if r4.button("⇄ Right", key=f"lr_{idx_l}"):
+                            rb.append(lb.pop(idx_l))
                             th["left_blocks"], th["right_blocks"] = lb, rb
                             save_profile_to_cloud()
                             st.rerun()
-                        if idx_l < len(lb) - 1 and r3.button("↓", key=f"ld_{idx_l}"):
-                            lb[idx_l], lb[idx_l + 1] = lb[idx_l + 1], lb[idx_l]
-                            th["left_blocks"], th["right_blocks"] = lb, rb
-                            save_profile_to_cloud()
-                            st.rerun()
-                    if r4.button("⇄ Right", key=f"lr_{idx_l}"):
-                        rb.append(lb.pop(idx_l))
-                        th["left_blocks"], th["right_blocks"] = lb, rb
-                        save_profile_to_cloud()
-                        st.rerun()
-                with mc2:
-                    st.caption("➡️ Right Column Order")
-                    for idx_r, blk in enumerate(rb):
-                        r1, r2, r3, r4 = st.columns([2.2, 0.6, 0.6, 0.8])
-                        r1.markdown(f"**{idx_r + 1}. {blk}**")
-                        if idx_r > 0 and r2.button("↑", key=f"ru_{idx_r}"):
-                            rb[idx_r], rb[idx_r - 1] = rb[idx_r - 1], rb[idx_r]
-                            th["left_blocks"], th["right_blocks"] = lb, rb
-                            save_profile_to_cloud()
-                            st.rerun()
-                        if idx_r < len(rb) - 1 and r3.button("↓", key=f"rd_{idx_r}"):
-                            rb[idx_r], rb[idx_r + 1] = rb[idx_r + 1], rb[idx_r]
-                            th["left_blocks"], th["right_blocks"] = lb, rb
-                            save_profile_to_cloud()
-                            st.rerun()
-                        if r4.button("⇄ Left", key=f"rl_{idx_r}"):
-                            lb.append(rb.pop(idx_r))
-                            th["left_blocks"], th["right_blocks"] = lb, rb
-                            save_profile_to_cloud()
-                            st.rerun()
+                    with mc2:
+                        st.caption("➡️ Right Column Order")
+                        for idx_r, blk in enumerate(rb):
+                            r1, r2, r3, r4 = st.columns([2.2, 0.6, 0.6, 0.8])
+                            r1.markdown(f"**{idx_r + 1}. {blk}**")
+                            if idx_r > 0 and r2.button("↑", key=f"ru_{idx_r}"):
+                                rb[idx_r], rb[idx_r - 1] = rb[idx_r - 1], rb[idx_r]
+                                th["left_blocks"], th["right_blocks"] = lb, rb
+                                save_profile_to_cloud()
+                                st.rerun()
+                            if idx_r < len(rb) - 1 and r3.button("↓", key=f"rd_{idx_r}"):
+                                rb[idx_r], rb[idx_r + 1] = rb[idx_r + 1], rb[idx_r]
+                                th["left_blocks"], th["right_blocks"] = lb, rb
+                                save_profile_to_cloud()
+                                st.rerun()
+                            if r4.button("⇄ Left", key=f"rl_{idx_r}"):
+                                lb.append(rb.pop(idx_r))
+                                th["left_blocks"], th["right_blocks"] = lb, rb
+                                save_profile_to_cloud()
+                                st.rerun()
         with st.expander("📸 Featured Photo Albums & 🎧 Audio-Only Playlist"):
             with st.form("studio_album_form", clear_on_submit=True):
                 alb_title = st.text_input("Album Title", placeholder="Studio Nights 2026")
