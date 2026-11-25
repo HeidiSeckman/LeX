@@ -1064,11 +1064,12 @@ if st.session_state.viewing_handle and sb:
     _v_bio_h = f'<div style="margin-top:10px;font-size:13px;">{vp.get("bio")}</div>' if vp.get("bio") else ""
     _v_home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{v_th.get("hometown")}</strong></div>' if v_th.get("hometown") else ""
     _v_work_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128188; <strong>{v_th.get("work_school")}</strong></div>' if v_th.get("work_school") else ""
+    _v_school_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#127891; <strong>{v_th.get("school")}</strong></div>' if v_th.get("school") else ""
     _v_rs_v = v_th.get("relationship_status", "Not Specified")
     _v_rp_v = (v_th.get("relationship_partner") or "").strip()
     _v_rp_tag = f' with <span style="display:inline-block;padding:1px 7px;border-radius:99px;background:{v_th.get("accent", "#FF2E93")}28;border:1px solid {v_th.get("accent", "#FF2E93")};color:#FFFFFF;font-weight:800;">{_v_rp_v}</span>' if _v_rp_v else ""
     _v_rel_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.9;">&#128158; <strong>{_v_rs_v}</strong>{_v_rp_tag}</div>' if (_v_rs_v and _v_rs_v != "Not Specified") else ""
-    _v_bio_h = f"{_v_home_h}{_v_work_h}{_v_rel_h}{_v_bio_h}"
+    _v_bio_h = f"{_v_home_h}{_v_work_h}{_v_school_h}{_v_rel_h}{_v_bio_h}"
     st.markdown(f'<div class="lex-card"><div style="display:flex;align-items:center;gap:14px;">{v_av}<div><div style="font-size:20px;font-weight:900;">{vp.get("display_name", vp.get("handle", ""))} {v_badges}</div><div style="color:{v_th.get("accent","#FF2E93")};font-weight:800;">{vp.get("handle", "")} • {online_badge}</div>{v_site}</div>{_vst_ring_html}</div>{_v_bio_h}{v_int_html}</div>', unsafe_allow_html=True)
     if v_th.get("allow_css_remix", True):
         if st.button(f"✨ Steal This Look (Remix {vp.get('handle', '')}'s Theme)", key="steal_look_btn"):
@@ -1437,8 +1438,9 @@ def render_profile_module(mod_name: str):
         my_site = founder_studio_link_html(user.get("handle", ""), th["accent"])
         my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("Books", "int_books")] if th.get(k, "")]
         my_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong>{lbl}:</strong> {val}</div>' for lbl, val in my_ints])
-        home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{th.get("hometown")}</strong></div>' if th.get("hometown") else ""
+        home_h = f"{home_h}{work_h}{school_h}{rel_h}"
         work_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128188; <strong>{th.get("work_school")}</strong></div>' if th.get("work_school") else ""
+        school_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#127891; <strong>{th.get("school")}</strong></div>' if th.get("school") else ""
         _rs_v = th.get("relationship_status", "Not Specified")
         _rp_v = (th.get("relationship_partner") or "").strip()
         _rp_tag = f' with <span style="display:inline-block;padding:1px 7px;border-radius:99px;background:{th["accent"]}28;border:1px solid {th["accent"]};color:#FFFFFF;font-weight:800;">{_rp_v}</span>' if _rp_v else ""
@@ -2124,7 +2126,8 @@ with t_studio:
             b_name = st.text_input("Display Name", value=user.get("name", ""))
             b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now ⚡"))
             b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Hometown, State")
-            b_work = st.text_input("Work / School (Optional)", value=th.get("work_school", ""), placeholder="e.g., Shawnee State University")
+            b_work = st.text_input("Work (Optional)", value=th.get("work_school", ""), placeholder="e.g., LexiTech Studio")
+            b_school = st.text_input("School (Optional)", value=th.get("school", ""), placeholder="e.g., Shawnee State University")
             _rel_opts = ["Not Specified", "Single", "In a Relationship", "Engaged", "Married", "It's Complicated"]
             _cur_rel = th.get("relationship_status", "Not Specified")
             b_rel_stat = st.radio("Relationship Status (Optional)", _rel_opts, index=_rel_opts.index(_cur_rel) if _cur_rel in _rel_opts else 0, horizontal=True)
@@ -2177,7 +2180,8 @@ with t_studio:
                 else:
                     user["name"] = b_name.strip() or user["name"]
                     user["mood"] = b_mood.strip()
-                    th["work_school"] = b_work.strip()
+                    th["work"] = b_work.strip()
+                    th["school"] = b_school.strip()
                     th["relationship_status"] = b_rel_stat
                     _new_rp = ("@" + clean_handle_str(b_rel_partner)) if b_rel_partner.strip() else ""
                     if not _new_rp or b_rel_stat in ("Not Specified", "Single"):
