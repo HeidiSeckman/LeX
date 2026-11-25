@@ -1097,11 +1097,39 @@ if st.session_state.viewing_handle and sb:
         _vb_pills = []
         if clean_handle_str(vp.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
             _vb_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
-        for _tb in (v_th.get("badges") or []):
+        _v_base_bdgs = v_th.get("badges") or ["OG EARLY ADOPTER"]
+        for _tb in _v_base_bdgs:
             _vb_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{v_th.get("accent","#FF2E93")}28;border:1px solid {v_th.get("accent","#FF2E93")};">{_tb}</span>')
         if sb:
             try:
                 _vfp_rows = sb.table("lex_posts").select("handle,body").ilike("body", "%[FLASHPIC_TO:%").limit(500).execute().data or []
+                _vpair = {}
+                for _r in _vfp_rows:
+                    _rb = _r.get("body") or ""
+                    _sh = "@" + clean_handle_str(_r.get("handle") or "").lower()
+                    _th_to = "@" + clean_handle_str(_rb.partition("[FLASHPIC_TO:")[2].partition("]")[0]).lower()
+                    if _vh_b in (_sh, _th_to):
+                        _peer = _th_to if _sh == _vh_b else _sh
+                        _vpair[_peer] = _vpair.get(_peer, 0) + 1
+                for _peer, _cnt in sorted(_vpair.items(), key=lambda x: x[1], reverse=True):
+                    if _cnt >= 2000:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1.5px solid #FFFFFF;box-shadow:0 0 10px rgba(255,255,255,0.75);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 LeX ICON • {_cnt // 1000}K ({_peer})</span>')
+                    elif _cnt >= 1000:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;box-shadow:0 0 10px rgba(251,191,36,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🌌 SOLAR ECLIPSE ({_peer})</span>')
+                    elif _cnt >= 500:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;box-shadow:0 0 10px rgba(236,72,153,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔮 SUPERNOVA ({_peer})</span>')
+                    elif _cnt >= 100:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">💎 DIAMOND DUO ({_peer})</span>')
+                    elif _cnt >= 50:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔥 INNER CIRCLE ({_peer})</span>')
+                    elif _cnt >= 10:
+                        _vb_pills.append(f'<span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">⚡ VIBE SPARK ({_peer})</span>')
+            except Exception:
+                pass
+        if _vb_pills:
+            _v_acc = v_th.get("accent", "#FF2E93")
+            st.markdown(f'<div class="lex-card" style="padding:14px 18px;margin-top:8px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{_v_acc};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(_vb_pills)}</div></div>', unsafe_allow_html=True)
+
                 _vpair = {}
                 for _r in _vfp_rows:
                     _rb = _r.get("body") or ""
@@ -1549,47 +1577,44 @@ def render_profile_module(mod_name: str):
             if not ok_w:
                 st.error(msg_w)
             else:
-                st.session_state.lex_wall.insert(0, {"sender": user["handle"], "msg": w_in.strip()})
-                save_profile_to_cloud()
-                st.rerun()
-        for w_item in (st.session_state.lex_wall or [])[:8]:
-            my_aux = list(th.get("guest_queue") or [])
-        if my_aux:
-            st.markdown(f'<div class="lex-card" style="padding:10px 14px;"><strong style="color:{th["accent"]};">🎶 Friends\' Pass-the-Aux Queue ({len(my_aux)})</strong></div>', unsafe_allow_html=True)
-            for idx_ma, max_tr in enumerate(my_aux[-8:]):
-                if st.button(f"▶ {max_tr.get('title', 'Track')} (from {max_tr.get('by', '@Friend')})", key=f"myax_btn_{idx_ma}"):
-                    st.session_state.active_yt_track = max_tr
-        all_my_sp = list(th.get("scrapbook_photos") or [])
-        approved_sp = [s for s in all_my_sp if s.get("approved", True)]
-        pending_sp = [s for s in all_my_sp if not s.get("approved", True)]
-        if approved_sp or pending_sp:
-            st.markdown(f'<div class="lex-card" style="padding:10px 14px;"><strong style="color:{th["accent"]};">🎞️ My Collaborative Scrapbook ({len(approved_sp)} Live • {len(pending_sp)} Pending)</strong></div>', unsafe_allow_html=True)
-            if approved_sp:
-                msc_cols = st.columns(2)
-                for idx_ms, msp in enumerate(approved_sp[-12:]):
-                    msc_cols[idx_ms % 2].markdown(f'<div class="lex-card" style="padding:6px;"><img src="{msp["img"]}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;" /><div style="font-size:11px;margin-top:4px;"><strong>{msp.get("by","@Friend")}:</strong> {msp.get("caption","")}</div></div>', unsafe_allow_html=True)
-            for idx_pd, psp in enumerate(pending_sp):
-                st.image(psp["img"], caption=f"Pending from {psp.get('by','@Friend')}: {psp.get('caption','')}", width=180)
-                ap_c1, ap_c2 = st.columns(2)
-                if ap_c1.button("✓ Approve Photo", key=f"app_sp_{idx_pd}"):
-                    psp["approved"] = True
-                    th["scrapbook_photos"] = all_my_sp
-                    save_profile_to_cloud()
-                    st.rerun()
-                if ap_c2.button("× Reject", key=f"rej_sp_{idx_pd}"):
-                    all_my_sp.remove(psp)
-                    th["scrapbook_photos"] = all_my_sp
-                    save_profile_to_cloud()
-                    st.rerun()
     elif mod_name == "Badge Trophy Case":
-
         if th.get("show_badges", True):
             my_h_b = "@" + clean_handle_str(user.get("handle", "")).lower()
             b_pills = []
             if clean_handle_str(user.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
                 b_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
-            for _tb in (th.get("badges") or []):
+            _base_bdgs = th.get("badges") or ["OG EARLY ADOPTER", "CSS ARCHITECT"]
+            for _tb in _base_bdgs:
                 b_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{th["accent"]}28;border:1px solid {th["accent"]};">{_tb}</span>')
+            if sb:
+                try:
+                    _fp_rows = sb.table("lex_posts").select("handle,body").ilike("body", "%[FLASHPIC_TO:%").limit(500).execute().data or []
+                    _pair_cnts = {}
+                    for _r in _fp_rows:
+                        _rb = _r.get("body") or ""
+                        _sh = "@" + clean_handle_str(_r.get("handle") or "").lower()
+                        _th_to = "@" + clean_handle_str(_rb.partition("[FLASHPIC_TO:")[2].partition("]")[0]).lower()
+                        if my_h_b in (_sh, _th_to):
+                            _peer = _th_to if _sh == my_h_b else _sh
+                            _pair_cnts[_peer] = _pair_cnts.get(_peer, 0) + 1
+                    for _peer, _cnt in sorted(_pair_cnts.items(), key=lambda x: x[1], reverse=True):
+                        if _cnt >= 2000:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1.5px solid #FFFFFF;box-shadow:0 0 10px rgba(255,255,255,0.75);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 LeX ICON • {_cnt // 1000}K ({_peer})</span>')
+                        elif _cnt >= 1000:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;box-shadow:0 0 10px rgba(251,191,36,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🌌 SOLAR ECLIPSE ({_peer})</span>')
+                        elif _cnt >= 500:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;box-shadow:0 0 10px rgba(236,72,153,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔮 SUPERNOVA ({_peer})</span>')
+                        elif _cnt >= 100:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">💎 DIAMOND DUO ({_peer})</span>')
+                        elif _cnt >= 50:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔥 INNER CIRCLE ({_peer})</span>')
+                        elif _cnt >= 10:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">⚡ VIBE SPARK ({_peer})</span>')
+                except Exception:
+                    pass
+            if b_pills:
+                st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
+
             if sb:
                 try:
                     _fp_rows = sb.table("lex_posts").select("handle,body").ilike("body", "%[FLASHPIC_TO:%").limit(500).execute().data or []
