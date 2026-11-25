@@ -1097,8 +1097,11 @@ if st.session_state.viewing_handle and sb:
         _vb_pills = []
         if clean_handle_str(vp.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
             _vb_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
-        _v_base_bdgs = vp.get("badges") or v_th.get("badges") or ["OG EARLY ADOPTER"]
+        _v_base_bdgs = list(vp.get("badges") or v_th.get("badges") or [])
+        if "OG EARLY ADOPTER" not in _v_base_bdgs:
+            _v_base_bdgs.insert(0, "OG EARLY ADOPTER")
         for _tb in _v_base_bdgs:
+
             _vb_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{v_th.get("accent","#FF2E93")}28;border:1px solid {v_th.get("accent","#FF2E93")};">{_tb}</span>')
         if sb:
             try:
@@ -1630,12 +1633,13 @@ def render_profile_module(mod_name: str):
         for i_t8, fr8 in enumerate(st.session_state.lex_top8[:8]):
             t8_top_cols[i_t8 % 4].markdown(friend_card_html(fr8, "👑 #1" if i_t8 == 0 else f"#{i_t8 + 1}", th), unsafe_allow_html=True)
 
-active_left = list(th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Playlist", "Photo Albums", "Guestbook Wall"])
-active_right = list(th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub"])
-if th.get("show_badges", True) and "Badge Trophy Case" not in active_left and "Badge Trophy Case" not in active_right:
-    active_right.append("Badge Trophy Case")
-if "Social Hub" not in active_left and "Social Hub" not in active_right:
-    active_right.append("Social Hub")
+    active_left = list(dict.fromkeys(th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Anthem", "Photo Albums", "Guestbook Wall"]))
+    active_right = list(dict.fromkeys(th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub", "Badge Trophy Case"]))
+    if th.get("show_badges", True) and "Badge Trophy Case" not in active_left and "Badge Trophy Case" not in active_right:
+        active_right.insert(max(0, len(active_right) - 1), "Badge Trophy Case")
+    if "Social Hub" not in active_left and "Social Hub" not in active_right:
+        active_right.append("Social Hub")
+
 st.markdown("""<style>
 @media (max-width: 768px) {
     div[data-testid="stHorizontalBlock"]:has(button) {
@@ -2417,14 +2421,15 @@ with t_studio:
                     save_profile_to_cloud()
                     st.toast("Saved Profile Song ✦")
                     st.rerun()
-                    
+
             tog_bdg = st.toggle("Show 🏆 Earned Badges & Milestones box on my profile", value=bool(th.get("show_badges", True)), key="studio_show_bdg_tog")
             if tog_bdg != bool(th.get("show_badges", True)):
                 th["show_badges"] = tog_bdg
                 st.session_state.lex_theme = th
                 save_profile_to_cloud()
                 st.rerun()
-            st.markdown("**🧩 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)**")
+            st.markdown("**🔀 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)**")
+
             lb = [m for m in (th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Playlist", "Photo Albums", "Guestbook Wall"]) if m in ALL_PROFILE_MODULES]
             rb = [m for m in (th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub"]) if m in ALL_PROFILE_MODULES and m not in lb]
             for missing_m in ALL_PROFILE_MODULES:
