@@ -1870,7 +1870,6 @@ with hub_col:
 
     with t_friends:      
         inc_reqs = list(th.get("incoming_requests") or [])
-        st.markdown(f'<div class="lex-card" style="padding:10px 16px;margin-bottom:10px;display:flex;justify-content:space-around;text-align:center;"><div><div style="font-size:18px;font-weight:900;color:{th["accent"]};">{len(st.session_state.get("lex_friends") or [])}</div><div style="font-size:10px;opacity:0.8;letter-spacing:1px;">FOLLOWING</div></div><div><div style="font-size:18px;font-weight:900;color:{th["accent"]};">{sum(1 for _u in (sb.table("lex_users").select("theme_json").limit(500).execute().data or []) if ("@" + clean_handle_str(user.get("handle", "")).lower()) in ["@" + clean_handle_str(x).lower() for x in ((_u.get("theme_json") or {}).get("friends") or [])]) if sb else len(st.session_state.get("lex_friends") or [])}</div><div style="font-size:10px;opacity:0.8;letter-spacing:1px;">FOLLOWERS</div></div></div>', unsafe_allow_html=True)
         sent_reqs = list(th.get("sent_requests") or [])
         blk_users = list(th.get("blocked_users") or [])
         with st.expander(f"⚙️ Requests & Blocked Manager ({len(inc_reqs)} Incoming • {len(sent_reqs)} Sent • {len(blk_users)} Blocked)", expanded=bool(inc_reqs)):
@@ -1913,7 +1912,7 @@ with hub_col:
                         th["blocked_users"] = [x for x in blk_users if str(x).lower() != str(bh).lower()]
                         save_profile_to_cloud()
                         st.rerun()
-        st.markdown(f"**👥 All Friends ({len(st.session_state.lex_friends)} / {MAX_FRIENDS})**")
+        st.markdown(f"**👥 All Friends ({len(st.session_state.lex_friends)} / 1000) • 🌟 Followers ({sum(1 for _u in (sb.table('lex_users').select('theme_json').limit(500).execute().data or []) if ('@' + clean_handle_str(user.get('handle', '')).lower()) in ['@' + clean_handle_str(x).lower() for x in ((_u.get('theme_json') or {}).get('friends') or [])]) if sb else len(st.session_state.lex_friends)})**")
         fcols = st.columns(3)
         for idx_f, fr in enumerate(st.session_state.lex_friends):
             fh = fr.get("handle", "")
