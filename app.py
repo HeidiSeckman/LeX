@@ -1431,6 +1431,12 @@ def render_profile_module(mod_name: str):
         my_ints = [(lbl, th.get(k, "")) for lbl, k in [("General", "int_general"), ("Music", "int_music"), ("Movies", "int_movies"), ("Books", "int_books")] if th.get(k, "")]
         my_int_html = "".join([f'<div style="font-size:12px;margin-top:4px;"><strong>{lbl}:</strong> {val}</div>' for lbl, val in my_ints])
         home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{th.get("hometown")}</strong></div>' if th.get("hometown") else ""
+        work_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128188; <strong>{th.get("work_school")}</strong></div>' if th.get("work_school") else ""
+        _rs_v = th.get("relationship_status", "Not Specified")
+        _rp_v = (th.get("relationship_partner") or "").strip()
+        _rp_tag = f' with <span style="display:inline-block;padding:1px 7px;border-radius:99px;background:{th["accent"]}28;border:1px solid {th["accent"]};color:#FFFFFF;font-weight:800;">{_rp_v}</span>' if _rp_v else ""
+        rel_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.9;">&#128158; <strong>{_rs_v}</strong>{_rp_tag}</div>' if (_rs_v and _rs_v != "Not Specified") else ""
+        home_h = f"{home_h}{work_h}{rel_h}"       
         bio_h = f'{home_h}<div style="margin-top:10px;font-size:13px;">{user.get("bio")}</div>' if user.get("bio") else home_h
 
         _st_ring_html = ""
