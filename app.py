@@ -1641,7 +1641,21 @@ st.markdown("""<style>
     }
 }
 </style>""", unsafe_allow_html=True)
+def format_mentions_html(raw_html: str, accent: str = "#FF2E93") -> str:
+    return re.sub(
+        r'(?<![\w/])@([a-zA-Z0-9_.]{2,30})',
+        rf'<span style="display:inline-block;padding:1px 7px;border-radius:99px;background:{accent}28;border:1px solid {accent};color:#FFFFFF;font-weight:800;font-size:0.92em;">@\1</span>',
+        raw_html or "",
+    )
 
+def notify_mentioned_handles(raw_txt: str, sender_handle: str, kind: str = "mention"):
+    _s_clean = clean_handle_str(sender_handle or "").lower()
+    for _mh in set(re.findall(r'(?<![\w/])@([a-zA-Z0-9_.]{2,30})', raw_txt or "")):
+        if _mh.lower() != _s_clean:
+            try:
+                push_activity_notif("@" + _mh.lower(), sender_handle, kind, (raw_txt or "")[:80])
+            except Exception:
+                pass
 def render_feed_post(p: dict, k_pfx: str):
     raw_b_chk = (p.get("body") or "").strip()
     if raw_b_chk.startswith("[FLASHPIC_TO:") or raw_b_chk.startswith("[REPORT_ALERT]") or raw_b_chk.startswith("[LEX_NOTIF]") or raw_b_chk.startswith("[STORY_"):
@@ -1649,6 +1663,7 @@ def render_feed_post(p: dict, k_pfx: str):
 
     p_author_h = (p.get("handle") or "").strip()
     clean_txt, lnk_src, img_src, p_meta = parse_post_blob(p.get("body"))
+    clean_txt = format_mentions_html(clean_txt, th.get("accent", "#FF2E93"))
     img_tag = f'<img src="{img_src}" style="width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin-top:8px;" />' if img_src else ""
     lnk_tag = f'<div style="margin-top:8px;"><a href="{lnk_src}" target="_blank" style="color:{th["accent"]};font-weight:700;">🔗 {lnk_src}</a></div>' if lnk_src else ""
     f_bdg = ' <span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:2px 7px;border-radius:99px;">CREATOR & FOUNDER</span>' if clean_handle_str(p_author_h).lower() in {"heidi", "heidiseckman"} else ""
@@ -1701,6 +1716,7 @@ def render_feed_post(p: dict, k_pfx: str):
     if st.session_state.get(c_open_key, False) or cm_list:
         with st.expander(f"💬 Comments ({len(cm_list)})", expanded=st.session_state.get(c_open_key, False)):
             for cm in cm_list[-20:]:
+                cm["text"] = format_mentions_html(cm.get("text", ""), th.get("accent", "#FF2E93"))                
                 st.markdown(f'<div style="padding:6px 10px;border-left:2px solid {th["accent"]};margin-bottom:4px;"><strong>{cm.get("author","")}</strong>: {cm.get("text","")}</div>', unsafe_allow_html=True)
             with st.form(f"{k_pfx}_cm_form_{p['id']}", clear_on_submit=True):
                 c_in = st.text_input("Write a comment...", key=f"{k_pfx}_cin_{p['id']}")
@@ -1713,6 +1729,7 @@ def render_feed_post(p: dict, k_pfx: str):
                         p_meta["comments"] = cm_list
                         sb.table("lex_posts").update({"body": pack_post_blob(clean_txt, lnk_src, img_src, p_meta)}).eq("id", p["id"]).execute()
                         push_activity_notif(p_author_h, user["handle"], "comment", c_in.strip()[:40])
+                        notify_mentioned_handles(c_in.strip(), user["handle"], "mention")                        
                         st.session_state[c_open_key] = True
                         st.rerun()
 
