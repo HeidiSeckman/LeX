@@ -1060,7 +1060,7 @@ if st.session_state.viewing_handle and sb:
             _vsb0 = _v_stories[0].get("body") or ""
             _vsimg0 = _vsb0.partition("||IMG:")[2].partition("||")[0] if "||IMG:" in _vsb0 else ""
             if _vsimg0:
-    _vst_ring_html = f'<div style="margin-left:auto;text-align:center;flex-shrink:0;"><img src="{_vsimg0}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid {v_th.get("accent","#FF2E93")};box-shadow:0 0 16px {v_th.get("accent","#FF2E93")}88;" /><div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:{v_th.get("accent","#FF2E93")};margin-top:4px;">STORY</div></div>'
+                _vst_ring_html = f'<div style="margin-left:auto;text-align:center;flex-shrink:0;"><img src="{_vsimg0}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid {v_th.get("accent","#FF2E93")};box-shadow:0 0 16px {v_th.get("accent","#FF2E93")}88;" /><div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:{v_th.get("accent","#FF2E93")};margin-top:4px;">STORY</div></div>'
     _v_bio_h = f'<div style="margin-top:10px;font-size:13px;">{vp.get("bio")}</div>' if vp.get("bio") else ""
     _v_home_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128205; From <strong>{v_th.get("hometown")}</strong></div>' if v_th.get("hometown") else ""
     _v_work_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.85;">&#128188; <strong>{v_th.get("work_school")}</strong></div>' if v_th.get("work_school") else ""
