@@ -1640,6 +1640,7 @@ def render_profile_module(mod_name: str):
     if "Social Hub" not in active_left and "Social Hub" not in active_right:
         active_right.append("Social Hub")
 
+
 st.markdown("""<style>
 @media (max-width: 768px) {
     div[data-testid="stHorizontalBlock"]:has(button) {
