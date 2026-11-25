@@ -1,4 +1,5 @@
 import os
+import streamlit.components.v1 as _stc
 import json
 import uuid
 import io
@@ -13,6 +14,7 @@ from supabase import create_client
 from audio_engine import ANTHEM_TRACKS, generate_anthem_wav
 import time
 st.set_page_config(page_title="LeX // Social by LexiTech Studio", page_icon="✦", layout="wide")
+_stc.html("<script>const p=window.parent.document;['lex-im-win','lex-im-wrap'].forEach(i=>{const e=p.getElementById(i);if(e)e.remove();});p.querySelectorAll('div').forEach(d=>{if(d.innerText&&d.innerText.includes('LeX Instant')&&getComputedStyle(d).position==='fixed')d.remove();});</script>", height=0)
 ST_OPEN = "<" + "style>"
 ST_CLOSE = "<" + "/style>"
 st.markdown(
