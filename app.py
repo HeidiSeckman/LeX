@@ -2026,29 +2026,7 @@ with hub_col:
                     f'<button id="lex-im-send" style="padding:8px 14px;border-radius:10px;border:none;background:{th["accent"]};color:#fff;font-weight:900;font-size:12px;cursor:pointer;">SEND</button>'
                     f'</div></div></div>'
             )
-                st.components.v1.html(
-                "<script>"
-                "const pd=window.parent.document;"
-                "let old=pd.getElementById('lex-im-win');if(old)old.remove();"
-                "const tabs=Array.from(pd.querySelectorAll('button[role=\"tab\"]'));"
-                "const msgTab=tabs.find(t=>t.textContent&&t.textContent.includes('Messages'));"
-                "if(msgTab&&msgTab.getAttribute('aria-selected')==='true'){"
-                "const wrap=pd.createElement('div');wrap.innerHTML=" + json.dumps(win_html) + ";"
-                "pd.body.appendChild(wrap.firstChild);"
-                "const w=pd.getElementById('lex-im-win'),b=pd.getElementById('lex-im-bar'),bd=pd.getElementById('lex-im-body'),mn=pd.getElementById('lex-im-min'),sc=pd.getElementById('lex-im-scroll');"
-                "if(sc)sc.scrollTop=sc.scrollHeight;"
-                "let dx=0,dy=0,drag=false;"
-                "b.onmousedown=e=>{if(e.target===mn)return;drag=true;dx=e.clientX-w.offsetLeft;dy=e.clientY-w.offsetTop;};"
-                "pd.onmousemove=e=>{if(!drag)return;w.style.left=(e.clientX-dx)+'px';w.style.top=(e.clientY-dy)+'px';w.style.right='auto';w.style.bottom='auto';};"
-                "pd.onmouseup=()=>{drag=false;};"
-                "mn.onclick=()=>{const h=bd.style.display==='none';bd.style.display=h?'flex':'none';mn.textContent=h?'−':'+';};"
-                "const inp=pd.getElementById('lex-im-txt'),sbtn=pd.getElementById('lex-im-send');"
-                "function fireSend(){const v=(inp.value||'').trim();if(!v)return;const b=pd.querySelector('input[aria-label=\"LEX_IM_BRIDGE\"]');if(b){const s=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;s.call(b,v);b.dispatchEvent(new Event('input',{bubbles:true}));b.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',keyCode:13,bubbles:true}));inp.value='';}}"
-                "sbtn.onclick=fireSend;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();fireSend();}};}"
-                "</script>",
-                height=0,
-            )
-
+                st.markdown(win_html.replace("position:fixed;bottom:16px;right:16px;width:320px;", "position:relative;width:100%;max-width:520px;margin:8px 0;").replace("display:none;", "display:flex;"), unsafe_allow_html=True)
                 st.markdown("""<style>
                 div.stElementContainer:has(input[aria-label="LEX_IM_BRIDGE"]),
                 div.stElementContainer:has(input[aria-label="LEX_IM_BRIDGE"]) + div.stElementContainer {
