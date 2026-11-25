@@ -1576,8 +1576,13 @@ def render_profile_module(mod_name: str):
                     th["scrapbook_photos"] = all_my_sp
                     save_profile_to_cloud()
                     st.rerun()
-                if ap_c2.button("✕ Reject", key=f"rej_sp_{idx_pd}"):
+                if ap_c2.button("× Reject", key=f"rej_sp_{idx_pd}"):
+                    all_my_sp.remove(psp)
+                    th["scrapbook_photos"] = all_my_sp
+                    save_profile_to_cloud()
+                    st.rerun()
     elif mod_name == "Badge Trophy Case":
+
         if th.get("show_badges", True):
             my_h_b = "@" + clean_handle_str(user.get("handle", "")).lower()
             b_pills = []
