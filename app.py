@@ -1550,6 +1550,12 @@ def render_profile_module(mod_name: str):
             if not ok_w:
                 st.error(msg_w)
             else:
+                w_list = list(th.get("wall_json") or [])
+                w_list.insert(0, {"author": user["name"], "handle": user["handle"], "body": w_in.strip(), "ts": "Just now"})
+                th["wall_json"] = w_list
+                st.session_state.lex_theme = th
+                save_profile_to_cloud()
+                st.rerun()
     elif mod_name == "Badge Trophy Case":
         if th.get("show_badges", True):
             my_h_b = "@" + clean_handle_str(user.get("handle", "")).lower()
