@@ -1915,9 +1915,10 @@ with hub_col:
 if not st.session_state.get("lex_friends") and th.get("friends"):
             st.session_state.lex_friends = th.get("friends") or []
             _flw_cnt = len(th.get("followers") or st.session_state.get("lex_followers") or st.session_state.lex_friends or [])
-            st.markdown(f"**👥 All Friends ({len(st.session_state.lex_friends)} / 1000) • 🌟 Followers ({_flw_cnt})**")        fcols = st.columns(3)
+            st.markdown(f"**👥 All Friends ({len(st.session_state.lex_friends)} / 1000) • 🌟 Followers ({_flw_cnt})**")        
+            fcols = st.columns(3)
         for idx_f, fr in enumerate(st.session_state.lex_friends):
-            fh = fr.get("handle", ")
+            fh = fr.get("handle", "")
             with fcols[idx_f % 3]:
                 st.markdown(friend_card_html(fr, "✓ Friend", th), unsafe_allow_html=True)
                 fb1, fb2 = st.columns(2)
