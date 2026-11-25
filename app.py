@@ -1868,7 +1868,7 @@ with hub_col:
         for p in fr_posts:
             render_feed_post(p, "fr")
 
-    with t_friends:
+        with t_friends:
             _all_f_list = st.session_state.get("lex_friends") or []
             _my_clean_h = "@" + clean_handle_str(user.get("handle", "")).lower()
             _follower_cnt = len(_all_f_list)
@@ -1888,9 +1888,9 @@ with hub_col:
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-    inc_reqs = list(th.get("incoming_requests") or [])
-    sent_reqs = list(th.get("sent_requests") or [])
-    blk_users = list(th.get("blocked_users") or [])
+        inc_reqs = list(th.get("incoming_requests") or [])
+        sent_reqs = list(th.get("sent_requests") or [])
+        blk_users = list(th.get("blocked_users") or [])
         with st.expander(f"⚙️ Requests & Blocked Manager ({len(inc_reqs)} Incoming • {len(sent_reqs)} Sent • {len(blk_users)} Blocked)", expanded=bool(inc_reqs)):
             mgr_pick = st.selectbox("Select Manager View", ["📩 Pending Friend Requests", "⏳ Sent Friend Requests", "🚫 Blocked Users List"], key="fr_mgr_sel")
             if mgr_pick == "📩 Pending Friend Requests":
