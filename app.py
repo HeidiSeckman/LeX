@@ -1612,7 +1612,44 @@ def render_profile_module(mod_name: str):
                 except Exception:
                     pass
             if b_pills:
-                st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)                    
+                st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
+    elif mod_name == "Badge Trophy Case":
+        if th.get("show_badges", True):
+            my_h_b = "@" + clean_handle_str(user.get("handle", "")).lower()
+            b_pills = []
+            if clean_handle_str(user.get("handle", "")).lower() in {"heidi", "heidiseckman"}:
+                b_pills.append('<span style="background:linear-gradient(90deg,#F59E0B,#EF4444);color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 CREATOR & FOUNDER</span>')
+            _base_bdgs = user.get("badges") or th.get("badges") or ["OG EARLY ADOPTER", "CSS ARCHITECT"]
+            for _tb in _base_bdgs:
+                b_pills.append(f'<span style="padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;background:{th["accent"]}28;border:1px solid {th["accent"]};">{_tb}</span>')
+            if sb:
+                try:
+                    _fp_rows = sb.table("lex_posts").select("handle,body").ilike("body", "%[FLASHPIC_TO:%").limit(500).execute().data or []
+                    _pair_cnts = {}
+                    for _r in _fp_rows:
+                        _rb = _r.get("body") or ""
+                        _sh = "@" + clean_handle_str(_r.get("handle") or "").lower()
+                        _th_to = "@" + clean_handle_str(_rb.partition("[FLASHPIC_TO:")[2].partition("]")[0]).lower()
+                        if my_h_b in (_sh, _th_to):
+                            _peer = _th_to if _sh == my_h_b else _sh
+                            _pair_cnts[_peer] = _pair_cnts.get(_peer, 0) + 1
+                    for _peer, _cnt in sorted(_pair_cnts.items(), key=lambda x: x[1], reverse=True):
+                        if _cnt >= 2000:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#27272A,#09090B);color:#FFFFFF;border:1.5px solid #FFFFFF;box-shadow:0 0 10px rgba(255,255,255,0.75);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">👑 LeX ICON • {_cnt // 1000}K ({_peer})</span>')
+                        elif _cnt >= 1000:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#6D28D9,#D97706);color:#FFFFFF;border:1px solid #FBBF24;box-shadow:0 0 10px rgba(251,191,36,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🌌 SOLAR ECLIPSE ({_peer})</span>')
+                        elif _cnt >= 500:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#09090B,#9D174D,#EC4899);color:#FFFFFF;border:1px solid #F472B6;box-shadow:0 0 10px rgba(236,72,153,0.65);font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔮 SUPERNOVA ({_peer})</span>')
+                        elif _cnt >= 100:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#18181B,#52525B);color:#F8FAFC;border:1px solid #E2E8F0;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">💎 DIAMOND DUO ({_peer})</span>')
+                        elif _cnt >= 50:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#7C2D12,#EA580C);color:#FFF7ED;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">🔥 INNER CIRCLE ({_peer})</span>')
+                        elif _cnt >= 10:
+                            b_pills.append(f'<span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">⚡ VIBE SPARK ({_peer})</span>')
+                except Exception:
+                    pass
+            if b_pills:
+                st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
     elif mod_name == "Pinned Bulletin" and th.get("pinned_note"):
         st.markdown(f'<div class="lex-card" style="border-width:2.5px;"><span style="color:{th["accent"]};font-weight:900;font-size:11px;">📌 PINNED BULLETIN</span><div style="margin-top:4px;">{th["pinned_note"]}</div></div>', unsafe_allow_html=True)
     elif mod_name == "Top 8" and st.session_state.lex_top8:
