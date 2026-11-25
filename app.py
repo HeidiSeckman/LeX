@@ -17,17 +17,19 @@ st.set_page_config(page_title="LeX // Social by LexiTech Studio", page_icon="✦
 _stc.html("<script>const p=window.parent.document;['lex-im-win','lex-im-wrap'].forEach(i=>{const e=p.getElementById(i);if(e)e.remove();});p.querySelectorAll('div').forEach(d=>{if(d.innerText&&d.innerText.includes('LeX Instant')&&getComputedStyle(d).position==='fixed')d.remove();});</script>", height=0)
 ST_OPEN = "<" + "style>"
 ST_CLOSE = "<" + "/style>"
-unsafe_allow_html=True,
-st.markdown(f"{ST_OPEN}[id*='im'],[class*='im-win'],[class*='chat-dock']{{display:none!important;visibility:hidden!important;pointer-events:none!important;}}{ST_CLOSE}", unsafe_allow_html=True)    + ".block-container { padding-left: 0.65rem !important; padding-right: 0.65rem !important; padding-top: 1.2rem !important; max-width: 100vw !important; overflow-x: hidden !important; }"
+st.markdown(
+    f"{ST_OPEN}@media (max-width: 768px) {{"
+    + ".block-container { padding-left: 0.65rem !important; padding-right: 0.65rem !important; }"
     + ".lex-card { padding: 12px !important; margin-bottom: 10px !important; }"
     + ".lex-card h2 { font-size: 1.25rem !important; }"
-    + "div[data-testid='stHorizontalBlock'] { flex-wrap: wrap !important; gap: 0.4rem !important; }"
-    + "div[data-testid='stHorizontalBlock'] > div[data-testid='column'] { min-width: 46% !important; flex: 1 1 46% !important; }"
+    + "div[data-testid='stHorizontalBlock'] { flex-wrap: wrap !important; gap: 0.45rem !important; }"
+    + "div[data-testid='stHorizontalBlock'] > div[data-testid='column'] { min-width: 100% !important; }"
     + ".stTabs [data-baseweb='tab-list'] { flex-wrap: wrap !important; gap: 4px !important; }"
     + ".stTabs [data-baseweb='tab'] { font-size: 12px !important; padding: 6px 10px !important; }"
     + f"}}{ST_CLOSE}",
     unsafe_allow_html=True,
 )
+st.markdown(f"{ST_OPEN}[id*='im'],[class*='im-win'],[class*='chat-dock']{{display:none!important;visibility:hidden!important;pointer-events:none!important;}}{ST_CLOSE}", unsafe_allow_html=True)
 
 LK_OPEN = "<" + "link "
 SV_OPEN = "<" + "svg "
