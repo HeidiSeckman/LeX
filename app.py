@@ -1445,7 +1445,7 @@ def render_profile_module(mod_name: str):
         _rp_v = (th.get("relationship_partner") or "").strip()
         _rp_tag = f' with <span style="display:inline-block;padding:1px 7px;border-radius:99px;background:{th["accent"]}28;border:1px solid {th["accent"]};color:#FFFFFF;font-weight:800;">{_rp_v}</span>' if _rp_v else ""
         rel_h = f'<div style="margin-top:4px;font-size:12px;opacity:0.9;">&#128158; <strong>{_rs_v}</strong>{_rp_tag}</div>' if (_rs_v and _rs_v != "Not Specified") else ""
-        home_h = f"{home_h}{work_h}{rel_h}"       
+        home_h = f"{home_h}{work_h}{school_h}{rel_h}"
         bio_h = f'{home_h}<div style="margin-top:10px;font-size:13px;">{user.get("bio")}</div>' if user.get("bio") else home_h
 
         _st_ring_html = ""
