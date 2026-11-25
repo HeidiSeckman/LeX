@@ -1903,23 +1903,23 @@ with hub_col:
         inc_reqs = list(th.get("incoming_requests") or [])
         sent_reqs = list(th.get("sent_requests") or [])
         blk_users = list(th.get("blocked_users") or [])
-            _inc_rel = th.get("incoming_rel_req")
-            if isinstance(_inc_rel, dict) and _inc_rel.get("handle"):
-                st.info(f"💞 **{_inc_rel.get('name', _inc_rel['handle'])}** (`{_inc_rel['handle']}`) wants to list you as their partner (**{_inc_rel.get('status', 'In a Relationship')}**).")
-                _rl1, _rl2 = st.columns(2)
-                if _rl1.button("💞 Approve Partner Tag", key="acc_rel_req", use_container_width=True) and sb:
-                    th["relationship_status"] = _inc_rel.get("status", "In a Relationship")
-                    th["relationship_partner"] = _inc_rel["handle"]
-                    th["incoming_rel_req"] = None
-                    save_profile_to_cloud()
-                    try:
-                        _sr = sb.table("lex_profiles").select("handle,theme_json").ilike("handle", _inc_rel["handle"]).limit(1).execute().data or []
-                        if _sr:
-                            _sth = dict(_sr[0].get("theme_json") or {})
-                            _sth["relationship_status"] = _inc_rel.get("status", "In a Relationship")
-                            _sth["relationship_partner"] = user["handle"]
-                            _sth["relationship_partner_pending"] = ""
-                            sb.table("lex_profiles").update({"theme_json": _sth}).eq("handle", _sr[0]["handle"]).execute()
+        _inc_rel = th.get("incoming_rel_req")
+        if isinstance(_inc_rel, dict) and _inc_rel.get("handle"):
+            st.info(f"💞 **{_inc_rel.get('name', _inc_rel['handle'])}** (`{_inc_rel['handle']}`) wants to list you as their partner (**{_inc_rel.get('status', 'In a Relationship')}**).")
+            _rl1, _rl2 = st.columns(2)
+            if _rl1.button("💞 Approve Partner Tag", key="acc_rel_req", use_container_width=True) and sb:
+                th["relationship_status"] = _inc_rel.get("status", "In a Relationship")
+                th["relationship_partner"] = _inc_rel["handle"]
+                th["incoming_rel_req"] = None
+                save_profile_to_cloud()
+                try:
+                    _sr = sb.table("lex_profiles").select("handle,theme_json").ilike("handle", _inc_rel["handle"]).limit(1).execute().data or []
+                    if _sr:
+                        _sth = dict(_sr[0].get("theme_json") or {})
+                        _sth["relationship_status"] = _inc_rel.get("status", "In a Relationship")
+                        _sth["relationship_partner"] = user["handle"]
+                        _sth["relationship_partner_pending"] = ""
+                        sb.table("lex_profiles").update({"theme_json": _sth}).eq("handle", _sr[0]["handle"]).execute()
                     except Exception:
                         pass
                     st.toast("💞 Partner tag approved on both profiles!")
