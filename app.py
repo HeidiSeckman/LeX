@@ -2179,7 +2179,23 @@ with t_studio:
                     user["mood"] = b_mood.strip()
                     th["work_school"] = b_work.strip()
                     th["relationship_status"] = b_rel_stat
-                    th["relationship_partner"] = ("@" + clean_handle_str(b_rel_partner)) if b_rel_partner.strip() else ""
+                    _new_rp = ("@" + clean_handle_str(b_rel_partner)) if b_rel_partner.strip() else ""
+                    if not _new_rp or b_rel_stat in ("Not Specified", "Single"):
+                        th["relationship_partner"] = ""
+                        th["relationship_partner_pending"] = ""
+                    elif _new_rp.lower() != (th.get("relationship_partner") or "").lower():
+                        th["relationship_partner"] = ""
+                        th["relationship_partner_pending"] = _new_rp
+                        if sb:
+                            try:
+                                _pr = sb.table("lex_profiles").select("handle,theme_json").ilike("handle", _new_rp).limit(1).execute().data or []
+                                if _pr:
+                                    _pth = dict(_pr[0].get("theme_json") or {})
+                                    _pth["incoming_rel_req"] = {"handle": user["handle"], "name": user.get("name", user["handle"]), "status": b_rel_stat}
+                                    sb.table("lex_profiles").update({"theme_json": _pth}).eq("handle", _pr[0]["handle"]).execute()
+                                    push_activity_notif(_pr[0]["handle"], user["handle"], "mention", f"sent a Relationship Tag request ({b_rel_stat})")
+                            except Exception:
+                                pass
                     th["hometown"] = b_home.strip()
                     th["is_private"] = True if _is_u16 else bool(b_priv)
                     if user.get("dob"):
