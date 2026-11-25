@@ -902,13 +902,9 @@ if sb and user.get("handle"):
                 unread_dms.append(dr)
     except Exception:
         pass
-if unread_dms:
-    latest_dm = unread_dms[0]
-    st.info(f"✉️ **{len(unread_dms)} New Message(s)** — Latest from **{latest_dm.get('sender_handle')}**: “{(latest_dm.get('body') or '')[:60]}” (Open **✉️ Messages** tab to reply!)")
-    if st.button("✓ Dismiss Message Alert", key="dismiss_dm_alert"):
-        th["dm_read_id"] = max(int(x.get("id") or 0) for x in unread_dms)
-        save_profile_to_cloud()
-        st.rerun()
+if unread_dms and not st.session_state.get("dm_alert_seen"):
+    st.session_state["dm_alert_seen"] = True
+    st.toast(f"💬 {len(unread_dms)} new message(s) in Messages!")
 
 top_c1, top_th, top_c2, top_c3 = st.columns([0.52, 0.16, 0.16, 0.16])
 if st.session_state.viewing_handle and top_c1.button(f"← Back to My Profile ({user['handle']})"):
