@@ -1912,7 +1912,7 @@ with hub_col:
                         th["blocked_users"] = [x for x in blk_users if str(x).lower() != str(bh).lower()]
                         save_profile_to_cloud()
                         st.rerun()
-        st.markdown(f"**👥 All Friends ({len(st.session_state.lex_friends)} / 1000) • 🌟 Followers ({_flw_total})**")       
+        st.markdown(f"**👥 All Friends ({len(st.session_state.lex_friends)} / 1000)**")          
         fcols = st.columns(3)
         for idx_f, fr in enumerate(st.session_state.lex_friends):
             fh = fr.get("handle", "")
