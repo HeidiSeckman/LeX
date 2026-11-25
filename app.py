@@ -2128,6 +2128,9 @@ with t_studio:
                 else:
                     user["name"] = b_name.strip() or user["name"]
                     user["mood"] = b_mood.strip()
+                    th["work_school"] = b_work.strip()
+                    th["relationship_status"] = b_rel_stat
+                    th["relationship_partner"] = ("@" + clean_handle_str(b_rel_partner)) if b_rel_partner.strip() else ""
                     th["hometown"] = b_home.strip()
                     th["is_private"] = True if _is_u16 else bool(b_priv)
                     if user.get("dob"):
