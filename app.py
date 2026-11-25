@@ -2463,7 +2463,7 @@ with t_studio:
                 st.session_state.lex_theme = th
                 save_profile_to_cloud()
                 st.rerun()
-            st.markdown("<st" + "yle>[data-testid='stVerticalBlockBorderWrapper']{background:#0B0B0F!important;border:1.5px solid #27272A!important;border-radius:14px!important;padding:14px!important;}[data-testid='stVerticalBlockBorderWrapper'] button{background:#18181B!important;border:1.5px solid #52525B!important;color:#FFFFFF!important;}</st" + "yle>", unsafe_allow_html=True)
+            st.markdown("<st" + "yle>[data-testid='stExpander'], [data-testid='stExpander'] > details, [data-testid='stExpander'] summary { background: #0B0B0F !important; background-color: #0B0B0F !important; border: 1px solid #27272A !important; border-radius: 14px !important; }</st" + "yle>", unsafe_allow_html=True)
             with st.container(border=True):
 
                  with st.expander("🔀 Move & Rearrange ALL Your Profile Modules (Up, Down, or Swap Columns)", expanded=True):
