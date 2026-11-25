@@ -1544,9 +1544,9 @@ def render_profile_module(mod_name: str):
                 save_profile_to_cloud()
                 st.rerun()
     elif mod_name == "Badge Trophy Case":
-        if "Badge Trophy Case" in globals().setdefault("_tc_seen_run", set()):
+        if st.session_state.get("_tc_rendered_pass"):
             return
-        globals()["_tc_seen_run"].add("Badge Trophy Case")
+        st.session_state["_tc_rendered_pass"] = True
         if th.get("show_badges", True):
 
             my_h_b = "@" + clean_handle_str(user.get("handle", "")).lower()
@@ -1724,6 +1724,7 @@ if "Social Hub" not in active_left and "Social Hub" not in active_right:
     active_right.append("Social Hub")
 _dedup_left = list(dict.fromkeys(active_left))
 _dedup_right = [m for m in dict.fromkeys(active_right) if m not in _dedup_left]
+st.session_state["_tc_rendered_pass"] = False
 col_left, col_right = st.columns([1.05, 1.95], gap="large")
 with col_left:
     for m_name in _dedup_left:
