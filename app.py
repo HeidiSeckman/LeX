@@ -1549,7 +1549,7 @@ def render_profile_module(mod_name: str):
         st.markdown(f'<div class="lex-card" style="padding:10px 14px;"><strong style="color:{th["accent"]};">💬 My Guestbook Wall</strong></div>', unsafe_allow_html=True)
         w_in = st.text_input("Post a note on your wall...", key="own_wall_in")
         if st.button("Post Wall Note ✦", key="own_wall_btn") and w_in.strip():
-            ok_w, msg_w = check_safety_and_dress_code(w_in)
+            ok_w, msg_w = check_safety_and_dress_code(w_in)            
             if not ok_w:
                 st.error(msg_w)
             else:
@@ -1560,6 +1560,9 @@ def render_profile_module(mod_name: str):
                 save_profile_to_cloud()
                 st.rerun()
     elif mod_name == "Badge Trophy Case":
+        if st.session_state.get("_tc_rendered_pass") == st.session_state.get("_tc_pass_token"):
+            return
+        st.session_state["_tc_rendered_pass"] = st.session_state.get("_tc_pass_token")
         if th.get("show_badges", True):
             my_h_b = "@" + clean_handle_str(user.get("handle", "")).lower()
             b_pills = []
@@ -1632,7 +1635,7 @@ def render_profile_module(mod_name: str):
         t8_top_cols = st.columns(4)
         for i_t8, fr8 in enumerate(st.session_state.lex_top8[:8]):
             t8_top_cols[i_t8 % 4].markdown(friend_card_html(fr8, "👑 #1" if i_t8 == 0 else f"#{i_t8 + 1}", th), unsafe_allow_html=True)
-
+st.session_state["_tc_pass_token"] = object()
 active_left = list(dict.fromkeys(th.get("left_blocks") or ["Profile Card", "Vibe Sticker", "Profile Song / Anthem", "Photo Albums", "Guestbook Wall"]))
 active_right = [m for m in dict.fromkeys(th.get("right_blocks") or ["Pinned Bulletin", "Top 8", "Social Hub", "Badge Trophy Case"]) if m not in active_left]
 if th.get("show_badges", True) and "Badge Trophy Case" not in active_left and "Badge Trophy Case" not in active_right:
