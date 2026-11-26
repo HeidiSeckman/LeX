@@ -2111,8 +2111,8 @@ with t_studio:
             b_name = st.text_input("Display Name", value=user.get("name", ""))
             b_mood = st.text_input("Current Mood", value=user.get("mood", "Online Now ⚡"))
             b_home = st.text_input("Where are you from?", value=th.get("hometown", ""), placeholder="e.g., Hometown, State")
-            b_work = st.text_input("Work (Optional)", value=th.get("work_school", ""), placeholder="e.g., LexiTech Studio")
-            b_school = st.text_input("School (Optional)", value=th.get("school", ""), placeholder="e.g., Shawnee State University")
+            b_work = st.text_input("Work (Optional)", value=th.get("work_school", ""), placeholder="e.g., Job Here")
+            b_school = st.text_input("School (Optional)", value=th.get("school", ""), placeholder="e.g., Education/School here")
             _rel_opts = ["Not Specified", "Single", "In a Relationship", "Engaged", "Married", "It's Complicated"]
             _cur_rel = th.get("relationship_status", "Not Specified")
             b_rel_stat = st.radio("Relationship Status (Optional)", _rel_opts, index=_rel_opts.index(_cur_rel) if _cur_rel in _rel_opts else 0, horizontal=True)
