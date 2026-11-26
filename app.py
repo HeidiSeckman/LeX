@@ -2700,11 +2700,12 @@ with t_radar:
             
 with st.container():
     st.markdown(
-        '<div style="background:#0a0a0d;border-top:2px solid #ff2a85;border-bottom:2px solid #ff2a85;'
-        'padding:14px 18px 8px 18px;margin-top:28px;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,0.85);">'
-        '<div style="text-align:center;color:#ffffff;font-size:12px;font-family:monospace;letter-spacing:0.4px;margin-bottom:8px;">'
+        '<div style="position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;'
+        'width:100vw;background:#000000;border-top:1px solid #222222;border-radius:0px;'
+        'padding:14px 20px;margin-top:36px;margin-bottom:-80px;text-align:center;'
+        'color:#ffffff;font-size:12px;font-family:monospace;letter-spacing:0.5px;">'
         'LeX Social // Engineered by LexiTech Studio • 13+ Community • Support &amp; Safety: <b>support@lexsocial.space</b>'
-        '</div></div>',
+        '</div>',
         unsafe_allow_html=True,
     )
     with st.expander("⚠️ Account Safety & Permanent Deletion"):
