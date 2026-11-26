@@ -782,7 +782,43 @@ if st.session_state.lex_user is None:
         4. **Privacy & Data:** We store your email, handle, profile settings, posts, and uploaded images on Supabase to operate your account. You can delete your posts, stories, and FlashPics anytime.
         5. **DMCA / Abuse Contact:** To report copyright infringement or abuse, use the in-app **🚩 Report** button or email **legal@lexitechstudio.com**.
         """)
-
+    _lex_hero_html = "".join([
+        '<div style="width:100%;max-width:1000px;margin:18px auto;background:radial-gradient(circle at top right,#2e2419,#0f1016 55%,#09090d);',
+        'border:1.5px solid rgba(212,175,55,0.45);border-radius:24px;padding:28px 30px;box-shadow:0 24px 60px rgba(0,0,0,0.9);',
+        'display:flex;flex-wrap:wrap;gap:24px;align-items:center;color:#ffffff;">',
+        '<div style="flex:1 1 300px;">',
+        '<div style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#f3d078;',
+        'border:1px solid rgba(243,208,120,0.4);background:rgba(243,208,120,0.08);padding:5px 12px;border-radius:999px;margin-bottom:12px;">',
+        'Public Beta // 13+ Community</div>',
+        '<div style="font-size:40px;font-weight:800;letter-spacing:-0.8px;line-height:1.05;margin-bottom:6px;">LeX Social</div>',
+        '<div style="font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#a1a1aa;margin-bottom:16px;">Engineered by LexiTech Studio</div>',
+        '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);',
+        'padding:9px 14px;border-radius:12px;font-size:12px;margin-bottom:14px;">',
+        '<span style="width:9px;height:9px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e;display:inline-block;"></span>',
+        '<span><strong>LIVE NOW</strong> • Algorithm-Free Hangout</span></div>',
+        '<div style="font-size:13px;color:#d4d4d8;">Join free at <strong style="color:#f3d078;">lexsocial.streamlit.app</strong></div>',
+        '</div>',
+        '<div style="flex:1.4 1 380px;display:flex;flex-direction:column;gap:12px;">',
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;">',
+        '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:13px 14px;">',
+        '<div style="font-size:13px;font-weight:700;color:#f3d078;margin-bottom:4px;">Total Profile Freedom</div>',
+        '<div style="font-size:11.5px;line-height:1.38;color:#d4d4d8;">1-Click Glam Themes, movable modules &amp; full HTML/CSS studio.</div></div>',
+        '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:13px 14px;">',
+        '<div style="font-size:13px;font-weight:700;color:#f3d078;margin-bottom:4px;">Wall Music Queues</div>',
+        '<div style="font-size:11.5px;line-height:1.38;color:#d4d4d8;">Queue songs onto friends&#39; players, audio playlists &amp; YouTube.</div></div>',
+        '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:13px 14px;">',
+        '<div style="font-size:13px;font-weight:700;color:#f3d078;margin-bottom:4px;">FlashPic &amp; Trophies</div>',
+        '<div style="font-size:11.5px;line-height:1.38;color:#d4d4d8;">Non-expiring daily streaks, lifetime rank badges &amp; Trophy Case.</div></div>',
+        '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:13px 14px;">',
+        '<div style="font-size:13px;font-weight:700;color:#f3d078;margin-bottom:4px;">Live Friend Circles</div>',
+        '<div style="font-size:11.5px;line-height:1.38;color:#d4d4d8;">Real-time Online status, shared albums, Top 8 &amp; mutual friends.</div></div>',
+        '</div>',
+        '<div style="background:linear-gradient(135deg,rgba(220,38,38,0.18),rgba(15,16,22,0.95));border:1px solid rgba(248,113,113,0.45);border-radius:14px;padding:13px 15px;">',
+        '<div style="font-size:12.5px;font-weight:700;color:#fca5a5;margin-bottom:4px;">Extreme Youth Safety Built Into the Code</div>',
+        '<div style="font-size:11.5px;line-height:1.4;color:#e4e4e7;">Mandatory locked-private profiles under 16, parent-approved friend lists &amp; instant automated lockdown for unapproved adult-minor messaging.</div></div>',
+        '</div></div>'
+    ])
+    st.markdown(_lex_hero_html, unsafe_allow_html=True)
     st.markdown(
         f"{ST_OPEN}"
         + ".lex-app-dock { margin-top: 18px; padding: 16px 14px; border-radius: 14px; "
