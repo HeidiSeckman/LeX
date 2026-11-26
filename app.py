@@ -2698,20 +2698,30 @@ with t_radar:
             st.markdown(friend_card_html(m_obj, "", th), unsafe_allow_html=True)
             render_member_action_buttons(m_obj["handle"], key_prefix=f"rad_{idx_m}")
     with st.expander("⚠️ Account Safety & Permanent Deletion"):
-
-        try:
-            if h_del:
-                sb.table("lex_posts").delete().ilike("handle", h_del).execute()
-                sb.table("lex_messages").delete().ilike("sender_handle", h_del).execute()
-                sb.table("lex_messages").delete().ilike("recipient_handle", h_del).execute()
-            if uid_del:
-                sb.table("lex_profiles").delete().eq("user_id", uid_del).execute()
-            sb.auth.sign_out()
-        except Exception as e:
-            st.error(f"Deletion notice: {e}")
-        st.session_state.lex_user = None
-        st.session_state.viewing_handle = None
-        st.toast("Your LeX account and profile data have been deleted.")
-        st.rerun()
+        _cur_h_del = ("@" + clean_handle_str(user.get("handle", ""))).lower()
+        if _cur_h_del in ("@heidiseckman", "@lexsocial", "@lexitech"):
+            st.info("🛡️ Founder & System accounts are permanently protected from deletion.")
+        else:
+            st.caption("Permanently deletes your LeX profile, posts, messages, and account data.")
+            del_confirm = st.checkbox("I understand this action is permanent and cannot be undone.", key="lex_del_chk_v3")
+            del_handle_in = st.text_input("Type your exact @handle to unlock deletion:", key="lex_del_handle_v3")
+            _can_del = del_confirm and del_handle_in.strip().lower() == _cur_h_del
+            if st.button("🗑️ Permanently Delete My Account", type="primary", disabled=not _can_del, key="lex_del_btn_v3"):
+                uid_del = str(user.get("user_id") or "")
+                h_del = user.get("handle", "")
+                try:
+                    if h_del:
+                        sb.table("lex_posts").delete().ilike("handle", h_del).execute()
+                        sb.table("lex_messages").delete().ilike("sender_handle", h_del).execute()
+                        sb.table("lex_messages").delete().ilike("recipient_handle", h_del).execute()
+                    if uid_del:
+                        sb.table("lex_profiles").delete().eq("user_id", uid_del).execute()
+                    sb.auth.sign_out()
+                except Exception as e:
+                    st.error(f"Deletion notice: {e}")
+                st.session_state.lex_user = None
+                st.session_state.viewing_handle = None
+                st.toast("Your LeX account and profile data have been deleted.")
+                st.rerun()
 
 st.markdown(f'<div style="text-align:center;opacity:0.55;font-size:11px;font-family:monospace;margin-top:24px;">LeX Social // Engineered by LexiTech Studio • 13+ Community</div>', unsafe_allow_html=True)
