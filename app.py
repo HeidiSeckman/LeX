@@ -2030,7 +2030,7 @@ with hub_col:
                     my_l, tg_l = _my_l_chk, im_act.lower()
                     im_thread = [
                         m for m in im_msgs
-                        if not (m.get("body") or "").startswith(("[LEX_F]", "[LEX_NOTIF]"))
+                        if not (m.get("body") or "").startswith("[LEX_")
                         and {("@" + clean_handle_str(m.get("sender_handle", ""))).lower(), ("@" + clean_handle_str(m.get("recipient_handle", ""))).lower()} == {my_l, tg_l}
                     ]
                     import html as _html
