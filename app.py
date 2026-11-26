@@ -2694,10 +2694,9 @@ with t_studio:
             continue
         _mut_lbl = f" • 👥 {len(_mutuals)} mutual friend{'s' if len(_mutuals) != 1 else ''}" if _mutuals else ""
         filtered.append({"handle": mh, "name": _dname or mh.lstrip("@"), "mood": f"{m.get('mood', 'Online ⚡')}{_mut_lbl}", "anthem": m.get("anthem", "Y2K Coding Beats")})
-        st.caption(f"Debug: {len(all_mem)} profiles loaded | query='{q_search}' | matches={len(filtered)}")    
+        st.caption(f"Debug: {len(all_mem)} profiles loaded | query='{q_search}' | matches={len(filtered)}")
         if not filtered:
         st.info("📡 No mutual-friend suggestions yet — add friends to discover People You May Know!")
-
         r_cols = st.columns(3)
         for idx_m, m_obj in enumerate(filtered):
             with r_cols[idx_m % 3]:
