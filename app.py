@@ -825,8 +825,16 @@ if st.session_state.lex_user is None:
         + "</div>",
         unsafe_allow_html=True,
     )
+    st.markdown('<div style="margin-bottom:54px;"></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div style="position:fixed;bottom:0;left:0;width:100vw;background:#000000;'
+        'border-top:1px solid #222222;border-radius:0px;padding:10px 20px;z-index:999;'
+        'text-align:center;color:#ffffff;font-size:12px;font-family:monospace;letter-spacing:0.5px;">'
+        'LeX Social // Engineered by LexiTech Studio • 13+ Community • Support &amp; Safety: <b>support@lexsocial.space</b>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
     st.stop()
-
 
 user = st.session_state.lex_user
 ping_member_heartbeat()
