@@ -1644,7 +1644,7 @@ def render_profile_module(mod_name: str):
             for i_t8, fr8 in enumerate(st.session_state.lex_top8[:8])
         )
         st.markdown(f'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:14px;">{_t8_cards}</div>', unsafe_allow_html=True)
- mod_name == "Top 8" and st.session_state.lex_top8:
+mod_name == "Top 8" and st.session_state.lex_top8:
         st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">✦ {user.get("name", "")}\'s Top 8</strong></div>', unsafe_allow_html=True)
         t8_top_cols = st.columns(4)
         for i_t8, fr8 in enumerate(st.session_state.lex_top8[:8]):
