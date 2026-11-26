@@ -1633,7 +1633,18 @@ def render_profile_module(mod_name: str):
                             b_pills.append(f'<span style="background:linear-gradient(90deg,#0E7490,#06B6D4);color:#ECFEFF;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;">⚡ VIBE SPARK ({_peer})</span>')
                 except Exception:
                     pass
-            if b_pills:
+        if b_pills:
+            st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:800;margin-bottom:6px;">Earned Badges</div><div style="display:flex;flex-wrap:wrap;gap:6px;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
+    elif mod_name == "Pinned Bulletin" and th.get("pinned_note"):
+        st.markdown(f'<div class="lex-card" style="border-width:2.5px;"><span style="color:{th["accent"]};font-weight:900;">PINNED BULLETIN</span><div style="margin-top:6px;">{html.escape(th["pinned_note"])}</div></div>', unsafe_allow_html=True)
+    elif mod_name == "Top 8" and st.session_state.lex_top8:
+        st.markdown('<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><span style="font-weight:800;font-size:15px;">Top 8</span></div>', unsafe_allow_html=True)
+        _t8_cards = "".join(
+            friend_card_html(fr8, "👑 #1" if i_t8 == 0 else f"#{i_t8 + 1}", th)
+            for i_t8, fr8 in enumerate(list(st.session_state.lex_top8)[:8])
+        )
+        st.markdown(f'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:14px;">{_t8_cards}</div>', unsafe_allow_html=True)
+ 
                 st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
         st.markdown("""<style>
 @media (max-width: 768px) {
