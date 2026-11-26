@@ -932,7 +932,7 @@ with top_th.popover("1-Click Themes", use_container_width=True):
         if st.button(_qlbl, key=f"top_qt_{_qi}", use_container_width=True):
             th.update({"bg": _qbg, "accent": _qacc, "card_bg": _qcard, "radius": _qrad, "custom_css": _qcss})
             st.session_state.lex_theme = th
-            save_profile_to_cloud()            
+            save_profile_to_cloud()          
             st.rerun()
 
 if top_c2.button(n_lbl, use_container_width=True, key="top_notif_btn"):
