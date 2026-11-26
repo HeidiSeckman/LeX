@@ -2681,7 +2681,7 @@ with t_studio:
         if mh_l in _my_friends and not q_search.strip():
             continue
         m_th = m.get("theme_json") if isinstance(m.get("theme_json"), dict) else (json.loads(m.get("theme_json") or "{}") if isinstance(m.get("theme_json"), str) else {})
-        _is_minor = (m_th.get("minor_locked") is True and str(m_th.get("age_group", "")) in ("", "13-15")) or str(m_th.get("age_group", "")) == "13-15"
+        _is_minor = str(m_th.get("age_group", "")) == "13-15"        
         if _is_minor:
             continue
         if m_th.get("is_private") and not q_search.strip():
