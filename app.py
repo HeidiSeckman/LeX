@@ -1987,55 +1987,56 @@ with hub_col:
             try:
                 im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
                 im_blk = get_blocked_handles()
-                im_peers, im_avs = {}, {}
-                _utj = user.get("theme_json") if isinstance(user.get("theme_json"), dict) else (json.loads(user.get("theme_json") or "{}") if isinstance(user.get("theme_json"), str) else {})
-                im_msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(500).execute().data or []
-                _my_l_chk = user["handle"].lower()
-                _my_f = {("@" + clean_handle_str(x)).lower() for x in (_utj.get("friends", []) + _utj.get("all_friends", []) + _utj.get("top8", []))}
-                for _fm in im_msgs:
-                    if (_fm.get("body") or "").startswith("[LEX_F]"):
-                        _s_h = ("@" + clean_handle_str(_fm.get("sender_handle", ""))).lower()
-                        _r_h = ("@" + clean_handle_str(_fm.get("recipient_handle", ""))).lower()
-                        if _s_h == _my_l_chk and len(_r_h) > 1:
-                            _my_f.add(_r_h)
-                        elif _r_h == _my_l_chk and len(_s_h) > 1:
-                            _my_f.add(_s_h)               
-                for mr in im_rows:
-                    mh = "@" + clean_handle_str(mr.get("handle", ""))
-                    if len(mh) > 1 and mh.lower() in _my_f and mh.lower() != user["handle"].lower() and mh.lower() not in im_blk:
-                        im_peers[mh] = f"{mr.get('display_name', mh)} ({mh})"
-                        mtj = mr.get("theme_json") or {}
-                        if isinstance(mtj, str):
-                            try: mtj = json.loads(mtj or "{}")
-                            except Exception: mtj = {}
-                        im_avs[mh] = mtj.get("avatar", "") if isinstance(mtj, dict) else ""
-                if not im_peers:
-                    st.info("💬 Add friends first to start a private conversation!")
-                if im_peers:
-                    im_list = list(im_peers.keys())
-                    im_act = st.session_state.get("lex_im_peer")
-                    if im_act not in im_peers:
-                        im_act = im_list[0]
-                        st.session_state["lex_im_peer"] = im_act
-                    st.markdown("**💬 Friend Conversations**")
-                    _conv_cols = st.columns(min(len(im_list), 4))
-                    for _ci, _ch in enumerate(im_list[:8]):
-                        if _conv_cols[_ci % len(_conv_cols)].button(f"{'🟢 ' if _ch == im_act else ''}{_ch}", key=f"conv_pick_{_ci}_{_ch}", use_container_width=True):
-                            st.session_state["lex_im_peer"] = _ch
-                            st.rerun()
-                    im_msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(300).execute().data or []
-                    my_l, tg_l = user["handle"].lower(), im_act.lower()
-                    im_thread = [
-                        m for m in im_msgs
-                        if not (m.get("body") or "").startswith(("[LEX_F", "[LEX_NOTIF]"))
-                        and {str(m.get("sender_handle", "")).lower(), str(m.get("recipient_handle", "")).lower()} == {my_l, tg_l}
-                    ]
-                    av_u = im_avs.get(im_act, "")
-                    av_h = f'<img src="{av_u}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1.5px solid {th["accent"]};">' if av_u else f'<div style="width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:900;">{im_act.lstrip("@")[:1].upper()}</div>'
+            im_peers, im_avs = {}, {}
+            _my_l_chk = ("@" + clean_handle_str(user["handle"])).lower()
+            _my_f = set()
+            for mr in im_rows:
+                _m_chk = ("@" + clean_handle_str(mr.get("handle", ""))).lower()
+                if _m_chk == _my_l_chk:
+                    _mtj = mr.get("theme_json") or {}
+                    if isinstance(_mtj, str):
+                        try: _mtj = json.loads(_mtj or "{}")
+                        except Exception: _mtj = {}
+                    if isinstance(_mtj, dict):
+                        for _fk in ("friends", "all_friends", "top8"):
+                            for _fv in (_mtj.get(_fk) or []):
+                                _fh = ("@" + clean_handle_str(_fv.get("handle", _fv) if isinstance(_fv, dict) else _fv)).lower()
+                                if len(_fh) > 1:
+                                    _my_f.add(_fh)
+            for mr in im_rows:
+                mh = "@" + clean_handle_str(mr.get("handle", ""))
+                if len(mh) > 1 and mh.lower() in _my_f and mh.lower() != _my_l_chk and mh.lower() not in im_blk:
+                    im_peers[mh] = f"{mr.get('display_name', mh)} ({mh})"
+                    mtj = mr.get("theme_json") or {}
+                    if isinstance(mtj, str):
+                        try: mtj = json.loads(mtj or "{}")
+                        except Exception: mtj = {}
+                    im_avs[mh] = mtj.get("avatar", "") if isinstance(mtj, dict) else ""
+            if not im_peers:
+                st.info("💬 Add friends first to start a private conversation!")
+            else:
+                im_list = list(im_peers.keys())
+                im_act = st.session_state.get("lex_im_peer")
+                if im_act not in im_peers:
+                    im_act = im_list[0]
+                    st.session_state["lex_im_peer"] = im_act
+                st.markdown("**💬 Friend Conversations**")
+                _conv_cols = st.columns(min(len(im_list), 4))
+                for _ci, _ch in enumerate(im_list[:8]):
+                    if _conv_cols[_ci % len(_conv_cols)].button(f"{'🟢 ' if _ch == im_act else ''}{_ch}", key=f"conv_pick_{_ci}_{_ch}", use_container_width=True):
+                        st.session_state["lex_im_peer"] = _ch
+                        st.rerun()
+                im_msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(300).execute().data or []
+                my_l, tg_l = _my_l_chk, im_act.lower()
+                im_thread = [
+                    m for m in im_msgs
+                    if not (m.get("body") or "").startswith(("[LEX_F]", "[LEX_NOTIF]"))
+                    and {("@" + clean_handle_str(m.get("sender_handle", ""))).lower(), ("@" + clean_handle_str(m.get("recipient_handle", ""))).lower()} == {my_l, tg_l}
+                ]
                 rows_h = "".join([
-                    f'<div style="margin-bottom:4px;font-size:12px;line-height:1.35;"><strong>{m.get("sender_handle", "")}:</strong> {m.get("body", "")}</div>'
+                    f'<div style="margin-bottom:6px;font-size:13px;"><b>{html.escape(str(m.get("sender_handle", "")))}:</b> {html.escape(str(m.get("body", "")))}</div>'
                     for m in im_thread[-30:]
-                ]) or '<div style="opacity:0.55;font-size:12px;padding:38px 8px;text-align:center;">No messages yet — say hi!</div>'
+                ]) or '<div style="opacity:0.65;font-size:12px;padding:24px;text-align:center;">No messages yet — say hi!</div>'
                 st.markdown(f'<div class="lex-card" style="padding:12px 14px;max-height:360px;overflow-y:auto;">{rows_h}</div>', unsafe_allow_html=True)
                 pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="im_peer_sel")
                 if pk != im_act:
@@ -2051,7 +2052,7 @@ with hub_col:
                             st.rerun()
                         else:
                             st.error(msg_i)
-                    
+       
             except Exception as e:
                 st.warning(f"LeX Instant notice: {e}")
 
