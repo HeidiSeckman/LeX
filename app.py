@@ -1988,9 +1988,9 @@ with hub_col:
                 im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
                 im_blk = get_blocked_handles()
                 im_peers, im_avs = {}, {}
-                for mr in im_rows:
+                for mr in (im_all or []):
                     mh = "@" + clean_handle_str(mr.get("handle", ""))
-                    if len(mh) > 1 and mh.lower() != user["handle"].lower() and mh.lower() not in im_blk:
+                    if len(mh) > 1 and mh.lower() != user["handle"].lower() and mh.lower() not in blocked_set:
                         im_peers[mh] = f"{mr.get('display_name', mh)} ({mh})"
                         mtj = mr.get("theme_json") or {}
                         if isinstance(mtj, str):
@@ -2003,6 +2003,7 @@ with hub_col:
                     if im_act not in im_peers:
                         im_act = im_list[0]
                         st.session_state["lex_im_peer"] = im_act
+
                     im_msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(300).execute().data or []
                     my_l, tg_l = user["handle"].lower(), im_act.lower()
                     im_thread = [
