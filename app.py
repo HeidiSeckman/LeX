@@ -2659,18 +2659,40 @@ with t_studio:
                     all_mem = sb.table("lex_profiles").select("handle, display_name, mood").limit(80).execute().data or []
                 except Exception:
                     all_mem = []
-        blocked_set = get_blocked_handles()
-        filtered = []
-        for m in all_mem:
-            mh = "@" + clean_handle_str(m.get("handle", ""))
-            if len(mh) <= 1 or mh.lower() == user["handle"].lower() or mh.lower() in blocked_set:
-                continue
-            if q_search.strip() and q_search.strip().lower() not in f"{mh} {m.get('display_name', '')}".lower():
-                continue
-            m_th = m.get("theme_json") if isinstance(m.get("theme_json"), dict) else {}
-            filtered.append({"handle": mh, "name": m.get("display_name", mh.lstrip("@")), "mood": m.get("mood", "Online ⚡"), "anthem": m.get("anthem", "Y2K Cobalt Synth"), "last_seen": m_th.get("last_seen", 0)})
-        if not filtered:
-            st.info("No matching members found.")
+                           
+    blocked_set = get_blocked_handles()
+    _my_r_h = ("@" + clean_handle_str(user.get("handle", ""))).lower()
+    _friends_map = {}
+    for _mr in all_mem:
+        _mh_k = ("@" + clean_handle_str(_mr.get("handle", ""))).lower()
+        _mt_j = _mr.get("theme_json") if isinstance(_mr.get("theme_json"), dict) else (json.loads(_mr.get("theme_json") or "{}") if isinstance(_mr.get("theme_json"), str) else {})
+        _f_s = set()
+        for _fk in ("friends", "all_friends", "top8"):
+            for _fv in (_mt_j.get(_fk) or []):
+                _fh = ("@" + clean_handle_str(_fv.get("handle", _fv) if isinstance(_fv, dict) else _fv)).lower()
+                if len(_fh) > 1:
+                    _f_s.add(_fh)
+        _friends_map[_mh_k] = _f_s
+    _my_friends = _friends_map.get(_my_r_h, set())
+    filtered = []
+    for m in all_mem:
+        mh = "@" + clean_handle_str(m.get("handle", ""))
+        mh_l = mh.lower()
+        if len(mh) <= 1 or mh_l == _my_r_h or mh_l in blocked_set or mh_l in _my_friends:
+            continue
+        m_th = m.get("theme_json") if isinstance(m.get("theme_json"), dict) else (json.loads(m.get("theme_json") or "{}") if isinstance(m.get("theme_json"), str) else {})
+        if m_th.get("is_private") or m_th.get("minor_locked"):
+            continue
+        _mutuals = _my_friends & _friends_map.get(mh_l, set())
+        if not _mutuals and not q_search.strip():
+            continue
+        if q_search.strip() and q_search.strip().lower() not in f"{mh} {m.get('display_name', '')}".lower():
+            continue
+        _mut_lbl = f" • 👥 {len(_mutuals)} mutual friend{'s' if len(_mutuals) != 1 else ''}" if _mutuals else ""
+        filtered.append({"handle": mh, "name": m.get("display_name", mh.lstrip("@")), "mood": f"{m.get('mood', 'Online ⚡')}{_mut_lbl}", "anthem": m.get("anthem", "Y2K Coding Beats")})
+    if not filtered:
+        st.info("📡 No mutual-friend suggestions yet — add friends to discover People You May Know!")
+
         r_cols = st.columns(3)
         for idx_m, m_obj in enumerate(filtered):
             with r_cols[idx_m % 3]:
