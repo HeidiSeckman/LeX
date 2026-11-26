@@ -679,10 +679,10 @@ if st.session_state.get("show_confirm_email_popup"):
     with _pop_c1:
         st.markdown(
             '<div style="background:linear-gradient(135deg,#120724,#2E1065);border:2px solid #A855F7;border-radius:16px;padding:16px 18px;box-shadow:0 0 28px rgba(168,85,247,0.65);margin:10px 0;">'
-            '<div style="font-size:16px;font-weight:900;color:#F3E8FF;margin-bottom:6px;">📩 Please Confirm Your Email Address</div>'
+            '<div style="font-size:16px;font-weight:900;color:#F3E8FF;margin-bottom:6px;">Please Confirm Your Email Address</div>'
             '<div style="font-size:13.5px;color:#E9D5FF;line-height:1.45;">We just sent a confirmation link to your inbox. Tap the link inside that email to verify your <b>LeX Social</b> account!</div>'
             '<div style="margin-top:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.08);font-size:11.5px;color:#FDE68A;line-height:1.4;">'
-            '⚠️ <b>Heads up:</b> When you click the confirmation link in your email, the page it opens may act broken or show an error—<b>don’t worry!</b> Clicking it still confirms your email automatically. Just come back here and sign in!'
+            '<b>Heads up:</b> When you click the confirmation link in your email, the page it opens may act broken or show an error—<b>don’t worry!</b> Clicking it still confirms your email automatically. Just come back here and sign in!'
             '</div></div>',
             unsafe_allow_html=True,
         )
@@ -901,7 +901,7 @@ if sb and user.get("handle"):
 
 last_seen_nid = int(th.get("notif_read_id") or 0)
 unread_n = sum(1 for x in my_notifs if x["id"] > last_seen_nid)
-n_lbl = f"🔔 Notifications ({unread_n})" if unread_n else "🔔 Notifications"
+n_lbl = f"Notifications ({unread_n})" if unread_n else "Notifications"
 unread_dms = []
 if sb and user.get("handle"):
     try:
@@ -921,7 +921,7 @@ top_c1, top_th, top_c2, top_c3 = st.columns([0.52, 0.16, 0.16, 0.16])
 if st.session_state.viewing_handle and top_c1.button(f"← Back to My Profile ({user['handle']})"):
     st.session_state.viewing_handle = None
     st.rerun()
-with top_th.popover("🎨 1-Click Themes", use_container_width=True):
+with top_th.popover("1-Click Themes", use_container_width=True):
     _top_qt = [
         ("🌈 Neon Prism", "#05030A", "#FF007F", "rgba(10,5,20,0.92)", "Pill (28px)", '@keyframes lexRainbow{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}} .lex-card{animation:lexRainbow 9s linear infinite !important;}'),
         ("⚙️ Carbon Tactical", "#0B0D10", "#F59E0B", "rgba(18,22,28,0.95)", "Sharp (4px)", 'html body .lex-card{border-left:4px solid #F59E0B !important;}'),
@@ -946,7 +946,7 @@ if top_c3.button("Sign Out", use_container_width=True):
 
 if st.session_state.show_notifs:
     nh1, nh2 = st.columns([0.75, 0.25])
-    nh1.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:6px;"><strong style="color:{th["accent"]};">🔔 Post Reactions &amp; Comments Activity</strong></div>', unsafe_allow_html=True)
+    nh1.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:6px;"><strong style="color:{th["accent"]};">Post Reactions &amp; Comments Activity</strong></div>', unsafe_allow_html=True)
     if my_notifs and nh2.button("✓ Mark All Read", use_container_width=True, key="mark_notifs_read"):
         th["notif_read_id"] = max(x["id"] for x in my_notifs)
         save_profile_to_cloud()
