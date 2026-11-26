@@ -1988,7 +1988,8 @@ with hub_col:
                 im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
                 im_blk = get_blocked_handles()
                 im_peers, im_avs = {}, {}
-                _my_f = {("@" + clean_handle_str(x)).lower() for x in (tj.get("all_friends", []) + tj.get("top8", []))}
+                _utj = user.get("theme_json") if isinstance(user.get("theme_json"), dict) else (json.loads(user.get("theme_json") or "{}") if isinstance(user.get("theme_json"), str) else {})
+                _my_f = {("@" + clean_handle_str(x)).lower() for x in (_utj.get("all_friends", []) + _utj.get("top8", []))}
                 for mr in im_rows:
                     mh = "@" + clean_handle_str(mr.get("handle", ""))
                     if len(mh) > 1 and mh.lower() in _my_f and mh.lower() != user["handle"].lower() and mh.lower() not in im_blk:
