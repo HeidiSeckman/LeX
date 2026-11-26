@@ -1991,7 +1991,7 @@ with hub_col:
                 for mr in im_rows:                    
                     mh = "@" + clean_handle_str(mr.get("handle", ""))
                     if len(mh) > 1 and mh.lower() != user["handle"].lower() and mh.lower() not in blocked_set:
-                        im_peers[mh] = f"{mr.get('display_name', mh)} ({mh})"
+                        if len(mh) > 1 and mh.lower() in _my_f and mh.lower() != user["handle"].lower():                        
                         mtj = mr.get("theme_json") or {}
                         if isinstance(mtj, str):
                             try: mtj = json.loads(mtj or "{}")
