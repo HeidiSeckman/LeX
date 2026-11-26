@@ -2724,4 +2724,4 @@ with st.expander("⚠️ Account Safety & Permanent Deletion"):
             st.toast("Your LeX account and profile data have been deleted.")
             st.rerun()
 
-st.markdown(f'<div style="text-align:center;opacity:0.55;font-size:11px;font-family:monospace;margin-top:24px;">LeX Social // Engineered by LexiTech Studio • 13+ Community</div>', unsafe_allow_html=True)
+st.markdown('<div style="text-align:center;opacity:0.65;font-size:11px;font-family:monospace;margin-top:24px;">LeX Social // Engineered by LexiTech Studio • 13+ Community • Support & Safety: support@lexsocial.space</div>', unsafe_allow_html=True)
