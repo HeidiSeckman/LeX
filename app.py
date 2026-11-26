@@ -1637,18 +1637,13 @@ def render_profile_module(mod_name: str):
                 st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
     elif mod_name == "Pinned Bulletin" and th.get("pinned_note"):
         st.markdown(f'<div class="lex-card" style="border-width:2.5px;"><span style="color:{th["accent"]};font-weight:900;font-size:11px;">📌 PINNED BULLETIN</span><div style="margin-top:4px;">{th["pinned_note"]}</div></div>', unsafe_allow_html=True)
-    elif "Top 8" in str(mod_name) and st.session_state.lex_top8:
-        st.markdown('<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><span style="font-weight:800;font-size:15px;">Top 8 Friends</span></div>', unsafe_allow_html=True)
-        _t8_cards = "".join(
-            friend_card_html(fr8, "👑 #1" if i_t8 == 0 else f"#{i_t8 + 1}", th)
-            for i_t8, fr8 in enumerate(st.session_state.lex_top8[:8])
-        )
-        st.markdown(f'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:14px;">{_t8_cards}</div>', unsafe_allow_html=True)
-mod_name == "Top 8" and st.session_state.lex_top8:
-        st.markdown(f'<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><strong style="color:{th["accent"]};">✦ {user.get("name", "")}\'s Top 8</strong></div>', unsafe_allow_html=True)
-        t8_top_cols = st.columns(4)
-        for i_t8, fr8 in enumerate(st.session_state.lex_top8[:8]):
-            t8_top_cols[i_t8 % 4].markdown(friend_card_html(fr8, "👑 #1" if i_t8 == 0 else f"#{i_t8 + 1}", th), unsafe_allow_html=True)
+                elif "Top 8" in str(mod_name) and st.session_state.lex_top8:
+                    st.markdown('<div class="lex-card" style="padding:10px 14px;margin-bottom:8px;"><span style="font-weight:800;font-size:15px;">Top 8</span></div>', unsafe_allow_html=True)
+                    _t8_cards = "".join(
+                        friend_card_html(fr8, "👑 #1" if i_t8 == 0 else f"#{i_t8 + 1}", th)
+                        for i_t8, fr8 in enumerate(list(st.session_state.lex_top8)[:8])
+                    )
+                    st.markdown(f'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:14px;">{_t8_cards}</div>', unsafe_allow_html=True)
 
 st.markdown("""<style>
 @media (max-width: 768px) {
