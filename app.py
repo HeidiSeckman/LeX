@@ -691,7 +691,7 @@ if st.session_state.get("show_confirm_email_popup"):
             st.session_state["show_confirm_email_popup"] = False
             st.rerun()
 if st.session_state.lex_user is None:
-    t_in, t_up = st.tabs(["🔐 Member Sign In", "+ Create Account"])
+    t_in, t_up = st.tabs(["Member Sign In", "+ Create Account"])
     with t_in:
         with st.form("lex_login_form"):
             l_email, l_pass = st.text_input("Email"), st.text_input("Password", type="password")
@@ -737,7 +737,7 @@ if st.session_state.lex_user is None:
             d_name, r_handle = st.text_input("Display Name"), st.text_input("@handle (Must be unique)")
             dob = st.date_input("Date of Birth (13+ Only)", value=date(2000, 1, 1), min_value=date(1920, 1, 1), max_value=date.today())
             site_in = st.text_input("Profile Link / Website (Optional)", placeholder="heidiseckman.github.io/lexitech-hub")
-            with st.expander("📜 Terms of Service, Privacy Policy & DMCA Rules"):
+            with st.expander("Terms of Service, Privacy Policy & DMCA Rules"):
                 st.markdown("""
                 **LeX Social Terms of Service & Privacy Policy (Operated by LexiTech Studio)**
                 1. **13+ Eligibility:** You must be at least 13 years old to create an account. Accounts created by anyone under 13 will be terminated immediately.
@@ -773,7 +773,7 @@ if st.session_state.lex_user is None:
                         st.error("An account with that email already exists. Please log in instead.")
                     else:
                         st.error(f"Signup error: {err_s}")
-    with st.expander("📜 Terms of Service, Privacy Policy & DMCA Rules"):
+    with st.expander("Terms of Service, Privacy Policy & DMCA Rules"):
         st.markdown("""
         **LeX Social Terms of Service & Privacy Policy (Operated by LexiTech Studio)**
         1. **13+ Eligibility & Youth Safety:** You must be at least 13 years old to create an account. Accounts for users ages 13–15 remain locked to Private mode automatically until age 16.
@@ -2715,7 +2715,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.markdown('<div style="margin-top:32px;margin-bottom:54px;"></div>', unsafe_allow_html=True)
-with st.expander("⚠️ Account Safety & Permanent Deletion"):
+with st.expander("Account Safety & Permanent Deletion"):
     _cur_h_del = ("@" + clean_handle_str(user.get("handle", ""))).lower()
     if _cur_h_del in ("@heidiseckman", "@lexsocial", "@lexitech"):
         st.info("🛡️ Founder & System accounts are permanently protected from deletion.")
