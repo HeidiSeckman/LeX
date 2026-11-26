@@ -1634,7 +1634,7 @@ def render_profile_module(mod_name: str):
                 except Exception:
                     pass
                 if b_pills:
-            st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:800;margin-bottom:6px;">Earned Badges</div><div style="display:flex;flex-wrap:wrap;gap:6px;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:800;margin-bottom:6px;">Earned Badges</div><div style="display:flex;flex-wrap:wrap;gap:6px;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
                 elif mod_name == "Pinned Bulletin" and th.get("pinned_note"):
                     st.markdown(f'<div class="lex-card" style="border-width:2.5px;"><span style="color:{th["accent"]};font-weight:900;">PINNED BULLETIN</span><div style="margin-top:6px;">{html.escape(th["pinned_note"])}</div></div>', unsafe_allow_html=True)
                 elif mod_name == "Top 8" and st.session_state.lex_top8:
