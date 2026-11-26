@@ -2648,16 +2648,14 @@ with t_studio:
                         save_profile_to_cloud()
                         st.toast("Added track to playlist ✦")
                         st.rerun()
-    with t_radar:
-        q_search = st.text_input("Search by @handle or Display Name...", placeholder="Type @handle or name...", key="radar_search")
+with t_radar:
+    q_search = st.text_input("Search by @handle or Display Name...", placeholder="Type a @handle or name to find anyone...")
     all_mem = []
     if sb:
         try:
             all_mem = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(500).execute().data or []
-        except Exception as _rad_e:
-            st.warning(f"Radar load notice: {_rad_e}")
+        except Exception:
             all_mem = []
-
     blocked_set = get_blocked_handles()
     _my_r_h = ("@" + clean_handle_str(user.get("handle", ""))).lower()
     _friends_map = {}
@@ -2673,41 +2671,34 @@ with t_studio:
         _friends_map[_mh_k] = _f_s
     _my_friends = _friends_map.get(_my_r_h, set())
     filtered = []
+    _q_clean = q_search.strip().lstrip("@").lower()
     for m in all_mem:
         mh = "@" + clean_handle_str(m.get("handle", ""))
         mh_l = mh.lower()
         if len(mh) <= 1 or mh_l == _my_r_h or mh_l in blocked_set:
             continue
-        if mh_l in _my_friends and not q_search.strip():
-            continue
         m_th = m.get("theme_json") if isinstance(m.get("theme_json"), dict) else (json.loads(m.get("theme_json") or "{}") if isinstance(m.get("theme_json"), str) else {})
-        _is_minor = str(m_th.get("age_group", "")) == "13-15"        
-        if _is_minor:
+        if str(m_th.get("age_group", "")) == "13-15":
             continue
-        if m_th.get("is_private") and not q_search.strip():
-            continue
+        _dname = str(m.get("display_name") or m_th.get("display_name") or m_th.get("name") or m_th.get("full_name") or "")
         _mutuals = _my_friends & _friends_map.get(mh_l, set())
-        if not _mutuals and not q_search.strip():
-            continue
-        _dname = str(m.get("display_name") or m_th.get("display_name") or m_th.get("name") or "")
-        if q_search.strip() and q_search.strip().lower() not in f"{mh} {_dname}".lower():
-            continue
+        if _q_clean:
+            if _q_clean not in mh.lstrip("@").lower() and _q_clean not in _dname.lower():
+                continue
+        else:
+            if mh_l in _my_friends or m_th.get("is_private") or not _mutuals:
+                continue
         _mut_lbl = f" • 👥 {len(_mutuals)} mutual friend{'s' if len(_mutuals) != 1 else ''}" if _mutuals else ""
-        filtered.append({"handle": mh, "name": _dname or mh.lstrip("@"), "mood": f"{m.get('mood', 'Online ⚡')}{_mut_lbl}", "anthem": m.get("anthem", "Y2K Coding Beats")})
-        st.caption(f"Debug: {len(all_mem)} profiles loaded | query='{q_search}' | matches={len(filtered)}")
-        if not filtered:
-        st.info("📡 No mutual-friend suggestions yet — add friends to discover People You May Know!")
-        r_cols = st.columns(3)
-        for idx_m, m_obj in enumerate(filtered):
-            with r_cols[idx_m % 3]:
-                st.markdown(friend_card_html(m_obj, "", th), unsafe_allow_html=True)
-                render_member_action_buttons(m_obj["handle"], key_prefix=f"rad_{idx_m}")
-with st.expander("⚠️ Account Safety & Permanent Deletion"):
-    st.caption("Permanently deletes your LeX profile, posts, messages, and account data.")
-    del_confirm = st.checkbox("I understand this action is permanent and cannot be undone.", key="del_acc_chk")
-    if st.button("🗑️ Permanently Delete My Account", type="primary", disabled=not del_confirm, key="del_acc_btn") and sb:
-        uid_del = str(user.get("user_id") or "")
-        h_del = user.get("handle", "")
+        filtered.append({"handle": mh, "name": _dname or mh.lstrip("@"), "mood": f"{m_th.get('mood', 'Online ⚡')}{_mut_lbl}", "anthem": m_th.get("anthem", "Y2K Coding Beats")})
+    if not filtered:
+        st.info("📡 No matches yet — type any @handle or name above to search, or add friends to see People You May Know!")
+    r_cols = st.columns(3)
+    for idx_m, m_obj in enumerate(filtered):
+        with r_cols[idx_m % 3]:
+            st.markdown(friend_card_html(m_obj, "", th), unsafe_allow_html=True)
+            render_member_action_buttons(m_obj["handle"], key_prefix=f"rad_{idx_m}")
+    with st.expander("⚠️ Account Safety & Permanent Deletion"):
+
         try:
             if h_del:
                 sb.table("lex_posts").delete().ilike("handle", h_del).execute()
