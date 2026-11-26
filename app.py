@@ -1989,7 +1989,17 @@ with hub_col:
                 im_blk = get_blocked_handles()
                 im_peers, im_avs = {}, {}
                 _utj = user.get("theme_json") if isinstance(user.get("theme_json"), dict) else (json.loads(user.get("theme_json") or "{}") if isinstance(user.get("theme_json"), str) else {})
-                _my_f = {("@" + clean_handle_str(x)).lower() for x in (_utj.get("all_friends", []) + _utj.get("top8", []))}
+                im_msgs = sb.table("lex_messages").select("*").order("id", desc=False).limit(500).execute().data or []
+                _my_l_chk = user["handle"].lower()
+                _my_f = {("@" + clean_handle_str(x)).lower() for x in (_utj.get("friends", []) + _utj.get("all_friends", []) + _utj.get("top8", []))}
+                for _fm in im_msgs:
+                    if (_fm.get("body") or "").startswith("[LEX_F]"):
+                        _s_h = ("@" + clean_handle_str(_fm.get("sender_handle", ""))).lower()
+                        _r_h = ("@" + clean_handle_str(_fm.get("recipient_handle", ""))).lower()
+                        if _s_h == _my_l_chk and len(_r_h) > 1:
+                            _my_f.add(_r_h)
+                        elif _r_h == _my_l_chk and len(_s_h) > 1:
+                            _my_f.add(_s_h)               
                 for mr in im_rows:
                     mh = "@" + clean_handle_str(mr.get("handle", ""))
                     if len(mh) > 1 and mh.lower() in _my_f and mh.lower() != user["handle"].lower() and mh.lower() not in im_blk:
