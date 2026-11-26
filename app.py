@@ -30,7 +30,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.markdown(f"{ST_OPEN}[id*='im'],[class*='im-win'],[class*='chat-dock']{{display:none!important;visibility:hidden!important;pointer-events:none!important;}}{ST_CLOSE}", unsafe_allow_html=True)
-
+[data-testid="stExpander"] { background: #000000 !important; border: 1px solid #222222 !important; border-radius: 0px !important; }
 LK_OPEN = "<" + "link "
 SV_OPEN = "<" + "svg "
 SV_CLOSE = "<" + "/svg>"
