@@ -1528,7 +1528,7 @@ def render_profile_module(mod_name: str):
     elif mod_name == "Vibe Sticker" and th.get("vibe_sticker"):
         my_stk = th["vibe_sticker"] if th["vibe_sticker"].startswith("data:") else normalize_gif_url(th["vibe_sticker"])
         st.markdown(f'<div class="lex-card" style="text-align:center;"><img src="{my_stk}" style="max-width:100%;max-height:220px;border-radius:10px;" /></div>', unsafe_allow_html=True)
-    elif mod_name == "Profile Song / Playlist":
+    elif "Profile Song" in mod_name:        
         if user.get("custom_song_url"):
             render_popular_song_embed(user["custom_song_url"])
         elif user.get("anthem"):
