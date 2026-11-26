@@ -1987,7 +1987,7 @@ with hub_col:
             try:
                 im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
                 im_blk = get_blocked_handles()
-    im_peers, im_avs = {}, {}
+            im_peers, im_avs = {}, {}
         _my_f = {("@" + clean_handle_str(x)).lower() for x in (tj.get("all_friends", []) + tj.get("top8", []))}
         for mr in im_rows:
             mh = "@" + clean_handle_str(mr.get("handle", ""))
