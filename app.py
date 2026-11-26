@@ -2037,7 +2037,8 @@ with hub_col:
                 rows_h = "".join([
                     f'<div style="margin-bottom:6px;font-size:13px;"><b>{_html.escape(str(m.get("sender_handle", "")))}:</b> {_html.escape(str(m.get("body", "")))}</div>'
                     for m in im_thread[-30:]
-                ]) or '<div style="opacity:0.65;font-size:12px;padding:24px;text-align:center;">No messages yet — say hi!</div>'                    st.markdown(f'<div class="lex-card" style="padding:12px 14px;max-height:360px;overflow-y:auto;">{rows_h}</div>', unsafe_allow_html=True)
+                ]) or '<div style="opacity:0.65;font-size:12px;padding:24px;text-align:center;">No messages yet — say hi!</div>'                   
+                st.markdown(f'<div class="lex-card" style="padding:12px 14px;max-height:360px;overflow-y:auto;">{rows_h}</div>', unsafe_allow_html=True)
                     pk = st.selectbox("Switch IM Friend", im_list, index=im_list.index(im_act), key="im_peer_sel")
                     if pk != im_act:
                         st.session_state["lex_im_peer"] = pk
