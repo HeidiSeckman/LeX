@@ -2679,19 +2679,21 @@ with t_studio:
             for _fv in (_mt_j.get(_fk) or []):
                 _fh = ("@" + clean_handle_str(_fv.get("handle", _fv) if isinstance(_fv, dict) else _fv)).lower()
                 if len(_fh) > 1:
-                    _f_s.add(_fh)
-        _friends_map[_mh_k] = _f_s
-    _my_friends = _friends_map.get(_my_r_h, set())
-    filtered = []
-    for m in all_mem:
-        mh = "@" + clean_handle_str(m.get("handle", ""))
-        mh_l = mh.lower()
-        if len(mh) <= 1 or mh_l == _my_r_h or mh_l in blocked_set:
-            continue
-        if mh_l in _my_friends and not q_search.strip():
-            continue
         m_th = m.get("theme_json") if isinstance(m.get("theme_json"), dict) else (json.loads(m.get("theme_json") or "{}") if isinstance(m.get("theme_json"), str) else {})
-        if m_th.get("minor_locked"):
+        _is_minor = (m_th.get("minor_locked") is True and str(m_th.get("age_group", "")) in ("", "13-15")) or str(m_th.get("age_group", "")) == "13-15"
+        if _is_minor:
+            continue
+        if m_th.get("is_private") and not q_search.strip():
+            continue
+        _mutuals = _my_friends & _friends_map.get(mh_l, set())
+        if not _mutuals and not q_search.strip():
+            continue
+        _dname = str(m.get("display_name") or m_th.get("display_name") or m_th.get("name") or "")
+        if q_search.strip() and q_search.strip().lower() not in f"{mh} {_dname}".lower():
+            continue
+        _mut_lbl = f" • 👥 {len(_mutuals)} mutual friend{'s' if len(_mutuals) != 1 else ''}" if _mutuals else ""
+        filtered.append({"handle": mh, "name": _dname or mh.lstrip("@"), "mood": f"{m.get('mood', 'Online ⚡')}{_mut_lbl}", "anthem": m.get("anthem", "Y2K Coding Beats")})
+
             continue
         if m_th.get("is_private") and not q_search.strip():
             continue
