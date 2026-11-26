@@ -1644,8 +1644,6 @@ def render_profile_module(mod_name: str):
             for i_t8, fr8 in enumerate(list(st.session_state.lex_top8)[:8])
         )
         st.markdown(f'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:14px;">{_t8_cards}</div>', unsafe_allow_html=True)
- 
-                st.markdown(f'<div class="lex-card" style="padding:14px 18px;"><div style="font-size:12px;font-weight:900;letter-spacing:1.2px;color:{th["accent"]};margin-bottom:8px;">🏆 EARNED BADGES & MILESTONES</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">{"".join(b_pills)}</div></div>', unsafe_allow_html=True)
         st.markdown("""<style>
 @media (max-width: 768px) {
     div[data-testid="stHorizontalBlock"]:has(button) {
