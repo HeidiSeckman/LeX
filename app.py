@@ -2653,21 +2653,11 @@ with t_studio:
     all_mem = []
     if sb:
         try:
-            all_mem = sb.table("lex_profiles").select("handle, display_name, mood, theme_json").limit(500).execute().data or []
-            if q_search.strip():
-                _qs = q_search.strip().lstrip("@").replace(",", "")
-                _q_rows = sb.table("lex_profiles").select("handle, display_name, mood, theme_json").or_(f"handle.ilike.%{_qs}%,display_name.ilike.%{_qs}%").limit(50).execute().data or []
-                _seen_h = {("@" + clean_handle_str(x.get("handle", ""))).lower() for x in all_mem}
-                for _qr in _q_rows:
-                    _qh = ("@" + clean_handle_str(_qr.get("handle", ""))).lower()
-                    if _qh not in _seen_h:
-                        all_mem.append(_qr)
-                        _seen_h.add(_qh)
-        except Exception:
-            try:
-                all_mem = sb.table("lex_profiles").select("handle, display_name, mood").limit(500).execute().data or []
-            except Exception:
-                all_mem = []
+            all_mem = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(500).execute().data or []
+        except Exception as _rad_e:
+            st.warning(f"Radar load notice: {_rad_e}")
+            all_mem = []
+
     blocked_set = get_blocked_handles()
     _my_r_h = ("@" + clean_handle_str(user.get("handle", ""))).lower()
     _friends_map = {}
