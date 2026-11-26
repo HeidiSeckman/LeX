@@ -1988,7 +1988,7 @@ with hub_col:
                 im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
                 im_blk = get_blocked_handles()
                 im_peers, im_avs = {}, {}
-                for mr in (im_all or []):
+                for mr in im_rows:                    
                     mh = "@" + clean_handle_str(mr.get("handle", ""))
                     if len(mh) > 1 and mh.lower() != user["handle"].lower() and mh.lower() not in blocked_set:
                         im_peers[mh] = f"{mr.get('display_name', mh)} ({mh})"
