@@ -2683,8 +2683,7 @@ with t_studio:
         m_th = m.get("theme_json") if isinstance(m.get("theme_json"), dict) else (json.loads(m.get("theme_json") or "{}") if isinstance(m.get("theme_json"), str) else {})
         if m_th.get("minor_locked"):
             continue
-        if m_th.get("is_private") and not q_search.strip():
-            continue m_th.get("is_private") or m_th.get("minor_locked"):
+        if m_th.get("is_private") and not q_search.strip():            
             continue
         _mutuals = _my_friends & _friends_map.get(mh_l, set())
         if not _mutuals and not q_search.strip():
