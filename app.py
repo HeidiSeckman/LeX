@@ -1296,17 +1296,17 @@ if st.session_state.viewing_handle and sb:
     st.stop()
 
 sp_c1, sp_c2 = st.columns(2)
-if sp_c1.button("📸 + Add 24h Story", key="prof_stories_btn", use_container_width=True):
+if sp_c1.button("Add 24h Story", key="prof_stories_btn", use_container_width=True):
     st.session_state.show_stories_panel = not st.session_state.get("show_stories_panel", False)
     st.session_state.show_flashpic_panel = False
     st.rerun()
-if sp_c2.button("⚡ FlashPic", key="prof_flashpic_btn", use_container_width=True):
+if sp_c2.button("FlashPic", key="prof_flashpic_btn", use_container_width=True):
     st.session_state.show_flashpic_panel = not st.session_state.get("show_flashpic_panel", False)
     st.session_state.show_stories_panel = False
     st.rerun()
 
 if st.session_state.get("show_stories_panel"):
-    st.markdown(f'<div class="lex-card" style="padding:12px 16px;margin-bottom:8px;"><strong style="color:{th["accent"]};">📸 Post a 24-Hour Story (Shows in Your Profile Story Box)</strong></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="lex-card" style="padding:12px 16px;margin-bottom:8px;"><strong style="color:{th["accent"]};">Post a 24-Hour Story (Shows in Your Profile Story Box)</strong></div>', unsafe_allow_html=True)
     st1, st2, st3 = st.columns([0.42, 0.34, 0.24])
     st_file = st1.file_uploader("Story Photo", type=["png", "jpg", "jpeg", "webp", "gif"], key="story_file_up", label_visibility="collapsed")
     st_cap = st2.text_input("Story caption...", placeholder="Add a 24h story caption...", key="story_cap_in", label_visibility="collapsed")
