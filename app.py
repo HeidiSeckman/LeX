@@ -103,8 +103,8 @@ def scan_image_safely(uploaded_file, caption_text: str = ""):
 
 @st.cache_resource
 def get_sb():
-    url = st.secrets.get("SUPABASE_URL", "")
-    key = st.secrets.get("SUPABASE_KEY", "")
+    url = os.environ.get("SUPABASE_URL") or st.secrets.get("SUPABASE_URL", "")
+    key = os.environ.get("SUPABASE_KEY") or st.secrets.get("SUPABASE_KEY", "")
     return create_client(url, key) if (url and key) else None
 FONT_MAP = {
     "Clean Studio Sans": ("Inter", "'Inter', sans-serif"),
