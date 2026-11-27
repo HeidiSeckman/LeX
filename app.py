@@ -744,7 +744,7 @@ if st.session_state.lex_user is None:
             s_email, s_pass = st.text_input("Email"), st.text_input("Password (6+ chars)", type="password")
             d_name, r_handle = st.text_input("Display Name"), st.text_input("@handle (Must be unique)")
             dob = st.date_input("Date of Birth (13+ Only)", value=date(2000, 1, 1), min_value=date(1920, 1, 1), max_value=date.today())
-            site_in = st.text_input("Profile Link / Website (Optional)", placeholder="heidiseckman.github.io/lexitech-hub")
+            site_in = st.text_input("Profile Link / Website (Optional)", placeholder="ell.lewis@fand.com")
             with st.expander("Terms of Service, Privacy Policy & DMCA Rules"):
                 st.markdown("""
                 **LeX Social Terms of Service & Privacy Policy (Operated by LexiTech Studio)**
@@ -752,7 +752,7 @@ if st.session_state.lex_user is None:
                 2. **User Content & Conduct:** You own the photos and posts you upload, and grant LeX Social a license to display them on the platform. Illegal content, CSAM, harassment, threats, nudity/explicit material, and copyright infringement are strictly prohibited.
                 3. **Stories & FlashPics:** While 24-hour Stories and FlashPics expire automatically, screenshots by recipients are possible. Illegal content is preserved and reported to law enforcement / NCMEC as required by law.
                 4. **Privacy & Data:** We store your email, handle, profile settings, posts, and uploaded images on Supabase to operate your account. You can delete your posts, stories, and FlashPics anytime.
-                5. **DMCA / Abuse Contact:** To report copyright infringement or abuse, use the in-app **🚩 Report** button or email **legal@lexitechstudio.com**.
+                5. **DMCA / Abuse Contact:** To report copyright infringement or abuse, use the in-app **🚩 Report** button or email **support@lexsocial.space**.
                 """)
             agree_terms = st.checkbox("I confirm I am 13+ and agree to the Terms of Service, Privacy Policy & Community Rules.")
             if st.form_submit_button("Create Permanent LeX Account ✦", use_container_width=True) and sb:
