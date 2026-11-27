@@ -76,8 +76,15 @@ def check_safety_and_dress_code(text_val: str, extra_name: str = ""):
         if term in blob:
             return False, "Blocked by LeX Safety & Dress Code Shield: nudity, adult links, and severe violence are prohibited."
     return True, ""
-
-def scan_image_safely(uploaded_file, caption_text: str = ""):
+def _get_secret(k: str) -> str:
+    val = os.environ.get(k, "")
+    if val:
+        return val
+    try:
+        return str(st.secrets.get(k, ""))
+    except Exception:
+        return ""
+        def scan_image_safely(uploaded_file, caption_text: str = ""):
     if uploaded_file is None:
         return True, ""
     fname = getattr(uploaded_file, "name", "")
