@@ -43,7 +43,7 @@ MAX_FRIENDS = 1000
 SEVERE_BLOCKED_TERMS = {
     "rape", "raping", "rapist", "molest", "pedophile", "pedo", "csam",
     "murder", "murdering", "homicide", "kill yourself", "kys", "suicide",
-    "mass shooting", "school shooting", "behead", "dismember", "gore",
+    "mass shooting", "school shooting", "behead", "dismember",
     "bestiality", "necrophilia"
 }
 
