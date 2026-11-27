@@ -2029,7 +2029,7 @@ with hub_col:
                     st.session_state.dm_target_override = fh
                     st.toast(f"Selected {fh} in Messages tab!")
     with t_dm:
-        st.link_button("Open Full LeX Messenger", "https://streamlit.app", use_container_width=True)        
+        st.link_button("Open Full LeX Messenger", "https://lex-messenger.streamlit.app", use_container_width=True)        
         if sb and user and user.get("handle"):
             try:
                 im_rows = sb.table("lex_profiles").select("handle, display_name, theme_json").limit(150).execute().data or []
