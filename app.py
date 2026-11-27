@@ -84,6 +84,7 @@ def _get_secret(k: str) -> str:
         return str(st.secrets.get(k, ""))
     except Exception:
         return ""
+        
         def scan_image_safely(uploaded_file, caption_text: str = ""):
     if uploaded_file is None:
         return True, ""
