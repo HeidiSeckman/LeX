@@ -94,8 +94,8 @@ def scan_image_safely(uploaded_file, caption_text: str = ""):
     ok_txt, msg_txt = check_safety_and_dress_code(caption_text, fname)
     if not ok_txt:
         return False, msg_txt
-    api_u = st.secrets.get("SIGHTENGINE_USER", "")
-    api_s = st.secrets.get("SIGHTENGINE_SECRET", "")
+    api_u = _get_secret("SIGHTENGINE_USER")
+    api_s = _get_secret("SIGHTENGINE_SECRET")
     if api_u and api_s:
         try:
             se_ep = "https://" + ".".join(["api", "sightengine", "com"]) + "/1.0/check.json"
