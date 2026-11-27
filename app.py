@@ -85,8 +85,8 @@ def _get_secret(k: str) -> str:
     except Exception:
         return ""
         
-        def scan_image_safely(uploaded_file, caption_text: str = ""):
-if uploaded_file is None:
+def scan_image_safely(uploaded_file, caption_text: str = ""):
+    if uploaded_file is None:
         return True, ""
     fname = getattr(uploaded_file, "name", "")
     if not str(getattr(uploaded_file, "type", "")).startswith("image/"):
